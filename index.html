@@ -20,7 +20,7 @@
             color: #1e293b;
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
-            padding-bottom: 100px;
+            padding-bottom: 110px;
         }
 
         .custom-scrollbar::-webkit-scrollbar { width: 3px; }
@@ -30,8 +30,8 @@
             transition: all 0.2s ease; 
             border: 1px solid #e2e8f0; 
             background: white; 
-            border-radius: 14px;
-            padding: 10px;
+            border-radius: 16px;
+            padding: 12px;
         }
         .article-card:active { transform: scale(0.96); background: #f1f5f9; }
 
@@ -54,7 +54,7 @@
         .loader { border: 2px solid #f3f3f3; border-top: 2px solid var(--primary); border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        .preset-btn { border: 1px solid #e2e8f0; background: white; padding: 4px 8px; border-radius: 8px; font-size: 9px; font-weight: 800; color: #64748b; }
+        .preset-btn { border: 1px solid #e2e8f0; background: white; padding: 6px 10px; border-radius: 10px; font-size: 10px; font-weight: 800; color: #64748b; }
         .preset-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
         
         .animate-pop { animation: popIn 0.3s ease-out; }
@@ -77,24 +77,24 @@
             </div>
             <div class="flex items-center gap-2">
                 <span id="totalItemsBadge" class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-[9px] font-black border border-emerald-100">0 Items</span>
-                <button onclick="switchTab('history')" class="text-slate-400">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
+                <button onclick="switchTab('history')" class="text-slate-400 p-2 active:scale-90">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
                 </button>
             </div>
         </header>
 
-        <!-- Compact Search -->
+        <!-- Search -->
         <div class="p-3 bg-white flex gap-2 border-b border-slate-100 shadow-sm">
             <div class="relative flex-1">
-                <input type="text" id="searchInput" oninput="render()" placeholder="Search..." class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border-0 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20">
+                <input type="text" id="searchInput" oninput="render()" placeholder="Find items..." class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border-0 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             </div>
-            <button onclick="toggleVoiceBilling()" id="voiceBtn" class="bg-slate-50 text-slate-500 px-5 rounded-2xl active:scale-90 transition-all border border-slate-100">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+            <button onclick="toggleVoiceBilling()" id="voiceBtn" class="bg-slate-50 text-slate-500 px-5 rounded-2xl active:scale-90 border border-slate-100">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
             </button>
         </div>
 
-        <!-- Navigation Tabs -->
+        <!-- Categories -->
         <div class="flex bg-white px-2 py-1 overflow-x-auto no-scrollbar border-b border-slate-100">
             <button onclick="setActiveCategory('Vegetable', this)" class="category-pill active flex-1 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">Veg</button>
             <button onclick="setActiveCategory('Fruit', this)" class="category-pill flex-1 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">Fruit</button>
@@ -108,66 +108,57 @@
 
         <div id="view-history" class="tab-view hidden p-4">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xs font-black uppercase text-slate-500">Memorized Sales</h2>
-                <button onclick="clearHistory()" class="text-[9px] font-bold text-red-400 uppercase">Clear All</button>
+                <h2 class="text-xs font-black uppercase text-slate-500">Sales Record</h2>
+                <button onclick="clearHistory()" class="text-[9px] font-bold text-red-400 uppercase bg-red-50 px-3 py-1 rounded-lg">Clear All</button>
             </div>
             <div id="historyList" class="space-y-2"></div>
         </div>
 
-        <!-- Floating Summary -->
+        <!-- Bottom Summary Desk -->
         <div class="glass-summary px-4 py-3 shadow-2xl rounded-t-[2.5rem] border-t-4 border-t-slate-900">
             <div class="flex justify-between items-center mb-2 px-1">
                 <div class="flex items-center gap-2">
-                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total Bill</span>
+                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Grand Total</span>
                     <span id="orderCount" class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[8px] font-bold">0 Items</span>
                 </div>
                 <button onclick="toggleBillView()" id="billToggle" class="text-emerald-600 font-bold text-[9px] uppercase">Expand Bill</button>
             </div>
             <div id="billDetails" class="hidden max-h-[30vh] overflow-y-auto custom-scrollbar space-y-1.5 mb-4 px-1"></div>
             <div class="flex items-center justify-between gap-4">
-                <div id="grandTotal" class="text-3xl font-black text-emerald-600 tracking-tighter tabular-nums leading-none">₹0.00</div>
+                <div id="grandTotal" class="text-3xl font-black text-emerald-600 tabular-nums leading-none">₹0.00</div>
                 <div class="flex gap-2 flex-1">
                     <button onclick="memorizeSale()" class="bg-slate-100 text-slate-500 p-3.5 rounded-2xl active:scale-95">
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                     </button>
-                    <button onclick="sendInvoice()" class="flex-1 bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase py-4 shadow-lg active:scale-95 transition-all">WhatsApp Bill</button>
+                    <button onclick="sendInvoice()" class="flex-1 bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase py-4 shadow-lg active:scale-95">Send Bill</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Stock Hub Modal -->
+    <!-- Stock Management Hub Modal -->
     <div id="addModal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md hidden flex items-center justify-center p-4 z-[100] overflow-y-auto">
         <div class="bg-white rounded-[2.5rem] w-full max-w-lg p-6 shadow-2xl flex flex-col my-auto max-h-[92vh]">
             <div class="flex justify-between items-center mb-6">
-                <h3 class="text-sm font-black text-slate-900 uppercase">Stock Hub</h3>
+                <h3 class="text-sm font-black text-slate-900 uppercase">Master Stock Hub</h3>
                 <button onclick="toggleAddModal()" class="bg-slate-100 p-2 rounded-full text-slate-400 active:scale-90"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
             </div>
 
             <div class="space-y-5 overflow-y-auto custom-scrollbar pr-1 pb-10">
                 
-                <!-- NEW: Verifiable API Settings -->
-                <div class="bg-slate-900 p-4 rounded-2xl space-y-3 shadow-xl">
+                <!-- Settings Area -->
+                <div class="bg-slate-900 p-4 rounded-2xl space-y-3">
                     <div class="flex justify-between items-center">
-                        <p class="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Enterprise Settings</p>
+                        <p class="text-[9px] font-black text-emerald-400 uppercase tracking-widest">Hosting Settings</p>
                         <div id="keyStatus" class="w-2 h-2 rounded-full bg-slate-700"></div>
                     </div>
                     <div class="flex gap-2">
-                        <input type="password" id="userApiKey" placeholder="Paste Gemini API Key..." class="flex-1 bg-slate-800 border-0 rounded-xl text-xs text-white font-bold p-3 outline-none">
+                        <input type="password" id="userApiKey" placeholder="Paste Gemini Key..." class="flex-1 bg-slate-800 border-0 rounded-xl text-xs text-white p-3 outline-none">
                         <button onclick="verifyKey()" id="verifyBtn" class="bg-white text-slate-900 px-3 rounded-xl text-[8px] font-black uppercase">Verify</button>
                     </div>
                     <div class="flex gap-2">
-                        <input type="text" id="branchNameInput" placeholder="Branch Name" class="flex-1 bg-slate-800 border-0 rounded-xl text-xs text-white font-bold p-3 outline-none">
+                        <input type="text" id="branchNameInput" placeholder="Branch Name" class="flex-1 bg-slate-800 border-0 rounded-xl text-xs text-white p-3 outline-none">
                         <button onclick="saveSettings()" class="bg-emerald-600 text-white px-4 rounded-xl text-[10px] font-black uppercase">Save</button>
-                    </div>
-                </div>
-
-                <!-- Google Sheet Sync -->
-                <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-[2rem] space-y-4">
-                    <p class="text-[10px] font-black text-emerald-700 uppercase tracking-widest">Google Sheet Integration</p>
-                    <div class="flex gap-2">
-                        <input type="text" id="sheetUrl" placeholder="Paste Public Link..." class="flex-1 px-4 py-3 bg-white border border-emerald-200 rounded-xl text-xs font-bold outline-none">
-                        <button onclick="syncFromSheet()" class="bg-emerald-600 text-white px-5 rounded-xl font-bold text-[10px] uppercase active:scale-95 transition-all">Sync</button>
                     </div>
                 </div>
 
@@ -175,40 +166,57 @@
                 <div class="grid grid-cols-2 gap-2">
                     <button onclick="document.getElementById('cameraInput').click()" class="bg-blue-50 text-blue-700 p-5 rounded-2xl flex flex-col items-center gap-1 active:scale-95 border border-blue-100">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-                        <span class="text-[9px] font-black uppercase">Camera Scan</span>
+                        <span class="text-[9px] font-black uppercase">AI Scan Photo</span>
                         <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleImageInput(event)">
                     </button>
                     <button id="voiceAddBtn" onclick="toggleVoiceStockAdd()" class="bg-purple-50 text-purple-700 p-5 rounded-2xl flex flex-col items-center gap-1 active:scale-95 border border-purple-100">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
-                        <span class="text-[9px] font-black uppercase">Voice Add</span>
+                        <span class="text-[9px] font-black uppercase">Voice Bulk Add</span>
                     </button>
+                </div>
+
+                <!-- Bulk Import & Smart Paste -->
+                <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-[2rem] space-y-4">
+                    <p class="text-[10px] font-black text-emerald-700 uppercase tracking-widest text-center">Smart Bulk Import</p>
+                    <textarea id="smartPasteArea" placeholder="e.g. Potato 30, Tomato 60, Onion 40..." class="w-full h-24 bg-white border-0 rounded-2xl text-xs p-4 shadow-inner outline-none"></textarea>
+                    <div class="flex gap-2">
+                        <button onclick="processSmartText()" class="flex-1 bg-emerald-600 text-white py-3 rounded-xl text-[10px] font-bold uppercase shadow-md">Extract from Paste</button>
+                        <button onclick="syncFromSheet()" class="bg-slate-900 text-white px-4 rounded-xl text-[10px] font-bold uppercase">Sync G-Sheet</button>
+                    </div>
                 </div>
 
                 <div id="smartLoader" class="hidden flex items-center gap-4 p-4 bg-slate-900 text-white rounded-2xl">
                     <div class="loader !border-emerald-400 !border-t-transparent"></div>
-                    <span id="loaderText" class="text-[10px] font-black uppercase">AI Processing...</span>
+                    <span id="loaderText" class="text-[10px] font-black uppercase">Processing...</span>
                 </div>
 
-                <!-- Form Section -->
-                <div class="bg-white border border-slate-100 p-5 rounded-[2rem] space-y-4 shadow-sm">
+                <!-- Manual Add Form -->
+                <div class="bg-white border-2 border-emerald-500/20 p-5 rounded-[2rem] space-y-4 shadow-sm relative overflow-hidden">
+                    <div class="absolute top-0 right-0 bg-emerald-500 text-white px-3 py-1 rounded-bl-xl text-[8px] font-black uppercase">Individual Add</div>
+                    <p id="formTitle" class="text-[11px] font-black text-slate-800 uppercase tracking-widest">Article Setup</p>
+                    
                     <div class="flex gap-1.5 h-[42px]">
-                        <button onclick="setMCat('Vegetable')" id="mcVeg" class="mcat flex-1 rounded-xl bg-emerald-600 text-white text-[10px] font-extrabold uppercase py-2">Veg</button>
+                        <button onclick="setMCat('Vegetable')" id="mcVeg" class="mcat flex-1 rounded-xl bg-emerald-600 text-white text-[10px] font-extrabold uppercase py-2 transition-all">Veg</button>
                         <button onclick="setMCat('Fruit')" id="mcFruit" class="mcat flex-1 rounded-xl bg-slate-50 text-slate-400 text-[10px] font-extrabold uppercase py-2">Fruit</button>
                         <button onclick="setMCat('Grocery')" id="mcGroc" class="mcat flex-1 rounded-xl bg-slate-50 text-slate-400 text-[10px] font-extrabold uppercase py-2">Groc</button>
                     </div>
-                    <div class="grid grid-cols-1 gap-2">
-                        <input type="text" id="newName" placeholder="Article Name" class="p-4 bg-slate-50 rounded-2xl text-xs font-bold outline-none focus:ring-4 focus:ring-emerald-500/10">
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="newName" placeholder="Item Name" class="p-4 bg-slate-50 rounded-2xl text-xs font-bold outline-none focus:ring-4 focus:ring-emerald-500/10">
+                        <input type="text" id="newHindi" placeholder="हिंदी नाम" class="p-4 bg-slate-50 rounded-2xl text-xs font-bold outline-none">
                     </div>
+
                     <div class="bg-slate-50 p-4 rounded-2xl space-y-3">
                         <div class="flex flex-wrap gap-1.5 justify-center mb-1">
                             <button onclick="setPriceBasis(100, 'Gm')" class="preset-btn">100g</button>
                             <button onclick="setPriceBasis(250, 'Gm')" class="preset-btn">250g</button>
                             <button onclick="setPriceBasis(500, 'Gm')" class="preset-btn">500g</button>
-                            <button onclick="setPriceBasis(1, 'Kg')" class="preset-btn">1kg</button>
+                            <button onclick="setPriceBasis(1, 'Kg')" class="preset-btn active">1kg</button>
+                            <button onclick="setPriceBasis(1, 'Pcs')" class="preset-btn">1 Pcs</button>
                         </div>
                         <div class="flex gap-2 items-center">
                             <input type="number" id="newPrice" placeholder="Price" class="flex-1 p-3 bg-white border border-slate-100 rounded-xl text-sm font-black outline-none">
-                            <span class="text-[9px] font-black text-slate-300 uppercase">FOR</span>
+                            <span class="text-[9px] font-black text-slate-300 uppercase leading-none">Price<br>For</span>
                             <div class="flex gap-1 items-center bg-white border border-slate-100 rounded-xl px-2">
                                 <input type="number" id="newRefQty" value="1" class="w-10 p-2 bg-transparent text-sm font-black text-center outline-none">
                                 <select id="newPriceUnit" class="bg-transparent border-0 text-[9px] font-black uppercase outline-none">
@@ -217,10 +225,41 @@
                             </div>
                         </div>
                     </div>
-                    <button id="saveBtn" onclick="saveItem()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-[11px] uppercase shadow-lg">Save Article</button>
+                    <button id="saveBtn" onclick="saveItem()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest active:scale-95 shadow-xl">Commit to Master Stock</button>
+                    <button id="cancelEditBtn" onclick="resetForm()" class="hidden w-full text-[9px] font-black text-slate-300 uppercase py-1">Discard Edit</button>
                 </div>
 
-                <div id="manageList" class="space-y-1.5 pt-2 border-t border-slate-100"></div>
+                <!-- NEW: Stock Memory & Snapshots -->
+                <div class="bg-slate-50 p-5 rounded-[2rem] border border-slate-100 space-y-4">
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Memorized Old Stocks</p>
+                    <button onclick="memorizeCurrentStock()" class="w-full bg-blue-600 text-white py-3 rounded-xl text-[10px] font-bold uppercase shadow-sm">Memorize Current Stock Rates</button>
+                    <div id="stockSnapshotsList" class="space-y-2 max-h-[150px] overflow-y-auto custom-scrollbar pr-1">
+                        <!-- Snapshots injected here -->
+                    </div>
+                </div>
+
+                <!-- Bulk Actions -->
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-4">
+                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-widest">Bulk Management</p>
+                    <div class="flex gap-2 items-center bg-white p-2 rounded-xl border border-slate-200">
+                        <input type="number" id="bulkPct" placeholder="%" class="w-12 text-xs font-black p-2 outline-none">
+                        <button onclick="bulkAdjust(true)" class="flex-1 bg-emerald-50 text-emerald-600 py-2 rounded-lg text-[9px] font-black uppercase">+ Rate %</button>
+                        <button onclick="bulkAdjust(false)" class="flex-1 bg-red-50 text-red-600 py-2 rounded-lg text-[9px] font-black uppercase">- Rate %</button>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="downloadBackup()" class="bg-white border border-slate-200 py-3 rounded-xl text-[9px] font-bold uppercase active:scale-95">Download JSON</button>
+                        <button onclick="bulkDelete()" class="bg-red-50 text-red-500 border border-red-100 py-3 rounded-xl text-[9px] font-bold uppercase text-center">Clear Cat</button>
+                    </div>
+                </div>
+
+                <!-- Search & Manage List -->
+                <div class="space-y-1.5 pt-2">
+                    <div class="flex justify-between items-center px-1 mb-2">
+                        <p class="text-[9px] font-black text-slate-500 uppercase">Current Inventory</p>
+                        <input type="text" id="manageSearch" oninput="renderManagement()" placeholder="Search stock..." class="bg-slate-100 rounded-lg text-[10px] p-1.5 w-32 outline-none">
+                    </div>
+                    <div id="manageList" class="space-y-1"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -232,46 +271,96 @@
     </div>
 
     <script>
-        const fallbackApiKey = ""; 
-        let activeCat = 'Vegetable';
-        let manualCat = 'Vegetable';
-        let editingId = null;
+        let activeCat = 'Vegetable', manualCat = 'Vegetable', editingId = null;
         let sLoc = localStorage.getItem('fg_loc') || "Main Branch";
-        
         let inventory = JSON.parse(localStorage.getItem('fg_inventory')) || [
             { id: 1, name: 'Potato', price: 30, refQty: 1, priceUnit: 'Kg', category: 'Vegetable' },
-            { id: 2, name: 'Tomato', price: 65, refQty: 1, priceUnit: 'Kg', category: 'Vegetable' },
-            { id: 3, name: 'Apple', nameHindi: 'सेब', price: 180, refQty: 1, priceUnit: 'Kg', category: 'Fruit' },
-            { id: 4, name: 'Beetroot', nameHindi: 'चुकंदर', price: 40, refQty: 1, priceUnit: 'Kg', category: 'Vegetable' }
+            { id: 2, name: 'Tomato', price: 65, refQty: 1, priceUnit: 'Kg', category: 'Vegetable' }
         ];
-
-        let cart = {};
-        let salesHistory = JSON.parse(localStorage.getItem('fg_history')) || [];
-        let recognition = null;
-        let voiceAddRecognition = null;
+        let cart = {}, salesHistory = JSON.parse(localStorage.getItem('fg_history')) || [];
+        let stockSnapshots = JSON.parse(localStorage.getItem('fg_stock_snapshots')) || [];
+        let recognition = null, voiceAddRecognition = null;
 
         function save() {
             localStorage.setItem('fg_inventory', JSON.stringify(inventory));
             localStorage.setItem('fg_history', JSON.stringify(salesHistory));
+            localStorage.setItem('fg_stock_snapshots', JSON.stringify(stockSnapshots));
             localStorage.setItem('fg_loc', sLoc);
             localStorage.setItem('user_api_key', document.getElementById('userApiKey').value);
             document.getElementById('totalItemsBadge').innerText = inventory.length + " Items";
             document.getElementById('displayLocHeader').innerText = sLoc;
         }
 
-        function switchTab(view) {
-            document.querySelectorAll('.tab-view').forEach(v => v.classList.add('hidden'));
-            document.getElementById('view-' + view).classList.remove('hidden');
-            if(view === 'history') renderHistory();
-            window.scrollTo(0,0);
+        async function verifyKey() {
+            const key = document.getElementById('userApiKey').value;
+            const dot = document.getElementById('keyStatus'), btn = document.getElementById('verifyBtn');
+            if(!key) return notify("Enter Key First");
+            btn.innerText = "...";
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+                    method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: "hi" }] }] })
+                });
+                if(res.ok) { dot.className = "w-2 h-2 rounded-full bg-green-500"; btn.innerText = "OK"; save(); } 
+                else { throw new Error(); }
+            } catch(e) { dot.className = "w-2 h-2 rounded-full bg-red-500"; btn.innerText = "ERR"; }
         }
 
-        function setActiveCategory(cat, el) {
-            activeCat = cat;
-            document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
-            el.classList.add('active');
-            switchTab('shop');
-            render();
+        function setPriceBasis(qty, unit) {
+            document.getElementById('newRefQty').value = qty;
+            document.getElementById('newPriceUnit').value = unit;
+            document.querySelectorAll('.preset-btn').forEach(b => {
+                b.classList.remove('active');
+                if(b.innerText.toLowerCase() === (qty + unit).toLowerCase()) b.classList.add('active');
+            });
+        }
+
+        /** MEMORIZE STOCK LOGIC **/
+        function memorizeCurrentStock() {
+            if(inventory.length === 0) return notify("Stock Empty");
+            const snap = {
+                id: Date.now(),
+                date: new Date().toLocaleString([], {day: '2-digit', month:'short', hour: '2-digit', minute:'2-digit'}),
+                data: JSON.parse(JSON.stringify(inventory)),
+                count: inventory.length
+            };
+            stockSnapshots.unshift(snap);
+            if(stockSnapshots.length > 10) stockSnapshots.pop();
+            save();
+            renderSnapshots();
+            notify("Snapshot Saved");
+        }
+
+        function restoreSnapshot(id) {
+            if(!confirm("Restore this old stock list? It will replace current items.")) return;
+            const snap = stockSnapshots.find(s => s.id === id);
+            if(snap) {
+                inventory = JSON.parse(JSON.stringify(snap.data));
+                save(); render(); renderManagement();
+                notify("Stock Restored");
+            }
+        }
+
+        function deleteSnapshot(id) {
+            stockSnapshots = stockSnapshots.filter(s => s.id !== id);
+            save(); renderSnapshots();
+        }
+
+        function renderSnapshots() {
+            const list = document.getElementById('stockSnapshotsList');
+            list.innerHTML = '';
+            if(stockSnapshots.length === 0) {
+                list.innerHTML = '<p class="text-[8px] text-slate-400 text-center italic">No saved stocks yet.</p>';
+                return;
+            }
+            stockSnapshots.forEach(s => {
+                list.innerHTML += `<div class="flex justify-between items-center bg-white p-2 rounded-lg border text-[9px] font-bold">
+                    <div class="flex flex-col"><span class="text-slate-800">${s.date}</span><span class="text-blue-500">${s.count} Items</span></div>
+                    <div class="flex gap-2">
+                        <button onclick="restoreSnapshot(${s.id})" class="text-emerald-500 uppercase tracking-tighter">Restore</button>
+                        <button onclick="deleteSnapshot(${s.id})" class="text-red-400 uppercase tracking-tighter">Delete</button>
+                    </div>
+                </div>`;
+            });
         }
 
         function render() {
@@ -295,11 +384,11 @@
                         </div>
                     </div>
                     <div class="flex gap-1 h-[38px]">
-                        <input type="number" id="qty-${it.id}" placeholder="Qty" class="w-12 bg-slate-50 border-0 rounded-lg text-xs font-black text-center outline-none">
+                        <input type="number" id="qty-${it.id}" placeholder="0" class="w-12 bg-slate-50 border-0 rounded-lg text-xs font-black text-center outline-none">
                         <select id="unit-${it.id}" class="flex-1 bg-slate-50 border-0 rounded-lg text-[8px] font-black uppercase outline-none px-1">
                             <option value="Kg">Kg</option><option value="Gm" ${it.priceUnit==='Gm'?'selected':''}>Gm</option>
                         </select>
-                        <button onclick="addToCart(${it.id})" class="bg-slate-900 text-white w-9 flex items-center justify-center rounded-lg active:scale-90 shadow-md">
+                        <button onclick="addToCart(${it.id})" class="bg-slate-900 text-white w-9 rounded-lg active:scale-90 shadow-md">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4"><path d="M12 5v14M5 12h14"/></svg>
                         </button>
                     </div>`;
@@ -308,57 +397,29 @@
             renderCart();
         }
 
-        function addToCart(id, vQty = null) {
+        function addToCart(id) {
             const qi = document.getElementById(`qty-${id}`), us = document.getElementById(`unit-${id}`);
-            const qty = vQty || parseFloat(qi?.value || 0), inU = us?.value || "Kg";
-            if (isNaN(qty) || qty <= 0) return;
+            const qty = parseFloat(qi?.value || 0), inU = us?.value || "Kg";
+            if (qty <= 0) return;
             const it = inventory.find(i => i.id === id);
-            const rQ = it.refQty || 1, rU = it.priceUnit || 'Kg';
             const norm = (v, u) => (u === 'Kg') ? v * 1000 : v;
-            const finalPrice = (norm(qty, inU) / norm(rQ, rU)) * it.price;
-            cart[`${id}-${inU}-${it.price}`] = { ...it, qty, totalPrice: finalPrice, unit: inU };
-            if(qi) qi.value = ''; renderCart(); notify(`${it.name} added`);
+            const finalP = (norm(qty, inU) / norm(it.priceUnit, it.refQty)) * it.price;
+            cart[`${id}-${inU}-${it.price}`] = { ...it, qty, totalPrice: finalP, unit: inU };
+            qi.value = ''; renderCart(); notify(`${it.name} added`);
         }
 
         function renderCart() {
             const list = document.getElementById('billDetails'), totalEl = document.getElementById('grandTotal');
-            if(!list) return;
-            list.innerHTML = ''; let total = 0; let count = 0;
-            Object.entries(cart).forEach(([key, item]) => {
-                total += item.totalPrice; count++;
-                const el = document.createElement('div');
-                el.className = 'flex items-center justify-between p-3 bg-white border border-slate-100 rounded-xl shadow-sm mx-1';
-                el.innerHTML = `<div class="min-w-0 flex-1 pr-3"><p class="font-black text-[11px] text-slate-800 uppercase truncate">${item.name}</p><p class="text-[8px] text-emerald-600 font-bold uppercase tracking-widest">${item.qty}${item.unit} @ ₹${item.price}</p></div><div class="flex items-center gap-2"><span class="font-black text-sm text-slate-900">₹${item.totalPrice.toFixed(2)}</span><button onclick="delete cart['${key}'];renderCart();" class="text-slate-300 active:scale-90"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>`;
-                list.appendChild(el);
+            list.innerHTML = ''; let total = 0, count = 0;
+            Object.entries(cart).forEach(([k, i]) => {
+                total += i.totalPrice; count++;
+                list.innerHTML += `<div class="flex justify-between items-center p-2.5 bg-white rounded-xl border border-slate-100 text-[10px] font-bold uppercase mx-1">
+                    <div class="flex flex-col"><span class="text-slate-800">${i.name}</span><span class="text-[8px] text-slate-400">${i.qty}${i.unit} @ ₹${i.price}</span></div>
+                    <div class="flex items-center gap-2"><span>₹${i.totalPrice.toFixed(2)}</span><button onclick="delete cart['${k}'];renderCart()" class="text-red-300 p-1">×</button></div>
+                </div>`;
             });
             totalEl.innerText = `₹${total.toFixed(2)}`;
             document.getElementById('orderCount').innerText = `${count} Items`;
-        }
-
-        /** KEY VERIFICATION LOGIC **/
-        async function verifyKey() {
-            const key = document.getElementById('userApiKey').value;
-            const statusDot = document.getElementById('keyStatus');
-            const btn = document.getElementById('verifyBtn');
-            if(!key) return notify("Enter Key First");
-            
-            btn.innerText = "Checking...";
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`;
-            const body = { contents: [{ parts: [{ text: "Hello" }] }] };
-            
-            try {
-                const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-                if(res.ok) {
-                    statusDot.style.background = "#10b981";
-                    btn.style.background = "#10b981"; btn.style.color = "white";
-                    btn.innerText = "Verified OK";
-                    save();
-                } else { throw new Error(); }
-            } catch(e) {
-                statusDot.style.background = "#ef4444";
-                btn.style.background = "#ef4444"; btn.style.color = "white";
-                btn.innerText = "Invalid Key";
-            }
         }
 
         async function syncFromSheet() {
@@ -374,105 +435,158 @@
                 rows.forEach(row => {
                     const cols = row.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
                     if (cols.length >= 3) {
-                        inventory.push({ id: Date.now() + Math.random(), name: cols[0], nameHindi: cols[1] || "", price: parseFloat(cols[2]) || 0, refQty: parseFloat(cols[3]) || 1, priceUnit: cols[4] || "Kg", category: cols[5] || "Vegetable" });
+                        inventory.push({ id: Date.now()+Math.random(), name: cols[0], nameHindi: cols[1] || "", price: parseFloat(cols[2]) || 0, refQty: parseFloat(cols[3]) || 1, priceUnit: cols[4] || "Kg", category: cols[5] || "Vegetable" });
                     }
                 });
-                save(); render(); renderManagement(); notify("Synced");
-            } catch (e) { notify("Sync Error"); }
+                save(); render(); renderManagement(); notify("Sync Done");
+            } catch(e) { notify("Sync Failed"); }
             document.getElementById('smartLoader').classList.add('hidden');
         }
 
-        async function apiCallWithRetry(p, b64 = null) {
-            const key = document.getElementById('userApiKey').value || fallbackApiKey;
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`;
-            const parts = [{ text: p }]; 
-            if(b64) parts.push({ inlineData: { mimeType: "image/jpeg", data: b64 } });
-            const body = { contents: [{ role: "user", parts: parts }], generationConfig: { responseMimeType: "application/json" } };
-            const delays = [1000, 2000, 4000, 8000];
-            for(let i=0; i<4; i++) {
-                try {
-                    const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
-                    const d = await res.json();
-                    return d.candidates[0].content.parts[0].text;
-                } catch(e) { await new Promise(r => setTimeout(r, delays[i])); }
-            }
-            throw new Error("AI Timeout");
-        }
-
         async function handleImageInput(ev) {
-            const fs = ev.target.files; if (!fs || fs.length === 0) return;
-            const loader = document.getElementById('smartLoader');
-            loader.classList.remove('hidden');
-            let addCount = 0;
-            for (let i = 0; i < fs.length; i++) {
-                try {
-                    document.getElementById('loaderText').innerText = `Scanning (${i+1}/${fs.length})...`;
-                    const b64 = await new Promise(res => {
-                        const r = new FileReader();
-                        r.onload = e => {
-                            const img = new Image();
-                            img.onload = () => {
-                                const canvas = document.createElement('canvas');
-                                const max = 1000;
-                                let w = img.width, h = img.height;
-                                if (w > h) { if (w > max) { h *= max/w; w = max; } } else { if (h > max) { w *= max/h; h = max; } }
-                                canvas.width = w; canvas.height = h;
-                                canvas.getContext('2d').drawImage(img,0,0,w,h);
-                                res(canvas.toDataURL('image/jpeg', 0.7).split(',')[1]);
-                            };
-                            img.src = e.target.result;
-                        };
-                        r.readAsDataURL(fs[i]);
-                    });
-                    const resText = await apiCallWithRetry("Extract only article and price. JSON: { \"articles\": [{ \"name\": \"...\", \"nameHindi\": \"...\", \"price\": 0, \"refQty\": 1, \"priceUnit\": \"Kg\", \"category\": \"...\" }] }", b64);
-                    const start = resText.indexOf('{');
-                    const end = resText.lastIndexOf('}') + 1;
-                    const cleaned = resText.substring(start, end);
-                    const d = JSON.parse(cleaned);
-                    if(d.articles) { d.articles.forEach(it => { inventory.unshift({id: Date.now()+Math.random(), ...it}); addCount++; }); }
-                } catch (e) { notify("Scan error"); }
-            }
-            if(addCount > 0) { save(); render(); renderManagement(); notify(`${addCount} imported`); }
+            const key = document.getElementById('userApiKey').value; if(!key) return notify("Key Req.");
+            const file = ev.target.files[0]; if(!file) return;
+            const loader = document.getElementById('smartLoader'); loader.classList.remove('hidden');
+            try {
+                const b64 = await new Promise(r => { const rd = new FileReader(); rd.onload = e => r(e.target.result.split(',')[1]); rd.readAsDataURL(file); });
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
+                    method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: "Identify food items. Strictly JSON: {articles:[{name, nameHindi, price, refQty:1, priceUnit:'Kg', category:'Vegetable'}]}" }, { inlineData: { mimeType: "image/jpeg", data: b64 } }] }] })
+                });
+                const d = await res.json();
+                const json = JSON.parse(d.candidates[0].content.parts[0].text.replace(/```json|```/g, ""));
+                json.articles.forEach(it => inventory.unshift({ id: Date.now() + Math.random(), ...it }));
+                save(); render(); renderManagement(); notify("AI Imported OK");
+            } catch(e) { notify("AI Failed"); }
             loader.classList.add('hidden');
         }
 
-        function setMCat(cat) { manualCat = cat; document.querySelectorAll('.mcat').forEach(b => b.className = 'mcat flex-1 rounded-xl bg-slate-50 text-slate-400 text-[10px] font-extrabold uppercase py-2'); const b = cat==='Vegetable'?'mcVeg':cat==='Fruit'?'mcFruit':'mcGroc'; if(document.getElementById(b)) document.getElementById(b).className = 'mcat flex-1 rounded-xl bg-emerald-600 text-white text-[10px] font-extrabold uppercase py-2 shadow-md'; }
-        function saveSettings() { sLoc = document.getElementById('branchNameInput').value || "Main Branch"; save(); notify("Settings Saved"); }
-        function toggleAddModal() { document.getElementById('addModal').classList.toggle('hidden'); if(!document.getElementById('addModal').classList.contains('hidden')) renderManagement(); }
-        function toggleBillView() { document.getElementById('billDetails').classList.toggle('hidden'); }
+        function processSmartText() {
+            const text = document.getElementById('smartPasteArea').value; if(!text) return;
+            text.split(/[\n,]+/).filter(l => l.trim() !== "").forEach(l => {
+                const match = l.match(/(\d+(?:\.\d+)?)\s*$/);
+                if(match) {
+                    let price = parseFloat(match[1]);
+                    let rawName = l.substring(0, l.lastIndexOf(match[1])).trim();
+                    const cleanName = rawName.replace(/^(?:\d+\s*(?:kg|gm|pcs|pkt|packet|kilo|gram|g|k))\s*/i, "").replace(/[:\-]/g, "").trim();
+                    if(cleanName) inventory.unshift({ id: Date.now() + Math.random(), name: cleanName, price: price, refQty: 1, priceUnit: 'Kg', category: activeCat });
+                }
+            });
+            save(); render(); renderManagement(); document.getElementById('smartPasteArea').value = ""; notify("Bulk Added");
+        }
+
+        function toggleVoiceStockAdd() {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return notify("No Mic");
+            if (voiceAddRecognition) { voiceAddRecognition.stop(); voiceAddRecognition = null; document.getElementById('voiceAddBtn').classList.remove('bg-purple-700','text-white'); return; }
+            voiceAddRecognition = new SR(); voiceAddRecognition.lang = "en-IN"; voiceAddRecognition.continuous = true;
+            voiceAddRecognition.onstart = () => { document.getElementById('voiceAddBtn').classList.add('bg-purple-700','text-white'); notify("Say 'Potato 40'..."); };
+            voiceAddRecognition.onresult = (e) => {
+                const txt = e.results[e.results.length-1][0].transcript.toLowerCase();
+                const parts = txt.match(/([a-zA-Z\u0900-\u097F\s]+)\s*(\d+)/);
+                if (parts) {
+                    inventory.unshift({ id: Date.now(), name: parts[1].trim(), price: parseFloat(parts[2]), refQty: 1, priceUnit: 'Kg', category: activeCat });
+                    save(); render(); renderManagement(); notify("Added " + parts[1]);
+                }
+            };
+            voiceAddRecognition.onend = () => { if(voiceAddRecognition) voiceAddRecognition.start(); };
+            voiceAddRecognition.start();
+        }
+
+        function toggleVoiceBilling() {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return notify("No Mic");
+            if (recognition) { recognition.stop(); recognition = null; document.getElementById('voiceBtn').classList.remove('mic-active'); return; }
+            recognition = new SR(); recognition.lang = "en-IN"; recognition.continuous = true;
+            recognition.onstart = () => { document.getElementById('voiceBtn').classList.add('mic-active'); notify("Mic Always On"); };
+            recognition.onresult = (e) => { 
+                const txt = e.results[e.results.length-1][0].transcript.toLowerCase(); 
+                let matched = inventory.find(i => txt.includes(i.name.toLowerCase())); 
+                if(matched) addToCart(matched.id, 1); 
+            };
+            recognition.onend = () => { if(recognition) recognition.start(); }; 
+            recognition.start();
+        }
+
+        function saveItem() {
+            const n = document.getElementById('newName').value.trim(), p = parseFloat(document.getElementById('newPrice').value);
+            const r = parseFloat(document.getElementById('newRefQty').value), u = document.getElementById('newPriceUnit').value;
+            const h = document.getElementById('newHindi').value.trim();
+            if(!n || isNaN(p)) return notify("Missing Info");
+            if (editingId) {
+                const idx = inventory.findIndex(i => i.id === editingId);
+                if (idx !== -1) inventory[idx] = { ...inventory[idx], name: n, nameHindi: h, price: p, refQty: r, priceUnit: u };
+                editingId = null; notify("Updated");
+            } else {
+                inventory.push({ id: Date.now(), name: n, nameHindi: h, price: p, refQty: r, priceUnit: u, category: manualCat });
+                notify("Saved");
+            }
+            save(); render(); renderManagement(); resetForm();
+        }
+
+        function editItem(id) {
+            const it = inventory.find(i => i.id === id); if(!it) return;
+            editingId = id;
+            document.getElementById('newName').value = it.name;
+            document.getElementById('newHindi').value = it.nameHindi || "";
+            document.getElementById('newPrice').value = it.price;
+            document.getElementById('newRefQty').value = it.refQty;
+            document.getElementById('newPriceUnit').value = it.priceUnit;
+            document.getElementById('saveBtn').innerText = "Update Now";
+            document.getElementById('cancelEditBtn').classList.remove('hidden');
+            document.getElementById('formTitle').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function resetForm() {
+            editingId = null; document.getElementById('newName').value = ''; document.getElementById('newPrice').value = '';
+            document.getElementById('newRefQty').value = '1'; document.getElementById('newPriceUnit').value = 'Kg';
+            document.getElementById('newHindi').value = ''; document.getElementById('saveBtn').innerText = "Commit to Stock";
+            document.getElementById('cancelEditBtn').classList.add('hidden');
+        }
+
+        function renderManagement() {
+            const div = document.getElementById('manageList'); div.innerHTML = '';
+            const q = document.getElementById('manageSearch')?.value.toLowerCase() || "";
+            inventory.filter(i => i.category === activeCat && i.name.toLowerCase().includes(q)).sort((a,b) => a.name.localeCompare(b.name)).forEach(it => {
+                const el = document.createElement('div'); el.className = `flex items-center justify-between p-3 border-b text-[10px] font-bold bg-white mb-1 rounded-lg shadow-sm`;
+                el.innerHTML = `<div class="flex flex-col"><span>${it.name}</span><span class="text-[8px] text-emerald-500 uppercase">₹${it.price}/${it.refQty}${it.priceUnit}</span></div>
+                    <div class="flex gap-2"><button onclick="editItem(${it.id})" class="text-blue-500">Edit</button><button onclick="inventory=inventory.filter(x=>x.id!=${it.id});save();renderManagement();render()" class="text-red-500">Del</button></div>`;
+                div.appendChild(el);
+            });
+        }
+
+        function bulkAdjust(inc) {
+            const pct = parseFloat(document.getElementById('bulkPct').value); if(isNaN(pct)) return notify("Enter %");
+            const factor = inc ? (1 + pct/100) : (1 - pct/100);
+            inventory.forEach(i => { if(i.category === activeCat) i.price = parseFloat((i.price * factor).toFixed(2)); });
+            save(); render(); renderManagement(); notify(`Rates Adjusted`);
+        }
+
+        function downloadBackup() {
+            const data = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(inventory));
+            const node = document.createElement('a'); node.setAttribute("href", data); node.setAttribute("download", `stock_${new Date().toLocaleDateString()}.json`); node.click();
+        }
+
+        function bulkDelete() { if(confirm(`Delete all ${activeCat}?`)) { inventory = inventory.filter(i => i.category !== activeCat); save(); render(); renderManagement(); } }
+        function setActiveCategory(c, el) { activeCat = c; document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active')); el.classList.add('active'); render(); }
+        function switchTab(v) { document.querySelectorAll('.tab-view').forEach(t => t.classList.add('hidden')); document.getElementById('view-'+v).classList.remove('hidden'); if(v==='history') renderHistory(); }
         function clearCart() { cart = {}; renderCart(); notify("Cleared"); }
         function clearHistory() { if(confirm("Clear history?")) { salesHistory = []; save(); renderHistory(); } }
-        function notify(m) { const t = document.getElementById('toast'); document.getElementById('toastMsg').innerText = m; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 2500); }
+        function notify(m) { const t = document.getElementById('toast'); document.getElementById('toastMsg').innerText = m; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 2000); }
+        function toggleAddModal() { document.getElementById('addModal').classList.toggle('hidden'); if(!document.getElementById('addModal').classList.contains('hidden')) { renderManagement(); renderSnapshots(); } }
+        function toggleBillView() { document.getElementById('billDetails').classList.toggle('hidden'); }
+        function setMCat(c) { manualCat = c; document.querySelectorAll('.mcat').forEach(b => b.className = 'mcat flex-1 rounded-xl bg-slate-50 text-slate-400 text-[10px] font-extrabold uppercase py-2'); const b = c==='Vegetable'?'mcVeg':c==='Fruit'?'mcFruit':'mcGroc'; document.getElementById(b).className = 'mcat flex-1 rounded-xl bg-emerald-600 text-white text-[10px] font-extrabold uppercase py-2 shadow-md'; renderManagement(); }
+        function saveSettings() { sLoc = document.getElementById('branchNameInput').value || "Main Branch"; save(); notify("Saved"); }
         function memorizeSale() {
             const items = Object.values(cart); if(items.length === 0) return notify("Empty");
             const sale = { id: Date.now(), date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), items: items.map(i => `${i.qty}${i.unit} ${i.name}`), total: document.getElementById('grandTotal').innerText };
             salesHistory.unshift(sale); if(salesHistory.length > 50) salesHistory.pop();
-            save(); clearCart(); notify("Memorized"); switchTab('history');
+            save(); clearCart(); notify("Saved to History"); switchTab('history');
         }
         function renderHistory() {
             const list = document.getElementById('historyList'); list.innerHTML = '';
-            if(salesHistory.length === 0) list.innerHTML = `<div class="py-10 text-center opacity-30 text-[10px] font-black uppercase tracking-widest">No History</div>`;
+            if(salesHistory.length === 0) list.innerHTML = `<div class="py-10 text-center opacity-30 text-[10px] font-black uppercase">No Sales</div>`;
             salesHistory.forEach(s => {
-                const el = document.createElement('div'); el.className = 'p-3.5 bg-white border border-slate-100 rounded-2xl shadow-sm';
-                el.innerHTML = `<div class="flex justify-between items-start mb-1"><span class="text-[10px] font-black text-slate-400 uppercase">${s.date}</span><span class="text-sm font-black text-emerald-600">${s.total}</span></div><p class="text-[10px] text-slate-500 font-bold truncate">${s.items.join(', ')}</p>`;
-                list.appendChild(el);
+                list.innerHTML += `<div class="p-3.5 bg-white border border-slate-100 rounded-2xl shadow-sm"><div class="flex justify-between items-start mb-1"><span class="text-[10px] font-black text-slate-400 uppercase">${s.date}</span><span class="text-sm font-black text-emerald-600">${s.total}</span></div><p class="text-[10px] text-slate-500 font-bold truncate">${s.items.join(', ')}</p></div>`;
             });
         }
-        function renderManagement() {
-            const div = document.getElementById('manageList'); div.innerHTML = '';
-            inventory.filter(it => it.category === activeCat).sort((a,b) => a.name.localeCompare(b.name)).forEach(it => {
-                const el = document.createElement('div'); el.className = `flex items-center justify-between p-3 border-b text-[10px] uppercase font-bold bg-white mb-1 rounded-lg`;
-                el.innerHTML = `<div class="flex flex-col"><span>${it.name}</span><span class="text-[8px] text-emerald-500">₹${it.price}/${it.refQty}${it.priceUnit}</span></div><button onclick="inventory=inventory.filter(i=>i.id!=${it.id});save();render();renderManagement();" class="text-red-500 p-2">Del</button>`;
-                div.appendChild(el);
-            });
-        }
-        function saveItem() {
-            const n = document.getElementById('newName').value.trim(), p = document.getElementById('newPrice').value, r = document.getElementById('newRefQty').value, u = document.getElementById('newPriceUnit').value;
-            if(!n || !p) return notify("Details?");
-            inventory.push({id: Date.now(), name: n, price: parseFloat(p), refQty: parseFloat(r), priceUnit: u, category: manualCat});
-            save(); render(); renderManagement(); notify("Saved");
-        }
-        function setPriceBasis(qty, unit) { document.getElementById('newRefQty').value = qty; document.getElementById('newPriceUnit').value = unit; }
         function sendInvoice() {
             const items = Object.values(cart); if(items.length===0) return notify("Empty");
             let msg = `🛒 *FARMER'S GATE BILL*\n📍 _${sLoc}_\n--------------------\n`;
@@ -480,33 +594,11 @@
             msg += `--------------------\n💰 *TOTAL: ${document.getElementById('grandTotal').innerText}*`;
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         }
-        function toggleVoiceBilling() {
-            const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return notify("No Mic Support");
-            if (recognition) { recognition.stop(); recognition = null; document.getElementById('voiceBtn').classList.remove('mic-active'); return; }
-            recognition = new SR(); recognition.lang = "en-IN"; recognition.continuous = true;
-            recognition.onstart = () => { document.getElementById('voiceBtn').classList.add('mic-active'); notify("Mic Active"); };
-            recognition.onresult = (e) => { const txt = e.results[e.results.length-1][0].transcript.toLowerCase(); let matched = inventory.find(i => txt.includes(i.name.toLowerCase())); if(matched) addToCart(matched.id, 1); };
-            recognition.onend = () => { document.getElementById('voiceBtn').classList.remove('mic-active'); recognition = null; };
-            recognition.start();
-        }
-        function toggleVoiceStockAdd() {
-            const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return notify("No Mic Support");
-            if (voiceAddRecognition) { voiceAddRecognition.stop(); voiceAddRecognition = null; document.getElementById('voiceAddBtn').classList.remove('bg-purple-700','text-white'); return; }
-            voiceAddRecognition = new SR(); voiceAddRecognition.lang = "en-IN"; voiceAddRecognition.continuous = true;
-            voiceAddRecognition.onstart = () => { document.getElementById('voiceAddBtn').classList.add('bg-purple-700','text-white'); notify("Say 'Potato 40'..."); };
-            voiceAddRecognition.onresult = (e) => {
-                const txt = e.results[e.results.length-1][0].transcript.toLowerCase();
-                const parts = txt.match(/([a-zA-Z\u0900-\u097F\s]+)\s*(\d+)/);
-                if (parts) { inventory.unshift({ id: Date.now(), name: parts[1].trim(), price: parseFloat(parts[2]), refQty: 1, priceUnit: 'Kg', category: activeCat }); save(); render(); renderManagement(); notify("Added " + parts[1]); }
-            };
-            voiceAddRecognition.start();
-        }
 
-        window.onload = () => {
-            const savedKey = localStorage.getItem('user_api_key');
-            if(savedKey) document.getElementById('userApiKey').value = savedKey;
+        window.onload = () => { 
+            const k = localStorage.getItem('user_api_key'); if(k) document.getElementById('userApiKey').value = k;
             document.getElementById('branchNameInput').value = sLoc;
-            render();
+            render(); 
         };
     </script>
 </body>
