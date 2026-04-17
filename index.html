@@ -49,30 +49,35 @@
         .mic-active { background: #ef4444 !important; color: white !important; animation: pulse-red 1.5s infinite; }
         @keyframes pulse-red { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         
-        input, select { font-size: 16px !important; }
+        input, select, textarea { font-size: 16px !important; }
         input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 
-        .loader { border: 2px solid #f3f3f3; border-top: 2px solid var(--primary); border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        /* Compact Preset Button Styles */
+        /* Responsive Preset Buttons */
+        .preset-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+        }
         .preset-btn { 
             border: 1px solid #e2e8f0; 
             background: white; 
-            padding: 6px 4px; 
+            padding: 8px 10px; 
             border-radius: 10px; 
             font-size: 10px; 
             font-weight: 800; 
             color: #64748b; 
+            flex: 1 1 calc(25% - 6px); /* 4 per row, shrinking to 3 on tiny screens */
+            min-width: 65px;
             text-align: center;
-            transition: all 0.2s;
-            flex: 1 1 30%; /* Ensures 3 items per row roughly */
-            min-width: 60px;
         }
         .preset-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
         
         .animate-pop { animation: popIn 0.3s ease-out; }
         @keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+
+        .loader { border: 2px solid #f3f3f3; border-top: 2px solid var(--primary); border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -97,13 +102,13 @@
             </div>
         </header>
 
-        <!-- Search Bar -->
+        <!-- Search & Billing Voice -->
         <div class="p-3 bg-white flex gap-2 border-b border-slate-100 shadow-sm">
             <div class="relative flex-1">
-                <input type="text" id="searchInput" oninput="render()" placeholder="Find items..." class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border-0 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20">
+                <input type="text" id="searchInput" oninput="render()" placeholder="Search items..." class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border-0 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             </div>
-            <button onclick="toggleVoiceBilling()" id="voiceBtn" class="bg-slate-50 text-slate-500 px-5 rounded-2xl active:scale-90 transition-all border border-slate-100">
+            <button onclick="toggleVoiceBilling()" id="voiceBtn" class="bg-slate-50 text-slate-500 px-5 rounded-2xl active:scale-90 border border-slate-100 transition-colors">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
             </button>
         </div>
@@ -115,36 +120,35 @@
             <button onclick="setActiveCategory('Grocery', this)" class="category-pill flex-1 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">Groc</button>
         </div>
 
-        <!-- Tab Views -->
         <div id="view-shop" class="tab-view">
             <div id="itemGrid" class="grid grid-cols-2 gap-2 p-2 pb-4"></div>
         </div>
 
         <div id="view-history" class="tab-view hidden p-4">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xs font-black uppercase text-slate-500">Record</h2>
-                <button onclick="clearHistory()" class="text-[9px] font-bold text-red-400 uppercase bg-red-50 px-3 py-1 rounded-lg">Clear All</button>
+                <h2 class="text-xs font-black uppercase text-slate-500">History</h2>
+                <button onclick="clearHistory()" class="text-[9px] font-bold text-red-400 uppercase bg-red-50 px-3 py-1 rounded-lg">Clear History</button>
             </div>
             <div id="historyList" class="space-y-2"></div>
         </div>
 
-        <!-- Checkout Bottom Desk -->
+        <!-- Bottom Summary Desk -->
         <div class="glass-summary px-4 py-3 shadow-2xl rounded-t-[2.5rem] border-t-4 border-t-slate-900">
             <div class="flex justify-between items-center mb-2 px-1">
                 <div class="flex items-center gap-2">
-                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Total Pay</span>
+                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Grand Total</span>
                     <span id="orderCount" class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[8px] font-bold">0 Items</span>
                 </div>
-                <button onclick="toggleBillView()" id="billToggle" class="text-emerald-600 font-bold text-[9px] uppercase">Expand Bill</button>
+                <button onclick="toggleBillView()" id="billToggle" class="text-emerald-600 font-bold text-[9px] uppercase">Details</button>
             </div>
             <div id="billDetails" class="hidden max-h-[30vh] overflow-y-auto custom-scrollbar space-y-1.5 mb-4 px-1"></div>
             <div class="flex items-center justify-between gap-4">
-                <div id="grandTotal" class="text-3xl font-black text-emerald-600 tracking-tighter tabular-nums leading-none">₹0.00</div>
+                <div id="grandTotal" class="text-3xl font-black text-emerald-600 tabular-nums leading-none">₹0.00</div>
                 <div class="flex gap-2 flex-1">
-                    <button onclick="memorizeSale()" class="bg-slate-100 text-slate-500 p-3.5 rounded-2xl active:scale-95" title="Save History">
+                    <button onclick="memorizeSale()" class="bg-slate-100 text-slate-500 p-3.5 rounded-2xl active:scale-95">
                         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                     </button>
-                    <button onclick="sendInvoice()" class="flex-1 bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase py-4 shadow-lg active:scale-95">Send Bill</button>
+                    <button onclick="sendInvoice()" class="flex-1 bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase py-4 shadow-lg active:scale-95">WhatsApp Bill</button>
                 </div>
             </div>
         </div>
@@ -152,101 +156,103 @@
 
     <!-- Stock Modal -->
     <div id="addModal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md hidden flex items-center justify-center p-4 z-[100] overflow-y-auto">
-        <div class="bg-white rounded-[2.5rem] w-full max-w-lg p-6 shadow-2xl flex flex-col my-auto max-h-[92vh]">
-            <div class="flex justify-between items-center mb-4">
-                <h3 class="text-sm font-black text-slate-900 uppercase">Master Stock Hub</h3>
+        <div class="bg-white rounded-[2.5rem] w-full max-w-lg p-6 shadow-2xl flex flex-col my-auto max-h-[95vh]">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-sm font-black text-slate-900 uppercase">Inventory Hub</h3>
                 <button onclick="toggleAddModal()" class="bg-slate-100 p-2 rounded-full text-slate-400 active:scale-90"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
             </div>
 
             <div class="space-y-5 overflow-y-auto custom-scrollbar pr-1 pb-10">
                 
-                <!-- Settings Area -->
-                <div class="bg-slate-900 p-4 rounded-2xl space-y-3 shadow-xl">
-                    <div class="flex justify-between items-center">
-                        <p class="text-[9px] font-black text-emerald-400 uppercase tracking-widest">AI Engine Settings</p>
-                        <select id="aiProvider" onchange="updateApiKeyPlaceholder()" class="bg-slate-800 text-white text-[10px] font-bold border-0 rounded-lg px-2 py-1 outline-none">
-                            <option value="gemini">Google Gemini</option>
-                            <option value="openai">OpenAI (GPT-4o)</option>
-                        </select>
-                    </div>
+                <div class="bg-slate-900 p-4 rounded-2xl space-y-3">
+                    <p class="text-[9px] font-black text-emerald-400 uppercase tracking-widest">General Settings</p>
                     <div class="flex gap-2">
-                        <input type="password" id="userApiKey" placeholder="Paste API Key..." class="flex-1 bg-slate-800 border-0 rounded-xl text-xs text-white font-bold p-3 outline-none">
-                        <button onclick="verifyKey()" id="verifyBtn" class="bg-white text-slate-900 px-3 rounded-xl text-[8px] font-black uppercase">Verify</button>
-                    </div>
-                    <div class="flex gap-2">
-                        <input type="text" id="branchNameInput" placeholder="Branch Name" class="flex-1 bg-slate-800 border-0 rounded-xl text-xs text-white font-bold p-3 outline-none">
+                        <input type="text" id="branchNameInput" placeholder="Enter Branch Name" class="flex-1 bg-slate-800 border-0 rounded-xl text-xs text-white font-bold p-3 outline-none">
                         <button onclick="saveSettings()" class="bg-emerald-600 text-white px-4 rounded-xl text-[10px] font-black uppercase">Save</button>
                     </div>
                 </div>
 
-                <!-- Sync & Scan Grid -->
+                <!-- Google Sheet Integration -->
+                <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-[2rem] space-y-3">
+                    <p class="text-[10px] font-black text-emerald-700 uppercase tracking-widest text-center">Google Sheet Sync</p>
+                    <div class="flex gap-2">
+                        <input type="text" id="sheetUrl" placeholder="Paste Public Sheet Link..." class="flex-1 px-4 py-3 bg-white border border-emerald-200 rounded-xl text-xs font-bold outline-none">
+                        <button onclick="syncFromSheet()" class="bg-emerald-600 text-white px-5 rounded-xl font-bold text-[10px] uppercase active:scale-95">Sync</button>
+                    </div>
+                    <p class="text-[7px] text-emerald-400 text-center uppercase font-black">Cols: Name, HindiName, Price, Qty, Unit, Category</p>
+                </div>
+
+                <!-- Bulk Grid (Text & File) -->
                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="document.getElementById('cameraInput').click()" class="bg-blue-50 text-blue-700 p-5 rounded-2xl flex flex-col items-center gap-1 active:scale-95 border border-blue-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-                        <span class="text-[9px] font-black uppercase">AI Scan Board</span>
-                        <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleImageInput(event)">
+                    <button onclick="document.getElementById('csvInput').click()" class="bg-blue-50 text-blue-700 p-5 rounded-2xl flex flex-col items-center gap-1 active:scale-95 border border-blue-100">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/></svg>
+                        <span class="text-[9px] font-black uppercase">Upload Excel</span>
+                        <input type="file" id="csvInput" accept=".csv" class="hidden" onchange="importFromCSV(event)">
                     </button>
                     <button id="voiceAddBtn" onclick="toggleVoiceStockAdd()" class="bg-purple-50 text-purple-700 p-5 rounded-2xl flex flex-col items-center gap-1 active:scale-95 border border-purple-100">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
-                        <span class="text-[9px] font-black uppercase">Voice Stock Add</span>
+                        <span class="text-[9px] font-black uppercase">Voice Add</span>
                     </button>
                 </div>
 
-                <!-- Individual Form -->
+                <!-- Smart Text Import -->
+                <div class="bg-slate-50 border border-slate-100 p-5 rounded-[2rem] space-y-3">
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Bulk Text Import</p>
+                    <textarea id="smartPasteArea" placeholder="e.g. Potato 30, Milk 65, Oil 150..." class="w-full h-24 bg-white border-0 rounded-2xl text-xs p-4 shadow-inner outline-none"></textarea>
+                    <button onclick="processSmartText()" class="w-full bg-slate-900 text-white py-3 rounded-xl text-[10px] font-bold uppercase">Extract Items</button>
+                </div>
+
+                <!-- Manual Form -->
                 <div class="bg-white border-2 border-emerald-500/20 p-5 rounded-[2rem] space-y-4 shadow-sm relative overflow-hidden">
-                    <div class="absolute top-0 right-0 bg-emerald-500 text-white px-3 py-1 rounded-bl-xl text-[8px] font-black uppercase">Article Setup</div>
+                    <div class="absolute top-0 right-0 bg-emerald-500 text-white px-3 py-1 rounded-bl-xl text-[8px] font-black uppercase">Manual Add</div>
                     <div class="flex gap-1.5 h-[42px]">
                         <button onclick="setMCat('Vegetable')" id="mcVeg" class="mcat flex-1 rounded-xl bg-emerald-600 text-white text-[10px] font-extrabold uppercase py-2">Veg</button>
                         <button onclick="setMCat('Fruit')" id="mcFruit" class="mcat flex-1 rounded-xl bg-slate-50 text-slate-400 text-[10px] font-extrabold uppercase py-2">Fruit</button>
                         <button onclick="setMCat('Grocery')" id="mcGroc" class="mcat flex-1 rounded-xl bg-slate-50 text-slate-400 text-[10px] font-extrabold uppercase py-2">Groc</button>
                     </div>
-                    <div class="grid grid-cols-1 gap-2">
-                        <input type="text" id="newName" placeholder="English Name" class="p-4 bg-slate-50 rounded-2xl text-xs font-bold outline-none focus:ring-4 focus:ring-emerald-500/10">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="newName" placeholder="English Name" class="p-4 bg-slate-50 rounded-2xl text-xs font-bold outline-none">
                         <input type="text" id="newHindi" placeholder="हिंदी नाम" class="p-4 bg-slate-50 rounded-2xl text-xs font-bold outline-none">
                     </div>
                     <div class="bg-slate-50 p-4 rounded-2xl space-y-3">
-                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest text-center">Set Selling Rate</p>
-                        <div class="flex flex-wrap gap-2 justify-center mb-1">
+                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest text-center">Price Per (Mobile Optimized)</p>
+                        <!-- FIXED MOBILE PRESET GRID -->
+                        <div class="preset-container">
                             <button onclick="setPriceBasis(100, 'Gm')" class="preset-btn">100 Gm</button>
                             <button onclick="setPriceBasis(250, 'Gm')" class="preset-btn">250 Gm</button>
                             <button onclick="setPriceBasis(500, 'Gm')" class="preset-btn">500 Gm</button>
+                            <button onclick="setPriceBasis(500, 'Ml')" class="preset-btn">500 Ml</button>
                             <button onclick="setPriceBasis(1, 'Kg')" class="preset-btn active">1.0 Kg</button>
-                            <button onclick="setPriceBasis(5, 'Kg')" class="preset-btn">5.0 Kg</button>
+                            <button onclick="setPriceBasis(1, 'Ltr')" class="preset-btn">1.0 Ltr</button>
                             <button onclick="setPriceBasis(1, 'Pcs')" class="preset-btn">1 Pcs</button>
+                            <button onclick="setPriceBasis(1, 'Pkt')" class="preset-btn">1 Pkt</button>
                         </div>
                         <div class="flex gap-2 items-center">
                             <input type="number" id="newPrice" placeholder="Price" class="flex-1 p-3 bg-white border border-slate-100 rounded-xl text-sm font-black outline-none shadow-sm">
-                            <span class="text-[9px] font-black text-slate-300">FOR</span>
+                            <span class="text-[9px] font-black text-slate-300 uppercase">Per</span>
                             <div class="flex gap-1 items-center bg-white border border-slate-100 rounded-xl px-2 shadow-sm">
                                 <input type="number" id="newRefQty" value="1" class="w-10 p-2 bg-transparent text-sm font-black text-center outline-none">
                                 <select id="newPriceUnit" class="bg-transparent border-0 text-[9px] font-black uppercase outline-none">
-                                    <option value="Kg">Kg</option><option value="Gm">Gm</option><option value="Pcs">Pcs</option><option value="Pkt">Pkt</option>
+                                    <option value="Kg">Kg</option><option value="Gm">Gm</option>
+                                    <option value="Ltr">Ltr</option><option value="Ml">Ml</option>
+                                    <option value="Pcs">Pcs</option><option value="Pkt">Pkt</option>
+                                    <option value="Box">Box</option>
                                 </select>
                             </div>
                         </div>
                     </div>
-                    <button id="saveBtn" onclick="saveItem()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest active:scale-95 shadow-xl">Commit Rate</button>
+                    <button id="saveBtn" onclick="saveItem()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-[11px] uppercase active:scale-95 shadow-xl">Commit to Stock</button>
                 </div>
 
-                <!-- Export Options -->
-                <div class="bg-slate-50 p-5 rounded-[2.5rem] border border-slate-100 space-y-4 shadow-inner">
-                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Data Exports</p>
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="downloadStockExcel()" class="bg-white border border-slate-200 py-4 rounded-2xl text-[9px] font-black uppercase active:scale-95 shadow-sm text-emerald-600 flex flex-col items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                            Excel (CSV)
-                        </button>
-                        <button onclick="downloadStockText()" class="bg-white border border-slate-200 py-4 rounded-2xl text-[9px] font-black uppercase active:scale-95 shadow-sm text-slate-600 flex flex-col items-center gap-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                            Text (TXT)
-                        </button>
-                    </div>
+                <div id="loaderUI" class="hidden flex items-center justify-center p-4 bg-white rounded-xl">
+                    <div class="loader mr-2"></div>
+                    <span class="text-[10px] font-black uppercase text-slate-500">Syncing...</span>
                 </div>
 
-                <!-- Stock List -->
+                <!-- Stock Table -->
                 <div class="space-y-1.5 pt-2">
                     <div class="flex justify-between items-center px-1 mb-2">
-                        <p class="text-[9px] font-black text-slate-500 uppercase tracking-wider">Stock Inventory</p>
+                        <p class="text-[9px] font-black text-slate-500 uppercase tracking-wider">Master List</p>
                         <div class="flex items-center gap-2">
                             <input type="text" id="manageSearch" oninput="renderManagement()" placeholder="Filter..." class="bg-slate-100 rounded-lg text-[10px] p-1.5 w-24 outline-none">
                             <button onclick="bulkDelete()" class="text-red-400 text-[10px] font-bold uppercase">Clear</button>
@@ -265,10 +271,9 @@
 
     <script>
         let activeCat = 'Vegetable', manualCat = 'Vegetable', editingId = null;
-        let sLoc = localStorage.getItem('fg_loc') || "Patiala Branch";
+        let sLoc = localStorage.getItem('fg_loc') || "Main Branch";
         let inventory = JSON.parse(localStorage.getItem('fg_inventory')) || [
-            { id: 1, name: 'Potato', nameHindi: 'आलू', price: 30, refQty: 1, priceUnit: 'Kg', category: 'Vegetable' },
-            { id: 2, name: 'Tomato', nameHindi: 'टमाटर', price: 65, refQty: 1, priceUnit: 'Kg', category: 'Vegetable' }
+            { id: 1, name: 'Potato', nameHindi: 'आलू', price: 30, refQty: 1, priceUnit: 'Kg', category: 'Vegetable' }
         ];
         let cart = {}, salesHistory = JSON.parse(localStorage.getItem('fg_history')) || [];
         let recognition = null, voiceAddRecognition = null;
@@ -277,92 +282,58 @@
             localStorage.setItem('fg_inventory', JSON.stringify(inventory));
             localStorage.setItem('fg_history', JSON.stringify(salesHistory));
             localStorage.setItem('fg_loc', sLoc);
-            localStorage.setItem('user_api_key', document.getElementById('userApiKey').value);
-            localStorage.setItem('ai_provider', document.getElementById('aiProvider').value);
             document.getElementById('totalItemsBadge').innerText = inventory.length + " Items";
             document.getElementById('displayLocHeader').innerText = sLoc;
         }
 
-        /** DATA EXPORT **/
-        function downloadStockExcel() {
-            let csv = "Name,Hindi Name,Price,Qty,Unit,Category\n";
-            inventory.forEach(it => csv += `"${it.name}","${it.nameHindi || ''}",${it.price},${it.refQty},"${it.priceUnit}","${it.category}"\n`);
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = 'stock_list.csv'; a.click();
-            notify("Excel/CSV Downloaded");
-        }
-
-        function downloadStockText() {
-            let txt = `FARMER'S GATE PRO - PRICE LIST\nLocation: ${sLoc}\nDate: ${new Date().toLocaleDateString()}\n---------------------------------\n\n`;
-            ['Vegetable', 'Fruit', 'Grocery'].forEach(cat => {
-                const items = inventory.filter(i => i.category === cat);
-                if(items.length > 0) {
-                    txt += `[ ${cat.toUpperCase()} ]\n`;
-                    items.forEach(it => {
-                        txt += `${it.name} (${it.nameHindi || 'N/A'}) - ₹${it.price} per ${it.refQty}${it.priceUnit}\n`;
-                    });
-                    txt += `\n`;
-                }
-            });
-            const blob = new Blob([txt], { type: 'text/plain' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a'); a.href = url; a.download = 'price_list.txt'; a.click();
-            notify("Text List Downloaded");
-        }
-
-        /** KEY VERIFICATION **/
-        async function verifyKey() {
-            const key = document.getElementById('userApiKey').value;
-            const provider = document.getElementById('aiProvider').value;
-            const dot = document.getElementById('keyStatus'), btn = document.getElementById('verifyBtn');
-            if(!key) return notify("Enter Key First");
-            btn.innerText = "...";
+        /** NEW: GOOGLE SHEET SYNC **/
+        async function syncFromSheet() {
+            const url = document.getElementById('sheetUrl').value.trim();
+            const match = url.match(/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
+            if (!match) return notify("Invalid Link");
+            const csvUrl = `https://docs.google.com/spreadsheets/d/${match[1]}/export?format=csv`;
+            
+            document.getElementById('loaderUI').classList.remove('hidden');
             try {
-                let res;
-                if(provider === 'gemini') {
-                    res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
-                        method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: "hi" }] }] })
-                    });
-                } else {
-                    res = await fetch(`https://api.openai.com/v1/chat/completions`, {
-                        method: 'POST', headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: "hi" }] })
-                    });
-                }
-                if(res.ok) { dot.className = "w-2 h-2 rounded-full bg-green-500"; btn.innerText = "OK"; save(); } 
-                else { throw new Error(); }
-            } catch(e) { dot.className = "w-2 h-2 rounded-full bg-red-500"; btn.innerText = "ERR"; }
+                const response = await fetch(csvUrl);
+                const data = await response.text();
+                const rows = data.split('\n').slice(1);
+                rows.forEach(row => {
+                    const cols = row.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+                    if (cols.length >= 3) {
+                        inventory.push({
+                            id: Date.now() + Math.random(),
+                            name: cols[0], nameHindi: cols[1] || "",
+                            price: parseFloat(cols[2]) || 0, refQty: parseFloat(cols[3]) || 1,
+                            priceUnit: cols[4] || "Kg", category: cols[5] || activeCat
+                        });
+                    }
+                });
+                save(); render(); renderManagement(); notify("Sync Done");
+            } catch(e) { notify("Sync Error"); }
+            document.getElementById('loaderUI').classList.add('hidden');
         }
 
-        /** AI SCANNING LOGIC **/
-        async function handleImageInput(ev) {
-            const key = document.getElementById('userApiKey').value;
-            const provider = document.getElementById('aiProvider').value;
-            const file = ev.target.files[0]; if(!file || !key) return notify("Key/File Missing");
-            const loader = document.getElementById('smartLoader'); loader.classList.remove('hidden');
-            try {
-                const b64 = await new Promise(r => { const rd = new FileReader(); rd.onload = e => r(e.target.result.split(',')[1]); rd.readAsDataURL(file); });
-                const prompt = "List items accurately. Strictly JSON format: {articles:[{name, nameHindi, price, refQty:1, priceUnit:'Kg', category:'Vegetable'}]}";
-                let json;
-                if(provider === 'gemini') {
-                    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`, {
-                        method: 'POST', body: JSON.stringify({ contents: [{ parts: [{ text: prompt }, { inlineData: { mimeType: "image/jpeg", data: b64 } }] }] })
-                    });
-                    const d = await res.json();
-                    json = JSON.parse(d.candidates[0].content.parts[0].text.replace(/```json|```/g, ""));
-                } else {
-                    const res = await fetch(`https://api.openai.com/v1/chat/completions`, {
-                        method: 'POST', headers: { 'Authorization': `Bearer ${key}`, 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ model: "gpt-4o-mini", messages: [{ role: "user", content: [{ type: "text", text: prompt }, { type: "image_url", image_url: { url: `data:image/jpeg;base64,${b64}` } }] }] })
-                    });
-                    const d = await res.json();
-                    json = JSON.parse(d.choices[0].message.content.replace(/```json|```/g, ""));
-                }
-                json.articles.forEach(it => inventory.unshift({ id: Date.now() + Math.random(), ...it }));
-                save(); render(); renderManagement(); notify("Scan Success");
-            } catch(e) { notify("Scan Failed"); }
-            loader.classList.add('hidden');
+        function importFromCSV(event) {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const text = e.target.result; const lines = text.split(/\r?\n/);
+                lines.forEach((line, index) => {
+                    if (index === 0 || !line.trim()) return;
+                    const cols = line.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
+                    if (cols.length >= 3) {
+                        inventory.push({
+                            id: Date.now() + Math.random(),
+                            name: cols[0], nameHindi: cols[1] || "",
+                            price: parseFloat(cols[2]) || 0, refQty: parseFloat(cols[3]) || 1,
+                            priceUnit: cols[4] || "Kg", category: cols[5] || activeCat
+                        });
+                    }
+                });
+                save(); render(); renderManagement(); notify("Imported!");
+            };
+            reader.readAsText(file);
         }
 
         function setPriceBasis(qty, unit) {
@@ -370,7 +341,7 @@
             document.getElementById('newPriceUnit').value = unit;
             document.querySelectorAll('.preset-btn').forEach(b => {
                 b.classList.remove('active');
-                if(b.innerText.replace(/\s/g, '').toLowerCase() === (qty + unit).toLowerCase() || (qty === 1 && unit === 'Pcs' && b.innerText === '1 Pcs')) b.classList.add('active');
+                if(b.innerText.replace(/\s/g, '').toLowerCase() === (qty + unit).toLowerCase()) b.classList.add('active');
             });
         }
 
@@ -378,16 +349,12 @@
             const grid = document.getElementById('itemGrid');
             const q = document.getElementById('searchInput').value.toLowerCase().trim();
             if(!grid) return; grid.innerHTML = '';
-            const filtered = inventory.filter(i => 
-                i.category === activeCat && (i.name.toLowerCase().includes(q) || (i.nameHindi && i.nameHindi.toLowerCase().includes(q)))
-            ).sort((a,b) => a.name.localeCompare(b.name));
-
-            filtered.forEach(it => {
-                const card = document.createElement('div');
-                card.className = 'article-card shadow-sm animate-pop';
-                const isW = (it.priceUnit === 'Kg' || it.priceUnit === 'Gm');
-                const units = isW ? ['Kg', 'Gm'] : [it.priceUnit];
-                let unitOptions = units.map(u => `<option value="${u}" ${it.priceUnit===u?'selected':''}>${u}</option>`).join('');
+            inventory.filter(i => i.category === activeCat && i.name.toLowerCase().includes(q)).sort((a,b) => a.name.localeCompare(b.name)).forEach(it => {
+                const card = document.createElement('div'); card.className = 'article-card shadow-sm animate-pop';
+                const isScalable = (u) => ['Kg', 'Gm', 'Ltr', 'Ml'].includes(u);
+                let unitOptions = isScalable(it.priceUnit) 
+                    ? (['Kg', 'Gm'].includes(it.priceUnit) ? '<option value="Kg">Kg</option><option value="Gm">Gm</option>' : '<option value="Ltr">Ltr</option><option value="Ml">Ml</option>')
+                    : `<option value="${it.priceUnit}">${it.priceUnit}</option>`;
 
                 card.innerHTML = `<div class="flex flex-col mb-3"><h4 class="font-black text-slate-800 text-[14px] uppercase truncate leading-tight">${it.name}</h4><div class="flex items-center justify-between mt-1"><span class="text-[9px] text-slate-400 font-bold truncate">${it.nameHindi || ''}</span><span class="text-[9px] text-emerald-600 font-black">₹${it.price}/${it.refQty}${it.priceUnit}</span></div></div><div class="flex gap-1 h-[38px]"><input type="number" id="qty-${it.id}" placeholder="0" class="w-12 bg-slate-50 border-0 rounded-lg text-xs font-black text-center outline-none"><select id="unit-${it.id}" class="flex-1 bg-slate-50 border-0 rounded-lg text-[8px] font-black uppercase outline-none px-1">${unitOptions}</select><button onclick="addToCart(${it.id})" class="bg-slate-900 text-white w-9 rounded-lg active:scale-90 shadow-md">+</button></div>`;
                 grid.appendChild(card);
@@ -400,13 +367,13 @@
             const qty = parseFloat(qi?.value || 0), inU = us?.value;
             if (qty <= 0) return;
             const it = inventory.find(i => i.id === id);
-            const norm = (v, u) => (u === 'Kg') ? v * 1000 : v;
-            const isW = (u) => u === 'Kg' || u === 'Gm';
-            const valA = isW(inU) && isW(it.priceUnit) ? norm(qty, inU) : qty;
-            const valB = isW(inU) && isW(it.priceUnit) ? norm(it.refQty, it.priceUnit) : it.refQty;
+            const norm = (v, u) => (u === 'Kg' || u === 'Ltr') ? v * 1000 : v;
+            const isScalable = (u) => ['Kg', 'Gm', 'Ltr', 'Ml'].includes(u);
+            const valA = isScalable(inU) && isScalable(it.priceUnit) ? norm(qty, inU) : qty;
+            const valB = isScalable(inU) && isScalable(it.priceUnit) ? norm(it.refQty, it.priceUnit) : it.refQty;
             const finalP = (valA / valB) * it.price;
             cart[`${id}-${inU}-${it.price}`] = { ...it, qty, totalPrice: finalP, unit: inU };
-            qi.value = ''; renderCart(); notify(`${it.name} Added`);
+            qi.value = ''; renderCart(); notify(`${it.name} added`);
         }
 
         function renderCart() {
@@ -414,10 +381,23 @@
             list.innerHTML = ''; let total = 0, count = 0;
             Object.entries(cart).forEach(([k, i]) => {
                 total += i.totalPrice; count++;
-                list.innerHTML += `<div class="flex justify-between items-center p-2.5 bg-white rounded-xl border border-slate-100 text-[10px] font-bold uppercase mx-1"><div class="flex flex-col"><span class="text-slate-800">${i.name}</span><span class="text-[8px] text-slate-400">${i.qty}${i.unit} @ ₹${i.price} / ${i.refQty}${i.priceUnit}</span></div><div class="flex items-center gap-2"><span>₹${i.totalPrice.toFixed(2)}</span><button onclick="delete cart['${k}'];renderCart()" class="text-red-300 p-1">×</button></div></div>`;
+                list.innerHTML += `<div class="flex justify-between items-center p-2.5 bg-white rounded-xl border border-slate-100 text-[10px] font-bold uppercase mx-1"><div class="flex flex-col"><span class="text-slate-800">${i.name}</span><span class="text-[8px] text-slate-400">${i.qty}${i.unit} @ ₹${i.price}/${i.refQty}${i.priceUnit}</span></div><div class="flex items-center gap-2"><span>₹${i.totalPrice.toFixed(2)}</span><button onclick="delete cart['${k}'];renderCart()" class="text-red-300 p-1">×</button></div></div>`;
             });
             totalEl.innerText = `₹${total.toFixed(2)}`;
             document.getElementById('orderCount').innerText = `${count} Items`;
+        }
+
+        function processSmartText() {
+            const text = document.getElementById('smartPasteArea').value; if(!text) return;
+            const lines = text.split(/[\n,;]+/).filter(l => l.trim() !== "");
+            lines.forEach(l => {
+                const match = l.match(/([^\d\s,:-][^\d,:-]*)\s*[\s,:-]\s*(\d+(?:\.\d+)?)/);
+                if(match) {
+                    let cleanName = match[1].trim().replace(/^(?:\d+\s*(?:kg|gm|pcs|pkt|packet|kilo|gram|g|k))\s*/i, "").trim();
+                    if(cleanName) inventory.unshift({ id: Date.now()+Math.random(), name: cleanName, price: parseFloat(match[2]), refQty: 1, priceUnit: 'Kg', category: activeCat });
+                }
+            });
+            save(); render(); renderManagement(); document.getElementById('smartPasteArea').value = ""; notify("Bulk Added");
         }
 
         function saveItem() {
@@ -428,57 +408,25 @@
             save(); render(); renderManagement(); resetForm(); notify("Stock Saved");
         }
 
-        /** UPDATED: RENDER MANAGEMENT LIST WITH FULL DETAILS **/
         function renderManagement() {
             const div = document.getElementById('manageList'); div.innerHTML = '';
             const q = document.getElementById('manageSearch')?.value.toLowerCase() || "";
-            inventory.filter(i => i.category === activeCat && (i.name.toLowerCase().includes(q) || (i.nameHindi && i.nameHindi.toLowerCase().includes(q))))
-            .sort((a,b) => a.name.localeCompare(b.name)).forEach(it => {
-                const el = document.createElement('div'); el.className = `flex flex-col p-3 border-b bg-white mb-1 rounded-lg shadow-sm`;
-                el.innerHTML = `
+            inventory.filter(i => i.category === activeCat && (i.name.toLowerCase().includes(q) || (i.nameHindi && i.nameHindi.toLowerCase().includes(q)))).forEach(it => {
+                div.innerHTML += `<div class="flex flex-col p-3 border-b bg-white mb-1 rounded-lg shadow-sm">
                     <div class="flex justify-between items-start">
-                        <div class="flex flex-col">
-                            <span class="text-[10px] font-black uppercase text-slate-800">${it.name}</span>
-                            <span class="text-[9px] font-bold text-slate-400">${it.nameHindi || ''}</span>
-                        </div>
-                        <div class="text-right">
-                            <span class="text-[10px] font-black text-emerald-600">₹${it.price}</span>
-                            <p class="text-[7px] font-bold text-slate-300 uppercase leading-none mt-0.5">Basis: ${it.refQty}${it.priceUnit}</p>
-                        </div>
+                        <div class="flex flex-col"><span class="text-[10px] font-black uppercase">${it.name}</span><span class="text-[9px] text-slate-400 font-bold">${it.nameHindi || ''}</span></div>
+                        <div class="text-right"><span class="text-[10px] font-black text-emerald-600">₹${it.price}</span><p class="text-[7px] text-slate-300 font-bold uppercase leading-none">Basis: ${it.refQty}${it.priceUnit}</p></div>
                     </div>
-                    <div class="flex justify-end mt-2">
-                        <button onclick="inventory=inventory.filter(x=>x.id!=${it.id});save();renderManagement();render()" class="bg-red-50 text-red-500 text-[8px] font-black uppercase px-3 py-1 rounded-md border border-red-100">Delete Item</button>
-                    </div>`;
-                div.appendChild(el);
+                    <div class="flex justify-end mt-2"><button onclick="inventory=inventory.filter(x=>x.id!=${it.id});save();renderManagement();render()" class="text-red-500 text-[8px] font-black uppercase px-2 py-1 bg-red-50 rounded border border-red-100">Delete</button></div>
+                </div>`;
             });
-        }
-
-        function switchTab(v) { document.querySelectorAll('.tab-view').forEach(t => t.classList.add('hidden')); document.getElementById('view-'+v).classList.remove('hidden'); if(v==='history') renderHistory(); }
-        function setActiveCategory(c, el) { activeCat = c; document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active')); el.classList.add('active'); render(); }
-        function notify(m) { const t = document.getElementById('toast'); document.getElementById('toastMsg').innerText = m; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 2000); }
-        function toggleAddModal() { document.getElementById('addModal').classList.toggle('hidden'); if(!document.getElementById('addModal').classList.contains('hidden')) renderManagement(); }
-        function toggleBillView() { document.getElementById('billDetails').classList.toggle('hidden'); }
-        function clearCart() { cart = {}; renderCart(); notify("Cleared"); }
-        function resetForm() { document.getElementById('newName').value = ''; document.getElementById('newPrice').value = ''; document.getElementById('newHindi').value = ''; }
-        function setMCat(c) { manualCat = c; document.querySelectorAll('.mcat').forEach(b => b.className = 'mcat flex-1 rounded-xl bg-slate-50 text-slate-400 text-[10px] font-extrabold uppercase py-2'); const b = c==='Vegetable'?'mcVeg':c==='Fruit'?'mcFruit':'mcGroc'; document.getElementById(b).className = 'mcat flex-1 rounded-xl bg-emerald-600 text-white text-[10px] font-extrabold uppercase py-2 shadow-md'; renderManagement(); }
-        function saveSettings() { sLoc = document.getElementById('branchNameInput').value || "Main Branch"; save(); notify("Saved"); }
-        function clearHistory() { if(confirm("Clear record?")) { salesHistory = []; save(); renderHistory(); } }
-        function memorizeSale() {
-            const items = Object.values(cart); if(items.length === 0) return notify("Empty");
-            const sale = { id: Date.now(), date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), items: items.map(i => `${i.qty}${i.unit} ${i.name}`), total: document.getElementById('grandTotal').innerText };
-            salesHistory.unshift(sale); if(salesHistory.length > 50) salesHistory.pop();
-            save(); clearCart(); notify("Saved"); switchTab('history');
-        }
-        function renderHistory() {
-            const list = document.getElementById('historyList'); list.innerHTML = '';
-            salesHistory.forEach(s => { list.innerHTML += `<div class="p-3.5 bg-white border border-slate-100 rounded-2xl shadow-sm mb-2"><div class="flex justify-between items-start mb-1"><span class="text-[10px] font-black text-slate-400 uppercase">${s.date}</span><span class="text-sm font-black text-emerald-600">${s.total}</span></div><p class="text-[10px] text-slate-500 font-bold truncate">${s.items.join(', ')}</p></div>`; });
         }
 
         function toggleVoiceBilling() {
             const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return notify("No Mic");
             if (recognition) { recognition.stop(); recognition = null; document.getElementById('voiceBtn').classList.remove('mic-active'); return; }
             recognition = new SR(); recognition.lang = "en-IN"; recognition.continuous = true;
-            recognition.onstart = () => { document.getElementById('voiceBtn').classList.add('mic-active'); notify("Mic On"); };
+            recognition.onstart = () => { document.getElementById('voiceBtn').classList.add('mic-active'); notify("Mic Always On"); };
             recognition.onresult = (e) => { const txt = e.results[e.results.length-1][0].transcript.toLowerCase(); let matched = inventory.find(i => txt.includes(i.name.toLowerCase())); if(matched) addToCart(matched.id, 1); };
             recognition.onend = () => { if(recognition) recognition.start(); }; 
             recognition.start();
@@ -494,7 +442,31 @@
                 const parts = txt.match(/([a-zA-Z\u0900-\u097F\s]+)\s*(\d+)/);
                 if (parts) { inventory.unshift({ id: Date.now(), name: parts[1].trim(), price: parseFloat(parts[2]), refQty: 1, priceUnit: 'Kg', category: activeCat }); save(); render(); renderManagement(); notify("Added " + parts[1]); }
             };
+            voiceAddRecognition.onend = () => { if(voiceAddRecognition) voiceAddRecognition.start(); };
             voiceAddRecognition.start();
+        }
+
+        function toggleAddModal() { document.getElementById('addModal').classList.toggle('hidden'); if(!document.getElementById('addModal').classList.contains('hidden')) renderManagement(); }
+        function setActiveCategory(c, el) { activeCat = c; document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active')); el.classList.add('active'); render(); }
+        function switchTab(v) { document.querySelectorAll('.tab-view').forEach(t => t.classList.add('hidden')); document.getElementById('view-'+v).classList.remove('hidden'); if(v==='history') renderHistory(); }
+        function saveSettings() { sLoc = document.getElementById('branchNameInput').value || "Main Branch"; save(); notify("Saved"); }
+        function clearHistory() { if(confirm("Clear history?")) { salesHistory = []; save(); renderHistory(); } }
+        function resetForm() { document.getElementById('newName').value = ''; document.getElementById('newPrice').value = ''; document.getElementById('newHindi').value = ''; }
+        function toggleBillView() { document.getElementById('billDetails').classList.toggle('hidden'); }
+        function notify(m) { const t = document.getElementById('toast'); document.getElementById('toastMsg').innerText = m; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 2500); }
+        function setMCat(c) { manualCat = c; document.querySelectorAll('.mcat').forEach(b => b.className = 'mcat flex-1 rounded-xl bg-slate-50 text-slate-400 text-[10px] font-extrabold uppercase py-2'); const b = c==='Vegetable'?'mcVeg':c==='Fruit'?'mcFruit':'mcGroc'; document.getElementById(b).className = 'mcat flex-1 rounded-xl bg-emerald-600 text-white text-[10px] font-extrabold uppercase py-2 shadow-md'; renderManagement(); }
+        function bulkDelete() { if(confirm(`Delete all ${activeCat}?`)) { inventory = inventory.filter(i => i.category !== activeCat); save(); render(); renderManagement(); } }
+
+        function memorizeSale() {
+            const items = Object.values(cart); if(items.length === 0) return notify("Empty");
+            const sale = { id: Date.now(), date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), items: items.map(i => `${i.qty}${i.unit} ${i.name}`), total: document.getElementById('grandTotal').innerText };
+            salesHistory.unshift(sale); if(salesHistory.length > 50) salesHistory.pop();
+            save(); clearCart(); notify("Saved"); switchTab('history');
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('historyList'); list.innerHTML = '';
+            salesHistory.forEach(s => { list.innerHTML += `<div class="p-3.5 bg-white border border-slate-100 rounded-2xl shadow-sm mb-2"><div class="flex justify-between items-start mb-1"><span class="text-[10px] font-black text-slate-400 uppercase">${s.date}</span><span class="text-sm font-black text-emerald-600">${s.total}</span></div><p class="text-[10px] text-slate-500 font-bold truncate">${s.items.join(', ')}</p></div>`; });
         }
 
         function sendInvoice() {
@@ -505,9 +477,9 @@
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
+        function clearCart() { cart = {}; renderCart(); notify("Cleared"); }
+
         window.onload = () => { 
-            const k = localStorage.getItem('user_api_key'); if(k) document.getElementById('userApiKey').value = k;
-            const p = localStorage.getItem('ai_provider'); if(p) document.getElementById('aiProvider').value = p;
             document.getElementById('branchNameInput').value = sLoc;
             render(); 
         };
