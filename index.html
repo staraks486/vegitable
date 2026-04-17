@@ -9,73 +9,33 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
         
-        :root { 
-            --primary: #10b981; 
-            --danger: #ef4444;
-            --bg: #f8fafc; 
-        }
-
-        body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: var(--bg); 
-            color: #1e293b;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            padding-bottom: 110px;
-        }
-
+        :root { --primary: #10b981; --danger: #ef4444; --bg: #f8fafc; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: #1e293b; -webkit-tap-highlight-color: transparent; touch-action: manipulation; padding-bottom: 110px; }
         .custom-scrollbar::-webkit-scrollbar { width: 3px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
-        .article-card { 
-            transition: all 0.2s ease; 
-            border: 1px solid #e2e8f0; 
-            background: white; 
-            border-radius: 16px;
-            padding: 12px;
-        }
+        .article-card { transition: all 0.2s ease; border: 1px solid #e2e8f0; background: white; border-radius: 16px; padding: 12px; }
         .article-card:active { transform: scale(0.96); background: #f1f5f9; }
+
+        /* Navigation Styling */
+        .tab-btn { transition: all 0.3s; position: relative; font-weight: 800; font-size: 10px; text-transform: uppercase; color: #94a3b8; }
+        .tab-btn.active { color: var(--primary); }
+        .tab-btn.active::after { content: ''; position: absolute; bottom: -8px; left: 25%; width: 50%; height: 3px; background: var(--primary); border-radius: 10px; }
 
         .category-pill { transition: all 0.2s ease; cursor: pointer; border: 1px solid transparent; }
         .category-pill.active { background: var(--primary) !important; color: white !important; box-shadow: 0 4px 10px rgba(16, 185, 129, 0.2); }
 
-        .glass-summary { 
-            background: rgba(255, 255, 255, 0.98); 
-            backdrop-filter: blur(12px); 
-            border-top: 1px solid #e2e8f0;
-            position: fixed; bottom: 0; left: 0; right: 0; z-index: 50;
-        }
-        
+        .glass-summary { background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(12px); border-top: 1px solid #e2e8f0; position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; }
         .mic-active { background: #ef4444 !important; color: white !important; animation: pulse-red 1.5s infinite; }
         @keyframes pulse-red { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
         
         input, select, textarea { font-size: 16px !important; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-
-        /* Responsive Preset Buttons */
-        .preset-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            justify-content: center;
-        }
-        .preset-btn { 
-            border: 1px solid #e2e8f0; 
-            background: white; 
-            padding: 8px 10px; 
-            border-radius: 10px; 
-            font-size: 10px; 
-            font-weight: 800; 
-            color: #64748b; 
-            flex: 1 1 calc(25% - 6px); /* 4 per row, shrinking to 3 on tiny screens */
-            min-width: 65px;
-            text-align: center;
-        }
+        .preset-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
+        .preset-btn { border: 1px solid #e2e8f0; background: white; padding: 8px 2px; border-radius: 10px; font-size: 9px; font-weight: 800; color: #64748b; text-align: center; }
         .preset-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
         
         .animate-pop { animation: popIn 0.3s ease-out; }
         @keyframes popIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-
         .loader { border: 2px solid #f3f3f3; border-top: 2px solid var(--primary); border-radius: 50%; width: 14px; height: 14px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
@@ -83,187 +43,173 @@
 <body>
 
     <div class="max-w-4xl mx-auto">
-        <!-- Header -->
-        <header class="flex items-center justify-between p-4 bg-white border-b border-slate-100 sticky top-0 z-40">
-            <div class="flex items-center gap-3">
-                <button onclick="toggleAddModal()" class="bg-slate-900 text-white p-2.5 rounded-xl active:scale-90 shadow-md">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                </button>
+        <!-- Main Navigation Header -->
+        <header class="bg-white border-b border-slate-100 sticky top-0 z-40 shadow-sm">
+            <div class="flex items-center justify-between p-4 pb-2">
                 <div>
                     <h1 class="text-sm font-black text-slate-900 uppercase tracking-tighter leading-none">Farmer's <span class="text-emerald-600">Gate</span></h1>
                     <p id="displayLocHeader" class="text-[8px] text-slate-400 font-bold uppercase mt-0.5">Patiala Branch</p>
                 </div>
+                <div class="flex items-center gap-4">
+                    <button onclick="switchTab('shop')" class="tab-btn active" id="btn-shop">Shop</button>
+                    <button onclick="switchTab('history')" class="tab-btn" id="btn-history">Records</button>
+                    <button onclick="switchTab('setup')" class="tab-btn" id="btn-setup">Setup</button>
+                </div>
             </div>
-            <div class="flex items-center gap-2">
+            <div class="px-4 py-2 flex items-center justify-between">
                 <span id="totalItemsBadge" class="bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded text-[9px] font-black border border-emerald-100">0 Items</span>
-                <button onclick="switchTab('history')" class="text-slate-400 p-2 active:scale-90">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 8v4l3 3"/><circle cx="12" cy="12" r="10"/></svg>
-                </button>
+                <div id="activeMicBadge" class="hidden flex items-center gap-1">
+                    <div class="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
+                    <span class="text-[8px] font-black text-red-500 uppercase">Mic Active</span>
+                </div>
             </div>
         </header>
 
-        <!-- Search & Billing Voice -->
-        <div class="p-3 bg-white flex gap-2 border-b border-slate-100 shadow-sm">
+        <!-- SEARCH BAR (Shared across Shop) -->
+        <div id="search-container" class="p-3 bg-white flex gap-2 border-b border-slate-100">
             <div class="relative flex-1">
                 <input type="text" id="searchInput" oninput="render()" placeholder="Search items..." class="w-full pl-9 pr-4 py-2.5 bg-slate-50 border-0 rounded-2xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500/20">
                 <svg class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
             </div>
-            <button onclick="toggleVoiceBilling()" id="voiceBtn" class="bg-slate-50 text-slate-500 px-5 rounded-2xl active:scale-90 border border-slate-100 transition-colors">
+            <button onclick="toggleVoiceBilling()" id="voiceBtn" class="bg-slate-50 text-slate-500 px-5 rounded-2xl active:scale-90 border border-slate-100">
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
             </button>
         </div>
 
-        <!-- Categories -->
-        <div class="flex bg-white px-2 py-1 overflow-x-auto no-scrollbar border-b border-slate-100">
+        <!-- CATEGORIES (Only for Shop) -->
+        <div id="category-bar" class="flex bg-white px-2 py-1 overflow-x-auto no-scrollbar border-b border-slate-100">
             <button onclick="setActiveCategory('Vegetable', this)" class="category-pill active flex-1 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">Veg</button>
             <button onclick="setActiveCategory('Fruit', this)" class="category-pill flex-1 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">Fruit</button>
             <button onclick="setActiveCategory('Grocery', this)" class="category-pill flex-1 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400">Groc</button>
         </div>
 
-        <div id="view-shop" class="tab-view">
-            <div id="itemGrid" class="grid grid-cols-2 gap-2 p-2 pb-4"></div>
+        <!-- VIEW: SHOP -->
+        <div id="view-shop" class="tab-view p-2">
+            <div id="itemGrid" class="grid grid-cols-2 gap-2 pb-4"></div>
         </div>
 
+        <!-- VIEW: HISTORY -->
         <div id="view-history" class="tab-view hidden p-4">
             <div class="flex justify-between items-center mb-4">
-                <h2 class="text-xs font-black uppercase text-slate-500">History</h2>
-                <button onclick="clearHistory()" class="text-[9px] font-bold text-red-400 uppercase bg-red-50 px-3 py-1 rounded-lg">Clear History</button>
+                <h2 class="text-xs font-black uppercase text-slate-500 tracking-widest">Transaction History</h2>
+                <button onclick="clearHistory()" class="text-[9px] font-bold text-red-400 uppercase bg-red-50 px-3 py-1 rounded-lg">Clear All</button>
             </div>
             <div id="historyList" class="space-y-2"></div>
         </div>
 
-        <!-- Bottom Summary Desk -->
-        <div class="glass-summary px-4 py-3 shadow-2xl rounded-t-[2.5rem] border-t-4 border-t-slate-900">
-            <div class="flex justify-between items-center mb-2 px-1">
-                <div class="flex items-center gap-2">
-                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Grand Total</span>
-                    <span id="orderCount" class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[8px] font-bold">0 Items</span>
-                </div>
-                <button onclick="toggleBillView()" id="billToggle" class="text-emerald-600 font-bold text-[9px] uppercase">Details</button>
-            </div>
-            <div id="billDetails" class="hidden max-h-[30vh] overflow-y-auto custom-scrollbar space-y-1.5 mb-4 px-1"></div>
-            <div class="flex items-center justify-between gap-4">
-                <div id="grandTotal" class="text-3xl font-black text-emerald-600 tabular-nums leading-none">₹0.00</div>
-                <div class="flex gap-2 flex-1">
-                    <button onclick="memorizeSale()" class="bg-slate-100 text-slate-500 p-3.5 rounded-2xl active:scale-95">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                    </button>
-                    <button onclick="sendInvoice()" class="flex-1 bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase py-4 shadow-lg active:scale-95">WhatsApp Bill</button>
-                </div>
-            </div>
-        </div>
-    </div>
+        <!-- VIEW: SETUP (THE "SAVE" TAB) -->
+        <div id="view-setup" class="tab-view hidden p-4 space-y-6">
+            
+            <!-- Branch Settings -->
+            <section class="bg-slate-900 p-5 rounded-[2rem] space-y-4 shadow-xl">
+                <p class="text-[10px] font-black text-emerald-400 uppercase tracking-widest">Branch & Bill Customization</p>
+                <input type="text" id="branchNameInput" placeholder="Store Name" class="w-full bg-slate-800 border-0 rounded-xl text-xs text-white font-bold p-3 outline-none">
+                <textarea id="healthAdviceInput" placeholder="Add Health Advice to Bill... e.g. Wash veggies before use!" class="w-full bg-slate-800 border-0 rounded-xl text-xs text-white font-bold p-3 outline-none h-16"></textarea>
+                <button onclick="saveSettings()" class="w-full bg-emerald-600 text-white py-3 rounded-xl text-[10px] font-black uppercase active:scale-95">Save Branding</button>
+            </section>
 
-    <!-- Stock Modal -->
-    <div id="addModal" class="fixed inset-0 bg-slate-900/90 backdrop-blur-md hidden flex items-center justify-center p-4 z-[100] overflow-y-auto">
-        <div class="bg-white rounded-[2.5rem] w-full max-w-lg p-6 shadow-2xl flex flex-col my-auto max-h-[95vh]">
-            <div class="flex justify-between items-center mb-6">
-                <h3 class="text-sm font-black text-slate-900 uppercase">Inventory Hub</h3>
-                <button onclick="toggleAddModal()" class="bg-slate-100 p-2 rounded-full text-slate-400 active:scale-90"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
-            </div>
-
-            <div class="space-y-5 overflow-y-auto custom-scrollbar pr-1 pb-10">
-                
-                <div class="bg-slate-900 p-4 rounded-2xl space-y-3">
-                    <p class="text-[9px] font-black text-emerald-400 uppercase tracking-widest">General Settings</p>
-                    <div class="flex gap-2">
-                        <input type="text" id="branchNameInput" placeholder="Enter Branch Name" class="flex-1 bg-slate-800 border-0 rounded-xl text-xs text-white font-bold p-3 outline-none">
-                        <button onclick="saveSettings()" class="bg-emerald-600 text-white px-4 rounded-xl text-[10px] font-black uppercase">Save</button>
-                    </div>
-                </div>
-
-                <!-- Google Sheet Integration -->
-                <div class="bg-emerald-50 border border-emerald-100 p-5 rounded-[2rem] space-y-3">
-                    <p class="text-[10px] font-black text-emerald-700 uppercase tracking-widest text-center">Google Sheet Sync</p>
-                    <div class="flex gap-2">
-                        <input type="text" id="sheetUrl" placeholder="Paste Public Sheet Link..." class="flex-1 px-4 py-3 bg-white border border-emerald-200 rounded-xl text-xs font-bold outline-none">
-                        <button onclick="syncFromSheet()" class="bg-emerald-600 text-white px-5 rounded-xl font-bold text-[10px] uppercase active:scale-95">Sync</button>
-                    </div>
-                    <p class="text-[7px] text-emerald-400 text-center uppercase font-black">Cols: Name, HindiName, Price, Qty, Unit, Category</p>
-                </div>
-
-                <!-- Bulk Grid (Text & File) -->
+            <!-- Bulk Imports -->
+            <section class="bg-blue-50 p-5 rounded-[2rem] border border-blue-100 space-y-4">
+                <p class="text-[10px] font-black text-blue-700 uppercase tracking-widest text-center">Bulk Stock Update</p>
                 <div class="grid grid-cols-2 gap-2">
-                    <button onclick="document.getElementById('csvInput').click()" class="bg-blue-50 text-blue-700 p-5 rounded-2xl flex flex-col items-center gap-1 active:scale-95 border border-blue-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/></svg>
-                        <span class="text-[9px] font-black uppercase">Upload Excel</span>
+                    <button onclick="document.getElementById('csvInput').click()" class="bg-white text-blue-600 p-4 rounded-2xl flex flex-col items-center gap-1 active:scale-95 border border-blue-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                        <span class="text-[8px] font-black">Upload CSV</span>
                         <input type="file" id="csvInput" accept=".csv" class="hidden" onchange="importFromCSV(event)">
                     </button>
-                    <button id="voiceAddBtn" onclick="toggleVoiceStockAdd()" class="bg-purple-50 text-purple-700 p-5 rounded-2xl flex flex-col items-center gap-1 active:scale-95 border border-purple-100">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
-                        <span class="text-[9px] font-black uppercase">Voice Add</span>
+                    <button onclick="syncFromSheet()" class="bg-white text-blue-600 p-4 rounded-2xl flex flex-col items-center gap-1 active:scale-95 border border-blue-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="18" x="3" y="3" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+                        <span class="text-[8px] font-black">Sync G-Sheet</span>
                     </button>
                 </div>
+                <input type="text" id="sheetUrl" placeholder="Paste Public Sheet Link..." class="w-full px-4 py-3 bg-white border border-blue-200 rounded-xl text-xs font-bold outline-none">
+                <textarea id="smartPasteArea" placeholder="Bulk Paste (e.g. Potato 30, Tomato 65)..." class="w-full h-20 bg-white border border-blue-200 rounded-xl text-xs p-3 outline-none"></textarea>
+                <button onclick="processSmartText()" class="w-full bg-blue-600 text-white py-3 rounded-xl text-[10px] font-bold uppercase active:scale-95">Extract Paste</button>
+            </section>
 
-                <!-- Smart Text Import -->
-                <div class="bg-slate-50 border border-slate-100 p-5 rounded-[2rem] space-y-3">
-                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest text-center">Bulk Text Import</p>
-                    <textarea id="smartPasteArea" placeholder="e.g. Potato 30, Milk 65, Oil 150..." class="w-full h-24 bg-white border-0 rounded-2xl text-xs p-4 shadow-inner outline-none"></textarea>
-                    <button onclick="processSmartText()" class="w-full bg-slate-900 text-white py-3 rounded-xl text-[10px] font-bold uppercase">Extract Items</button>
+            <!-- Manual Article Form -->
+            <section class="bg-white border-2 border-emerald-500/20 p-5 rounded-[2rem] space-y-4 shadow-sm relative overflow-hidden">
+                <div class="absolute top-0 right-0 bg-emerald-500 text-white px-3 py-1 rounded-bl-xl text-[8px] font-black uppercase">Article Entry</div>
+                <p class="text-[11px] font-black text-slate-800 uppercase tracking-widest">Manual Setup</p>
+                <div class="flex gap-1.5 h-[40px]">
+                    <button onclick="setMCat('Vegetable')" id="mcVeg" class="mcat flex-1 rounded-xl bg-emerald-600 text-white text-[10px] font-extrabold uppercase transition-all">Veg</button>
+                    <button onclick="setMCat('Fruit')" id="mcFruit" class="mcat flex-1 rounded-xl bg-slate-50 text-slate-400 text-[10px] font-extrabold uppercase">Fruit</button>
+                    <button onclick="setMCat('Grocery')" id="mcGroc" class="mcat flex-1 rounded-xl bg-slate-50 text-slate-400 text-[10px] font-extrabold uppercase">Groc</button>
                 </div>
-
-                <!-- Manual Form -->
-                <div class="bg-white border-2 border-emerald-500/20 p-5 rounded-[2rem] space-y-4 shadow-sm relative overflow-hidden">
-                    <div class="absolute top-0 right-0 bg-emerald-500 text-white px-3 py-1 rounded-bl-xl text-[8px] font-black uppercase">Manual Add</div>
-                    <div class="flex gap-1.5 h-[42px]">
-                        <button onclick="setMCat('Vegetable')" id="mcVeg" class="mcat flex-1 rounded-xl bg-emerald-600 text-white text-[10px] font-extrabold uppercase py-2">Veg</button>
-                        <button onclick="setMCat('Fruit')" id="mcFruit" class="mcat flex-1 rounded-xl bg-slate-50 text-slate-400 text-[10px] font-extrabold uppercase py-2">Fruit</button>
-                        <button onclick="setMCat('Grocery')" id="mcGroc" class="mcat flex-1 rounded-xl bg-slate-50 text-slate-400 text-[10px] font-extrabold uppercase py-2">Groc</button>
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" id="newName" placeholder="English Name" class="p-4 bg-slate-50 rounded-2xl text-xs font-bold outline-none">
+                    <input type="text" id="newHindi" placeholder="हिंदी नाम" class="p-4 bg-slate-50 rounded-2xl text-xs font-bold outline-none">
+                </div>
+                <div class="bg-slate-50 p-4 rounded-2xl space-y-3">
+                    <div class="preset-grid">
+                        <button onclick="setPriceBasis(100, 'Gm')" class="preset-btn">100 Gm</button>
+                        <button onclick="setPriceBasis(250, 'Gm')" class="preset-btn">250 Gm</button>
+                        <button onclick="setPriceBasis(500, 'Ml')" class="preset-btn">500 Ml</button>
+                        <button onclick="setPriceBasis(1, 'Kg')" class="preset-btn active">1.0 Kg</button>
+                        <button onclick="setPriceBasis(1, 'Ltr')" class="preset-btn">1.0 Ltr</button>
+                        <button onclick="setPriceBasis(1, 'Pcs')" class="preset-btn">1 Pcs</button>
+                        <button onclick="setPriceBasis(1, 'Pkt')" class="preset-btn">1 Pkt</button>
+                        <button onclick="setPriceBasis(1, 'Box')" class="preset-btn">1 Box</button>
                     </div>
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="text" id="newName" placeholder="English Name" class="p-4 bg-slate-50 rounded-2xl text-xs font-bold outline-none">
-                        <input type="text" id="newHindi" placeholder="हिंदी नाम" class="p-4 bg-slate-50 rounded-2xl text-xs font-bold outline-none">
-                    </div>
-                    <div class="bg-slate-50 p-4 rounded-2xl space-y-3">
-                        <p class="text-[8px] font-black text-slate-400 uppercase tracking-widest text-center">Price Per (Mobile Optimized)</p>
-                        <!-- FIXED MOBILE PRESET GRID -->
-                        <div class="preset-container">
-                            <button onclick="setPriceBasis(100, 'Gm')" class="preset-btn">100 Gm</button>
-                            <button onclick="setPriceBasis(250, 'Gm')" class="preset-btn">250 Gm</button>
-                            <button onclick="setPriceBasis(500, 'Gm')" class="preset-btn">500 Gm</button>
-                            <button onclick="setPriceBasis(500, 'Ml')" class="preset-btn">500 Ml</button>
-                            <button onclick="setPriceBasis(1, 'Kg')" class="preset-btn active">1.0 Kg</button>
-                            <button onclick="setPriceBasis(1, 'Ltr')" class="preset-btn">1.0 Ltr</button>
-                            <button onclick="setPriceBasis(1, 'Pcs')" class="preset-btn">1 Pcs</button>
-                            <button onclick="setPriceBasis(1, 'Pkt')" class="preset-btn">1 Pkt</button>
-                        </div>
-                        <div class="flex gap-2 items-center">
-                            <input type="number" id="newPrice" placeholder="Price" class="flex-1 p-3 bg-white border border-slate-100 rounded-xl text-sm font-black outline-none shadow-sm">
-                            <span class="text-[9px] font-black text-slate-300 uppercase">Per</span>
-                            <div class="flex gap-1 items-center bg-white border border-slate-100 rounded-xl px-2 shadow-sm">
-                                <input type="number" id="newRefQty" value="1" class="w-10 p-2 bg-transparent text-sm font-black text-center outline-none">
-                                <select id="newPriceUnit" class="bg-transparent border-0 text-[9px] font-black uppercase outline-none">
-                                    <option value="Kg">Kg</option><option value="Gm">Gm</option>
-                                    <option value="Ltr">Ltr</option><option value="Ml">Ml</option>
-                                    <option value="Pcs">Pcs</option><option value="Pkt">Pkt</option>
-                                    <option value="Box">Box</option>
-                                </select>
-                            </div>
+                    <div class="flex gap-2 items-center">
+                        <input type="number" id="newPrice" placeholder="Price" class="flex-1 p-3 bg-white border border-slate-100 rounded-xl text-sm font-black outline-none shadow-sm">
+                        <span class="text-[9px] font-black text-slate-300 uppercase">Per</span>
+                        <div class="flex gap-1 items-center bg-white border border-slate-100 rounded-xl px-2 shadow-sm">
+                            <input type="number" id="newRefQty" value="1" class="w-10 p-2 bg-transparent text-sm font-black text-center outline-none">
+                            <select id="newPriceUnit" class="bg-transparent border-0 text-[9px] font-black uppercase outline-none">
+                                <option value="Kg">Kg</option><option value="Gm">Gm</option>
+                                <option value="Ltr">Ltr</option><option value="Ml">Ml</option>
+                                <option value="Pcs">Pcs</option><option value="Pkt">Pkt</option>
+                            </select>
                         </div>
                     </div>
-                    <button id="saveBtn" onclick="saveItem()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-[11px] uppercase active:scale-95 shadow-xl">Commit to Stock</button>
                 </div>
+                <button id="saveBtn" onclick="saveItem()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl active:scale-95">Save to Live Stock</button>
+            </section>
 
-                <div id="loaderUI" class="hidden flex items-center justify-center p-4 bg-white rounded-xl">
-                    <div class="loader mr-2"></div>
-                    <span class="text-[10px] font-black uppercase text-slate-500">Syncing...</span>
-                </div>
+            <!-- Memory Section -->
+            <section class="bg-indigo-50 border border-indigo-100 p-5 rounded-[2rem] space-y-4">
+                <p class="text-[10px] font-black text-indigo-700 uppercase tracking-widest text-center">Stock Snapshot (Memory)</p>
+                <button onclick="takeStockSnapshot()" class="w-full bg-indigo-600 text-white py-3 rounded-xl text-[10px] font-bold uppercase shadow-md">Memorize Current Rates</button>
+                <div id="snapshotsList" class="space-y-2 max-h-[200px] overflow-y-auto pr-1"></div>
+            </section>
 
-                <!-- Stock Table -->
-                <div class="space-y-1.5 pt-2">
-                    <div class="flex justify-between items-center px-1 mb-2">
-                        <p class="text-[9px] font-black text-slate-500 uppercase tracking-wider">Master List</p>
-                        <div class="flex items-center gap-2">
-                            <input type="text" id="manageSearch" oninput="renderManagement()" placeholder="Filter..." class="bg-slate-100 rounded-lg text-[10px] p-1.5 w-24 outline-none">
-                            <button onclick="bulkDelete()" class="text-red-400 text-[10px] font-bold uppercase">Clear</button>
-                        </div>
+            <!-- Live List Management -->
+            <section class="space-y-4 pt-4 border-t border-slate-200">
+                <div class="flex justify-between items-center px-1">
+                    <p class="text-[9px] font-black text-slate-500 uppercase tracking-wider">Live Inventory List</p>
+                    <div class="flex items-center gap-2">
+                        <input type="text" id="manageSearch" oninput="renderManagement()" placeholder="Filter..." class="bg-slate-100 rounded-lg text-[10px] p-1.5 w-24 outline-none">
+                        <button onclick="bulkDelete()" class="text-red-400 text-[10px] font-bold uppercase">Clear Cat</button>
                     </div>
-                    <div id="manageList" class="space-y-1"></div>
+                </div>
+                <div id="manageList" class="space-y-1"></div>
+            </section>
+        </div>
+
+        <!-- Checkout Desk (Only visible when Shop is active) -->
+        <div id="billing-summary" class="glass-summary px-4 py-3 shadow-2xl rounded-t-[2.5rem] border-t-4 border-t-slate-900">
+            <div class="flex justify-between items-center mb-2 px-1">
+                <div class="flex items-center gap-2">
+                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Current Bill</span>
+                    <span id="orderCount" class="bg-slate-100 text-slate-500 px-2 py-0.5 rounded text-[8px] font-bold">0 Items</span>
+                </div>
+                <button onclick="toggleBillView()" id="billToggle" class="text-emerald-600 font-bold text-[9px] uppercase">Expand Bill</button>
+            </div>
+            <div id="billDetails" class="hidden max-h-[35vh] overflow-y-auto custom-scrollbar space-y-1.5 mb-4 px-1"></div>
+            <div class="flex items-center justify-between gap-4">
+                <div id="grandTotal" class="text-3xl font-black text-emerald-600 tabular-nums leading-none tracking-tighter">₹0.00</div>
+                <div class="flex gap-2 flex-1">
+                    <button onclick="clearCart()" class="bg-slate-100 text-slate-400 p-3.5 rounded-2xl active:scale-95" title="Clear">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>
+                    </button>
+                    <button onclick="sendInvoice()" class="flex-1 bg-slate-900 text-white rounded-2xl font-black text-[11px] uppercase py-4 shadow-lg active:scale-95">Send Bill</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Toast UI -->
     <div id="toast" class="fixed bottom-32 left-1/2 -translate-x-1/2 px-10 py-3.5 bg-slate-900 text-white rounded-full shadow-2xl opacity-0 transition-all duration-300 pointer-events-none z-[200] font-bold text-[10px] uppercase tracking-widest flex items-center gap-2">
         <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
         <span id="toastMsg">Success</span>
@@ -272,90 +218,127 @@
     <script>
         let activeCat = 'Vegetable', manualCat = 'Vegetable', editingId = null;
         let sLoc = localStorage.getItem('fg_loc') || "Main Branch";
+        let hAdvice = localStorage.getItem('fg_advice') || "Eat green vegetables for good health!";
         let inventory = JSON.parse(localStorage.getItem('fg_inventory')) || [
             { id: 1, name: 'Potato', nameHindi: 'आलू', price: 30, refQty: 1, priceUnit: 'Kg', category: 'Vegetable' }
         ];
+        let snapshots = JSON.parse(localStorage.getItem('fg_snapshots')) || [];
         let cart = {}, salesHistory = JSON.parse(localStorage.getItem('fg_history')) || [];
         let recognition = null, voiceAddRecognition = null;
 
         function save() {
             localStorage.setItem('fg_inventory', JSON.stringify(inventory));
             localStorage.setItem('fg_history', JSON.stringify(salesHistory));
+            localStorage.setItem('fg_snapshots', JSON.stringify(snapshots));
             localStorage.setItem('fg_loc', sLoc);
+            localStorage.setItem('fg_advice', hAdvice);
             document.getElementById('totalItemsBadge').innerText = inventory.length + " Items";
             document.getElementById('displayLocHeader').innerText = sLoc;
         }
 
-        /** NEW: GOOGLE SHEET SYNC **/
+        /** TAB NAVIGATION LOGIC **/
+        function switchTab(v) {
+            document.querySelectorAll('.tab-view').forEach(t => t.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById('view-'+v).classList.remove('hidden');
+            document.getElementById('btn-'+v).classList.add('active');
+            
+            // Hide billing summary if in Records or Setup
+            const billingSummary = document.getElementById('billing-summary');
+            const searchBar = document.getElementById('search-container');
+            const categoryBar = document.getElementById('category-bar');
+
+            if(v === 'shop') {
+                billingSummary.classList.remove('hidden');
+                searchBar.classList.remove('hidden');
+                categoryBar.classList.remove('hidden');
+            } else {
+                billingSummary.classList.add('hidden');
+                searchBar.classList.add('hidden');
+                categoryBar.classList.add('hidden');
+            }
+
+            if(v === 'history') renderHistory();
+            if(v === 'setup') { renderManagement(); renderSnapshots(); }
+            window.scrollTo(0,0);
+        }
+
+        /** STOCK SNAPSHOT LOGIC **/
+        function takeStockSnapshot() {
+            if(inventory.length === 0) return notify("Nothing to memorize");
+            const snap = { id: Date.now(), date: new Date().toLocaleString([], {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit'}), data: JSON.parse(JSON.stringify(inventory)), count: inventory.length };
+            snapshots.unshift(snap);
+            if(snapshots.length > 10) snapshots.pop();
+            save(); renderSnapshots(); notify("Snap Saved");
+        }
+
+        function restoreSnapshot(id) {
+            if(!confirm("Restore this old stock list? It will replace current rates.")) return;
+            const snap = snapshots.find(s => s.id === id);
+            if(snap) { inventory = JSON.parse(JSON.stringify(snap.data)); save(); render(); renderManagement(); notify("Stock Restored"); }
+        }
+
+        function renderSnapshots() {
+            const div = document.getElementById('snapshotsList'); div.innerHTML = '';
+            snapshots.forEach(s => {
+                div.innerHTML += `<div class="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-200 text-[10px] font-bold mb-1 shadow-sm">
+                    <div class="flex flex-col"><span class="text-slate-800">${s.date}</span><span class="text-emerald-500">${s.count} Items</span></div>
+                    <div class="flex gap-2">
+                        <button onclick="restoreSnapshot(${s.id})" class="bg-emerald-50 text-emerald-600 px-3 py-1 rounded-md uppercase">Restore</button>
+                        <button onclick="snapshots=snapshots.filter(x=>x.id!=${s.id});save();renderSnapshots();" class="text-red-300 p-1">×</button>
+                    </div>
+                </div>`;
+            });
+        }
+
+        /** GOOGLE SHEET SYNC **/
         async function syncFromSheet() {
             const url = document.getElementById('sheetUrl').value.trim();
             const match = url.match(/spreadsheets\/d\/([a-zA-Z0-9-_]+)/);
-            if (!match) return notify("Invalid Link");
+            if (!match) return notify("Link Invalid");
             const csvUrl = `https://docs.google.com/spreadsheets/d/${match[1]}/export?format=csv`;
-            
-            document.getElementById('loaderUI').classList.remove('hidden');
+            notify("Syncing...");
             try {
                 const response = await fetch(csvUrl);
                 const data = await response.text();
-                const rows = data.split('\n').slice(1);
-                rows.forEach(row => {
-                    const cols = row.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
-                    if (cols.length >= 3) {
-                        inventory.push({
-                            id: Date.now() + Math.random(),
-                            name: cols[0], nameHindi: cols[1] || "",
-                            price: parseFloat(cols[2]) || 0, refQty: parseFloat(cols[3]) || 1,
-                            priceUnit: cols[4] || "Kg", category: cols[5] || activeCat
-                        });
-                    }
-                });
-                save(); render(); renderManagement(); notify("Sync Done");
-            } catch(e) { notify("Sync Error"); }
-            document.getElementById('loaderUI').classList.add('hidden');
-        }
-
-        function importFromCSV(event) {
-            const file = event.target.files[0]; if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const text = e.target.result; const lines = text.split(/\r?\n/);
+                const lines = data.split(/\r?\n/);
                 lines.forEach((line, index) => {
                     if (index === 0 || !line.trim()) return;
                     const cols = line.split(',').map(c => c.trim().replace(/^"|"$/g, ''));
                     if (cols.length >= 3) {
-                        inventory.push({
-                            id: Date.now() + Math.random(),
-                            name: cols[0], nameHindi: cols[1] || "",
-                            price: parseFloat(cols[2]) || 0, refQty: parseFloat(cols[3]) || 1,
-                            priceUnit: cols[4] || "Kg", category: cols[5] || activeCat
-                        });
+                        inventory.push({ id: Date.now()+Math.random(), name: cols[0], nameHindi: cols[1] || "", price: parseFloat(cols[2]) || 0, refQty: parseFloat(cols[3]) || 1, priceUnit: cols[4] || "Kg", category: cols[5] || activeCat });
                     }
                 });
+                save(); render(); renderManagement(); notify("Sync OK!");
+            } catch(e) { notify("Sync Failed"); }
+        }
+
+        /** IMPORT CSV **/
+        function importFromCSV(event) {
+            const file = event.target.files[0]; if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const lines = e.target.result.split(/\r?\n/);
+                lines.forEach((l, i) => { if (i > 0 && l.trim()) { 
+                    const c = l.split(',').map(x => x.trim().replace(/^"|"$/g, ''));
+                    inventory.push({id: Date.now()+Math.random(), name: c[0], nameHindi: c[1]||"", price: parseFloat(c[2])||0, refQty: parseFloat(c[3])||1, priceUnit: c[4]||"Kg", category: c[5]||activeCat });
+                }});
                 save(); render(); renderManagement(); notify("Imported!");
             };
             reader.readAsText(file);
         }
 
-        function setPriceBasis(qty, unit) {
-            document.getElementById('newRefQty').value = qty;
-            document.getElementById('newPriceUnit').value = unit;
-            document.querySelectorAll('.preset-btn').forEach(b => {
-                b.classList.remove('active');
-                if(b.innerText.replace(/\s/g, '').toLowerCase() === (qty + unit).toLowerCase()) b.classList.add('active');
-            });
-        }
-
+        /** RENDER SHOP **/
         function render() {
             const grid = document.getElementById('itemGrid');
             const q = document.getElementById('searchInput').value.toLowerCase().trim();
             if(!grid) return; grid.innerHTML = '';
-            inventory.filter(i => i.category === activeCat && i.name.toLowerCase().includes(q)).sort((a,b) => a.name.localeCompare(b.name)).forEach(it => {
+            inventory.filter(i => i.category === activeCat && (i.name.toLowerCase().includes(q) || i.nameHindi.toLowerCase().includes(q))).sort((a,b) => a.name.localeCompare(b.name)).forEach(it => {
                 const card = document.createElement('div'); card.className = 'article-card shadow-sm animate-pop';
-                const isScalable = (u) => ['Kg', 'Gm', 'Ltr', 'Ml'].includes(u);
-                let unitOptions = isScalable(it.priceUnit) 
-                    ? (['Kg', 'Gm'].includes(it.priceUnit) ? '<option value="Kg">Kg</option><option value="Gm">Gm</option>' : '<option value="Ltr">Ltr</option><option value="Ml">Ml</option>')
-                    : `<option value="${it.priceUnit}">${it.priceUnit}</option>`;
-
+                const isW = (it.priceUnit === 'Kg' || it.priceUnit === 'Gm');
+                const isL = (it.priceUnit === 'Ltr' || it.priceUnit === 'Ml');
+                let unitOptions = isW ? '<option value="Kg">Kg</option><option value="Gm">Gm</option>' : (isL ? '<option value="Ltr">Ltr</option><option value="Ml">Ml</option>' : `<option value="${it.priceUnit}">${it.priceUnit}</option>`);
                 card.innerHTML = `<div class="flex flex-col mb-3"><h4 class="font-black text-slate-800 text-[14px] uppercase truncate leading-tight">${it.name}</h4><div class="flex items-center justify-between mt-1"><span class="text-[9px] text-slate-400 font-bold truncate">${it.nameHindi || ''}</span><span class="text-[9px] text-emerald-600 font-black">₹${it.price}/${it.refQty}${it.priceUnit}</span></div></div><div class="flex gap-1 h-[38px]"><input type="number" id="qty-${it.id}" placeholder="0" class="w-12 bg-slate-50 border-0 rounded-lg text-xs font-black text-center outline-none"><select id="unit-${it.id}" class="flex-1 bg-slate-50 border-0 rounded-lg text-[8px] font-black uppercase outline-none px-1">${unitOptions}</select><button onclick="addToCart(${it.id})" class="bg-slate-900 text-white w-9 rounded-lg active:scale-90 shadow-md">+</button></div>`;
                 grid.appendChild(card);
             });
@@ -368,9 +351,9 @@
             if (qty <= 0) return;
             const it = inventory.find(i => i.id === id);
             const norm = (v, u) => (u === 'Kg' || u === 'Ltr') ? v * 1000 : v;
-            const isScalable = (u) => ['Kg', 'Gm', 'Ltr', 'Ml'].includes(u);
-            const valA = isScalable(inU) && isScalable(it.priceUnit) ? norm(qty, inU) : qty;
-            const valB = isScalable(inU) && isScalable(it.priceUnit) ? norm(it.refQty, it.priceUnit) : it.refQty;
+            const isSc = (u) => ['Kg', 'Gm', 'Ltr', 'Ml'].includes(u);
+            const valA = isSc(inU) && isSc(it.priceUnit) ? norm(qty, inU) : qty;
+            const valB = isSc(inU) && isSc(it.priceUnit) ? norm(it.refQty, it.priceUnit) : it.refQty;
             const finalP = (valA / valB) * it.price;
             cart[`${id}-${inU}-${it.price}`] = { ...it, qty, totalPrice: finalP, unit: inU };
             qi.value = ''; renderCart(); notify(`${it.name} added`);
@@ -381,10 +364,97 @@
             list.innerHTML = ''; let total = 0, count = 0;
             Object.entries(cart).forEach(([k, i]) => {
                 total += i.totalPrice; count++;
-                list.innerHTML += `<div class="flex justify-between items-center p-2.5 bg-white rounded-xl border border-slate-100 text-[10px] font-bold uppercase mx-1"><div class="flex flex-col"><span class="text-slate-800">${i.name}</span><span class="text-[8px] text-slate-400">${i.qty}${i.unit} @ ₹${i.price}/${i.refQty}${i.priceUnit}</span></div><div class="flex items-center gap-2"><span>₹${i.totalPrice.toFixed(2)}</span><button onclick="delete cart['${k}'];renderCart()" class="text-red-300 p-1">×</button></div></div>`;
+                list.innerHTML += `<div class="flex justify-between items-center p-2.5 bg-white rounded-xl border border-slate-100 text-[10px] font-bold uppercase mx-1 shadow-sm"><div class="flex flex-col"><span class="text-slate-800">${i.name}</span><span class="text-[8px] text-slate-400">${i.qty}${i.unit} @ ₹${i.price}/${i.refQty}${i.priceUnit}</span></div><div class="flex items-center gap-2"><span>₹${i.totalPrice.toFixed(2)}</span><button onclick="delete cart['${k}'];renderCart()" class="text-red-300 p-1">×</button></div></div>`;
             });
             totalEl.innerText = `₹${total.toFixed(2)}`;
             document.getElementById('orderCount').innerText = `${count} Items`;
+        }
+
+        /** BILLING WITH HEALTH ADVICE **/
+        function sendInvoice() {
+            const items = Object.values(cart); if(items.length===0) return notify("Bill Empty");
+            let msg = `🛒 *FARMER'S GATE BILL*\n📍 _${sLoc}_\n--------------------\n`;
+            items.forEach(i => {
+                msg += `✅ *${i.name}*\n   ${i.qty}${i.unit} x ₹${i.price}/${i.refQty}${i.priceUnit} = *₹${i.totalPrice.toFixed(2)}*\n`;
+            });
+            msg += `--------------------\n💰 *TOTAL: ${document.getElementById('grandTotal').innerText}*\n\n🌟 *Health Tip:* ${hAdvice}\n\n🙏 *Thank you for shopping with us!*`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+            memorizeSale();
+        }
+
+        function memorizeSale() {
+            const items = Object.values(cart); if(items.length === 0) return;
+            const sale = { id: Date.now(), date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), items: items.map(i => `${i.qty}${i.unit} ${i.name}`), total: document.getElementById('grandTotal').innerText };
+            salesHistory.unshift(sale); if(salesHistory.length > 50) salesHistory.pop();
+            save(); clearCart();
+        }
+
+        function renderHistory() {
+            const list = document.getElementById('historyList'); list.innerHTML = '';
+            if(salesHistory.length === 0) list.innerHTML = `<div class="py-10 text-center opacity-30 text-[10px] font-black uppercase">No Sales Yet</div>`;
+            salesHistory.forEach(s => {
+                list.innerHTML += `<div class="p-3.5 bg-white border border-slate-100 rounded-2xl shadow-sm mb-2"><div class="flex justify-between items-start mb-1"><span class="text-[10px] font-black text-slate-400 uppercase">${s.date}</span><span class="text-sm font-black text-emerald-600">${s.total}</span></div><p class="text-[10px] text-slate-500 font-bold truncate">${s.items.join(', ')}</p></div>`;
+            });
+        }
+
+        /** MANAGEMENT LOGIC **/
+        function saveItem() {
+            const n = document.getElementById('newName').value.trim(), p = parseFloat(document.getElementById('newPrice').value);
+            const r = parseFloat(document.getElementById('newRefQty').value), u = document.getElementById('newPriceUnit').value, h = document.getElementById('newHindi').value.trim();
+            if(!n || isNaN(p)) return notify("Invalid Info");
+            inventory.push({ id: Date.now(), name: n, nameHindi: h, price: p, refQty: r, priceUnit: u, category: manualCat });
+            save(); render(); renderManagement(); resetForm(); notify("Stock Added");
+        }
+
+        function renderManagement() {
+            const div = document.getElementById('manageList'); div.innerHTML = '';
+            const q = document.getElementById('manageSearch')?.value.toLowerCase() || "";
+            inventory.filter(i => i.category === activeCat && (i.name.toLowerCase().includes(q) || i.nameHindi.toLowerCase().includes(q))).forEach(it => {
+                div.innerHTML += `<div class="flex flex-col p-3 border-b bg-white mb-1 rounded-lg shadow-sm">
+                    <div class="flex justify-between items-start">
+                        <div class="flex flex-col"><span class="text-[10px] font-black uppercase">${it.name}</span><span class="text-[9px] text-slate-400 font-bold">${it.nameHindi}</span></div>
+                        <div class="text-right"><span class="text-[10px] font-black text-emerald-600">₹${it.price}</span><p class="text-[7px] text-slate-300 font-bold uppercase leading-none">Basis: ${it.refQty}${it.priceUnit}</p></div>
+                    </div>
+                    <div class="flex justify-end mt-1"><button onclick="inventory=inventory.filter(x=>x.id!=${it.id});save();renderManagement();render()" class="text-red-400 text-[8px] font-black uppercase px-2 py-1 bg-red-50 rounded border border-red-100">Remove</button></div>
+                </div>`;
+            });
+        }
+
+        /** UTILS **/
+        function setPriceBasis(q, u) { document.getElementById('newRefQty').value = q; document.getElementById('newPriceUnit').value = u; document.querySelectorAll('.preset-btn').forEach(b => { b.classList.remove('active'); if(b.innerText.replace(/\s/g, '').toLowerCase() === (q + u).toLowerCase()) b.classList.add('active'); }); }
+        function setMCat(c) { manualCat = c; document.querySelectorAll('.mcat').forEach(b => b.className = 'mcat flex-1 rounded-xl bg-slate-50 text-slate-400 text-[10px] font-extrabold uppercase py-2'); const b = c==='Vegetable'?'mcVeg':c==='Fruit'?'mcFruit':'mcGroc'; document.getElementById(b).className = 'mcat flex-1 rounded-xl bg-emerald-600 text-white text-[10px] font-extrabold uppercase py-2 shadow-md'; renderManagement(); }
+        function saveSettings() { sLoc = document.getElementById('branchNameInput').value || "Main Branch"; hAdvice = document.getElementById('healthAdviceInput').value || "Wash veggies before use!"; save(); notify("Settings Saved"); }
+        function clearCart() { cart = {}; renderCart(); notify("Bill Cleared"); }
+        function clearHistory() { if(confirm("Clear history?")) { salesHistory = []; save(); renderHistory(); } }
+        function setActiveCategory(c, el) { activeCat = c; document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active')); el.classList.add('active'); render(); }
+        function notify(m) { const t = document.getElementById('toast'); document.getElementById('toastMsg').innerText = m; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 2500); }
+        function toggleBillView() { document.getElementById('billDetails').classList.toggle('hidden'); }
+        function resetForm() { document.getElementById('newName').value = ''; document.getElementById('newPrice').value = ''; document.getElementById('newHindi').value = ''; }
+        function bulkDelete() { if(confirm(`Delete all ${activeCat}?`)) { inventory = inventory.filter(i => i.category !== activeCat); save(); render(); renderManagement(); } }
+        function toggleAddModal() { switchTab('setup'); }
+
+        /** VOICE LOGIC **/
+        function toggleVoiceBilling() {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return notify("No Mic");
+            if (recognition) { recognition.stop(); recognition = null; document.getElementById('voiceBtn').classList.remove('mic-active'); document.getElementById('activeMicBadge').classList.add('hidden'); return; }
+            recognition = new SR(); recognition.lang = "en-IN"; recognition.continuous = true;
+            recognition.onstart = () => { document.getElementById('voiceBtn').classList.add('mic-active'); document.getElementById('activeMicBadge').classList.remove('hidden'); notify("Mic On"); };
+            recognition.onresult = (e) => { const txt = e.results[e.results.length-1][0].transcript.toLowerCase(); let matched = inventory.find(i => txt.includes(i.name.toLowerCase())); if(matched) addToCart(matched.id, 1); };
+            recognition.onend = () => { if(recognition) recognition.start(); }; 
+            recognition.start();
+        }
+
+        function toggleVoiceStockAdd() {
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return notify("No Mic");
+            if (voiceAddRecognition) { voiceAddRecognition.stop(); voiceAddRecognition = null; document.getElementById('voiceAddBtn').classList.remove('bg-purple-700','text-white'); return; }
+            voiceAddRecognition = new SR(); voiceAddRecognition.lang = "en-IN"; voiceAddRecognition.continuous = true;
+            voiceAddRecognition.onstart = () => { document.getElementById('voiceAddBtn').classList.add('bg-purple-700','text-white'); notify("Ready: 'Potato 40'..."); };
+            voiceAddRecognition.onresult = (e) => {
+                const txt = e.results[e.results.length-1][0].transcript.toLowerCase();
+                const parts = txt.match(/([a-zA-Z\u0900-\u097F\s]+)\s*(\d+)/);
+                if (parts) { inventory.unshift({ id: Date.now(), name: parts[1].trim(), price: parseFloat(parts[2]), refQty: 1, priceUnit: 'Kg', category: activeCat }); save(); render(); renderManagement(); notify("Added " + parts[1]); }
+            };
+            voiceAddRecognition.start();
         }
 
         function processSmartText() {
@@ -397,90 +467,12 @@
                     if(cleanName) inventory.unshift({ id: Date.now()+Math.random(), name: cleanName, price: parseFloat(match[2]), refQty: 1, priceUnit: 'Kg', category: activeCat });
                 }
             });
-            save(); render(); renderManagement(); document.getElementById('smartPasteArea').value = ""; notify("Bulk Added");
+            save(); render(); renderManagement(); document.getElementById('smartPasteArea').value = ""; notify("Bulk Imported");
         }
-
-        function saveItem() {
-            const n = document.getElementById('newName').value.trim(), p = parseFloat(document.getElementById('newPrice').value);
-            const r = parseFloat(document.getElementById('newRefQty').value), u = document.getElementById('newPriceUnit').value, h = document.getElementById('newHindi').value.trim();
-            if(!n || isNaN(p)) return notify("Missing Details");
-            inventory.push({ id: Date.now(), name: n, nameHindi: h, price: p, refQty: r, priceUnit: u, category: manualCat });
-            save(); render(); renderManagement(); resetForm(); notify("Stock Saved");
-        }
-
-        function renderManagement() {
-            const div = document.getElementById('manageList'); div.innerHTML = '';
-            const q = document.getElementById('manageSearch')?.value.toLowerCase() || "";
-            inventory.filter(i => i.category === activeCat && (i.name.toLowerCase().includes(q) || (i.nameHindi && i.nameHindi.toLowerCase().includes(q)))).forEach(it => {
-                div.innerHTML += `<div class="flex flex-col p-3 border-b bg-white mb-1 rounded-lg shadow-sm">
-                    <div class="flex justify-between items-start">
-                        <div class="flex flex-col"><span class="text-[10px] font-black uppercase">${it.name}</span><span class="text-[9px] text-slate-400 font-bold">${it.nameHindi || ''}</span></div>
-                        <div class="text-right"><span class="text-[10px] font-black text-emerald-600">₹${it.price}</span><p class="text-[7px] text-slate-300 font-bold uppercase leading-none">Basis: ${it.refQty}${it.priceUnit}</p></div>
-                    </div>
-                    <div class="flex justify-end mt-2"><button onclick="inventory=inventory.filter(x=>x.id!=${it.id});save();renderManagement();render()" class="text-red-500 text-[8px] font-black uppercase px-2 py-1 bg-red-50 rounded border border-red-100">Delete</button></div>
-                </div>`;
-            });
-        }
-
-        function toggleVoiceBilling() {
-            const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return notify("No Mic");
-            if (recognition) { recognition.stop(); recognition = null; document.getElementById('voiceBtn').classList.remove('mic-active'); return; }
-            recognition = new SR(); recognition.lang = "en-IN"; recognition.continuous = true;
-            recognition.onstart = () => { document.getElementById('voiceBtn').classList.add('mic-active'); notify("Mic Always On"); };
-            recognition.onresult = (e) => { const txt = e.results[e.results.length-1][0].transcript.toLowerCase(); let matched = inventory.find(i => txt.includes(i.name.toLowerCase())); if(matched) addToCart(matched.id, 1); };
-            recognition.onend = () => { if(recognition) recognition.start(); }; 
-            recognition.start();
-        }
-
-        function toggleVoiceStockAdd() {
-            const SR = window.SpeechRecognition || window.webkitSpeechRecognition; if (!SR) return notify("No Mic");
-            if (voiceAddRecognition) { voiceAddRecognition.stop(); voiceAddRecognition = null; document.getElementById('voiceAddBtn').classList.remove('bg-purple-700','text-white'); return; }
-            voiceAddRecognition = new SR(); voiceAddRecognition.lang = "en-IN"; voiceAddRecognition.continuous = true;
-            voiceAddRecognition.onstart = () => { document.getElementById('voiceAddBtn').classList.add('bg-purple-700','text-white'); notify("Say 'Potato 40'..."); };
-            voiceAddRecognition.onresult = (e) => {
-                const txt = e.results[e.results.length-1][0].transcript.toLowerCase();
-                const parts = txt.match(/([a-zA-Z\u0900-\u097F\s]+)\s*(\d+)/);
-                if (parts) { inventory.unshift({ id: Date.now(), name: parts[1].trim(), price: parseFloat(parts[2]), refQty: 1, priceUnit: 'Kg', category: activeCat }); save(); render(); renderManagement(); notify("Added " + parts[1]); }
-            };
-            voiceAddRecognition.onend = () => { if(voiceAddRecognition) voiceAddRecognition.start(); };
-            voiceAddRecognition.start();
-        }
-
-        function toggleAddModal() { document.getElementById('addModal').classList.toggle('hidden'); if(!document.getElementById('addModal').classList.contains('hidden')) renderManagement(); }
-        function setActiveCategory(c, el) { activeCat = c; document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active')); el.classList.add('active'); render(); }
-        function switchTab(v) { document.querySelectorAll('.tab-view').forEach(t => t.classList.add('hidden')); document.getElementById('view-'+v).classList.remove('hidden'); if(v==='history') renderHistory(); }
-        function saveSettings() { sLoc = document.getElementById('branchNameInput').value || "Main Branch"; save(); notify("Saved"); }
-        function clearHistory() { if(confirm("Clear history?")) { salesHistory = []; save(); renderHistory(); } }
-        function resetForm() { document.getElementById('newName').value = ''; document.getElementById('newPrice').value = ''; document.getElementById('newHindi').value = ''; }
-        function toggleBillView() { document.getElementById('billDetails').classList.toggle('hidden'); }
-        function notify(m) { const t = document.getElementById('toast'); document.getElementById('toastMsg').innerText = m; t.style.opacity = '1'; setTimeout(() => t.style.opacity = '0', 2500); }
-        function setMCat(c) { manualCat = c; document.querySelectorAll('.mcat').forEach(b => b.className = 'mcat flex-1 rounded-xl bg-slate-50 text-slate-400 text-[10px] font-extrabold uppercase py-2'); const b = c==='Vegetable'?'mcVeg':c==='Fruit'?'mcFruit':'mcGroc'; document.getElementById(b).className = 'mcat flex-1 rounded-xl bg-emerald-600 text-white text-[10px] font-extrabold uppercase py-2 shadow-md'; renderManagement(); }
-        function bulkDelete() { if(confirm(`Delete all ${activeCat}?`)) { inventory = inventory.filter(i => i.category !== activeCat); save(); render(); renderManagement(); } }
-
-        function memorizeSale() {
-            const items = Object.values(cart); if(items.length === 0) return notify("Empty");
-            const sale = { id: Date.now(), date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}), items: items.map(i => `${i.qty}${i.unit} ${i.name}`), total: document.getElementById('grandTotal').innerText };
-            salesHistory.unshift(sale); if(salesHistory.length > 50) salesHistory.pop();
-            save(); clearCart(); notify("Saved"); switchTab('history');
-        }
-
-        function renderHistory() {
-            const list = document.getElementById('historyList'); list.innerHTML = '';
-            salesHistory.forEach(s => { list.innerHTML += `<div class="p-3.5 bg-white border border-slate-100 rounded-2xl shadow-sm mb-2"><div class="flex justify-between items-start mb-1"><span class="text-[10px] font-black text-slate-400 uppercase">${s.date}</span><span class="text-sm font-black text-emerald-600">${s.total}</span></div><p class="text-[10px] text-slate-500 font-bold truncate">${s.items.join(', ')}</p></div>`; });
-        }
-
-        function sendInvoice() {
-            const items = Object.values(cart); if(items.length===0) return notify("Empty");
-            let msg = `🛒 *FARMER'S GATE BILL*\n📍 _${sLoc}_\n--------------------\n`;
-            items.forEach(i => msg += `✅ ${i.name}: ${i.qty}${i.unit} = ₹${i.totalPrice.toFixed(2)}\n`);
-            msg += `--------------------\n💰 *TOTAL: ${document.getElementById('grandTotal').innerText}*`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-        }
-
-        function clearCart() { cart = {}; renderCart(); notify("Cleared"); }
 
         window.onload = () => { 
             document.getElementById('branchNameInput').value = sLoc;
+            document.getElementById('healthAdviceInput').value = hAdvice;
             render(); 
         };
     </script>
