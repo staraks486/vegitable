@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -794,7 +794,6 @@
         }
 
         async function scanImageWithGemini(base64Data, mimeType) {
-            if (!apiKey) throw new Error("API Key Missing! (Check script code)");
             
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
 
@@ -1008,6 +1007,7 @@
     </script>
 </body>
 </html>
+
 
 
 ```
