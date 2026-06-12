@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -287,7 +288,7 @@
                             <span class="bg-blue-600 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest shadow-sm">100% Free / No API Key</span>
                             <h4 class="text-sm font-black text-indigo-900 uppercase">Local List Scan</h4>
                         </div>
-                        <p class="text-[11px] text-indigo-700 font-medium mb-4">Snap a photo of a printed or clearly handwritten price list/bill. Everything processes privately on your device.</p>
+                        <p class="text-[11px] text-indigo-700 font-medium mb-4">Snap a photo of a printed or clearly handwritten price list/bill. We process and enhance it entirely on your device.</p>
                         
                         <div class="grid grid-cols-2 gap-3">
                             <button onclick="document.getElementById('cameraInput').click(); softVibrate();" class="bg-white text-indigo-700 p-4 rounded-[1.5rem] flex flex-col items-center justify-center gap-2 active:scale-95 transition-all shadow-sm hover:shadow-md border border-indigo-100">
@@ -304,9 +305,12 @@
                     </div>
                 </div>
 
-                <div id="smartLoader" class="hidden flex items-center justify-center gap-3 p-4 bg-indigo-900 text-white rounded-2xl shadow-xl animate-pop">
-                    <div class="loader !border-indigo-400 !border-t-white w-5 h-5"></div>
-                    <span id="loaderText" class="text-[11px] font-black uppercase tracking-widest animate-pulse">Running OCR on Device...</span>
+                <div id="smartLoader" class="hidden flex flex-col items-center justify-center p-6 bg-indigo-900 text-white rounded-2xl shadow-xl animate-pop">
+                    <div class="loader !border-indigo-400 !border-t-white w-6 h-6 mb-3"></div>
+                    <span id="loaderText" class="text-[11px] font-black uppercase tracking-widest text-center">Processing Image...</span>
+                    <div class="w-full bg-indigo-800 rounded-full h-1.5 mt-3 overflow-hidden">
+                        <div id="scanProgress" class="bg-indigo-400 h-1.5 rounded-full w-0 transition-all duration-300"></div>
+                    </div>
                 </div>
 
                 <div class="bg-slate-50 p-5 rounded-[2rem] space-y-4 border border-slate-100">
@@ -753,63 +757,126 @@
             });
         }
 
-        // --- LOCAL OCR (No API Keys) ---
+        // --- LOCAL OCR (No API Keys - Highly Enhanced) ---
+        
+        // 1. Applies High Contrast and Grayscale so Tesseract can easily read bad photos
+        async function preprocessImageForOCR(file) {
+            return new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width * 1.2; // slight upscale helps small text
+                    canvas.height = img.height * 1.2;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    const data = imageData.data;
+                    
+                    for (let i = 0; i < data.length; i += 4) {
+                        const r = data[i], g = data[i + 1], b = data[i + 2];
+                        const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+                        const color = gray > 130 ? 255 : 0; // High contrast threshold
+                        data[i] = data[i + 1] = data[i + 2] = color;
+                    }
+                    ctx.putImageData(imageData, 0, 0);
+                    resolve(canvas.toDataURL('image/png'));
+                };
+                img.src = URL.createObjectURL(file);
+            });
+        }
+
         async function handleLocalScan(ev) {
             const file = ev.target.files[0];
             if (!file) return;
 
             const loader = document.getElementById('smartLoader');
+            const progress = document.getElementById('scanProgress');
+            const loaderText = document.getElementById('loaderText');
+            
             loader.classList.remove('hidden');
             loader.scrollIntoView({ behavior: 'smooth' });
+            progress.style.width = '10%';
             
             try {
-                // Initialize Tesseract worker
-                const worker = await Tesseract.createWorker('eng');
-                const result = await worker.recognize(file);
-                await worker.terminate();
+                loaderText.innerText = "Enhancing Image Clarity...";
+                const enhancedImage = await preprocessImageForOCR(file);
+                progress.style.width = '40%';
                 
+                loaderText.innerText = "Extracting Text Data...";
+                const worker = await Tesseract.createWorker('eng');
+                const result = await worker.recognize(enhancedImage);
+                await worker.terminate();
+                progress.style.width = '80%';
+                
+                loaderText.innerText = "Parsing Items...";
                 const text = result.data.text;
                 let addedCount = 0;
 
-                // Simple parser for extracting lists (e.g. "Apple 120" or "Onion - 40")
+                // 2. Very forgiving text parsing. Looks for ANY word and number match.
                 const lines = text.split('\n');
                 lines.forEach(line => {
-                    if (line.trim().length < 3) return;
+                    let cleaned = line.replace(/[^\w\s\.\,\₹\-]/g, ' ').trim();
+                    if (cleaned.length < 3) return;
                     
-                    // Regex looking for: Letters (name) followed by numbers (price)
-                    const match = line.match(/^([a-zA-Z\s]+)[\s:-]+([\d\.]+)/);
-                    if (match) {
-                        const extractedName = match[1].trim();
-                        const extractedPrice = parseFloat(match[2]);
+                    // Filter out noise lines like Total, Date, Tax
+                    const lower = cleaned.toLowerCase();
+                    if (/total|tax|date|time|gst|cash|change|amount|balance/.test(lower)) return;
+
+                    // Extract actual words (ignoring standard measurement units)
+                    const words = cleaned.match(/[A-Za-z]{3,}/g);
+                    let validWords = words ? words.filter(w => !/^(inr|mrp|qty|kg|gm|pcs|pkt|rate|price|rs|rupee)$/i.test(w)) : [];
+                    
+                    // Extract numbers (prices)
+                    const nums = cleaned.match(/\b\d+([.,]\d{1,2})?\b/g);
+                    
+                    if (validWords.length > 0 && nums && nums.length > 0) {
+                        // Create item name
+                        let itemName = validWords.join(' ');
+                        itemName = itemName.charAt(0).toUpperCase() + itemName.slice(1).toLowerCase();
                         
-                        if (extractedName.length > 2 && !isNaN(extractedPrice)) {
+                        // Assume the last found number is the price (standard receipt format)
+                        let priceCandidate = parseFloat(nums[nums.length - 1].replace(',', '.'));
+                        
+                        // Filter out crazy numbers that might be phone numbers or zip codes
+                        if (priceCandidate > 0 && priceCandidate < 5000) {
+                            
+                            // Guess category
+                            let cat = 'Vegetable';
+                            if (/apple|banana|mango|grape|orange|kiwi|melon|berry|papaya/i.test(itemName)) cat = 'Fruit';
+                            else if (/rice|sugar|salt|oil|flour|bread|milk|dal|pulse|tea|coffee/i.test(itemName)) cat = 'Grocery';
+
                             inventory.unshift({
                                 id: Date.now() + Math.random(),
-                                name: extractedName,
+                                name: itemName,
                                 nameHindi: "",
-                                price: extractedPrice,
+                                price: priceCandidate,
                                 refQty: 1,
                                 priceUnit: "Kg",
-                                category: "Vegetable" // Defaults to Vegetable
+                                category: cat
                             });
                             addedCount++;
                         }
                     }
                 });
 
-                if(addedCount > 0) {
-                    triggerSave(); render(); renderManagement(); softVibrate();
-                    notify(`${addedCount} Items Extracted locally! ✨`);
-                } else {
-                    notify("No clear prices found in image.");
-                }
+                progress.style.width = '100%';
+                setTimeout(() => {
+                    if(addedCount > 0) {
+                        triggerSave(); render(); renderManagement(); softVibrate();
+                        notify(`${addedCount} Items Extracted locally! ✨`);
+                    } else {
+                        notify("Could not find clear Name + Price pairs. Try a flatter photo.");
+                    }
+                    loader.classList.add('hidden');
+                    ev.target.value = '';
+                }, 500);
+
             } catch (err) {
                 console.error("OCR Error:", err);
-                notify("Failed to read text from image.");
+                notify("Failed to process image.");
+                loader.classList.add('hidden');
             }
-
-            loader.classList.add('hidden');
-            ev.target.value = '';
         }
 
         function setMCat(cat) { 
@@ -939,3 +1006,6 @@
     </script>
 </body>
 </html>
+
+
+```
