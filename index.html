@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,8 +6,12 @@
     <title>Farmer's Gate PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Image & PDF Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <!-- Tesseract.js for Local, No-API-Key Text Extraction -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -277,25 +280,25 @@
                 
                 <div class="bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-[2rem] border border-blue-100 relative overflow-hidden">
                     <div class="absolute top-0 right-0 p-4 opacity-10">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M3 15h6"/><path d="M3 18h6"/><path d="M3 21h6"/></svg>
                     </div>
                     <div class="relative z-10">
                         <div class="flex items-center gap-2 mb-4">
-                            <span class="bg-blue-600 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest shadow-sm">AI Powered</span>
-                            <h4 class="text-sm font-black text-indigo-900 uppercase">Smart Scan Add</h4>
+                            <span class="bg-blue-600 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest shadow-sm">100% Free / No API Key</span>
+                            <h4 class="text-sm font-black text-indigo-900 uppercase">Local List Scan</h4>
                         </div>
-                        <p class="text-[11px] text-indigo-700 font-medium mb-4">Snap a photo of vegetables, fruits, or a handwritten price list to automatically extract and add items to your stock.</p>
+                        <p class="text-[11px] text-indigo-700 font-medium mb-4">Snap a photo of a printed or clearly handwritten price list/bill. Everything processes privately on your device.</p>
                         
                         <div class="grid grid-cols-2 gap-3">
                             <button onclick="document.getElementById('cameraInput').click(); softVibrate();" class="bg-white text-indigo-700 p-4 rounded-[1.5rem] flex flex-col items-center justify-center gap-2 active:scale-95 transition-all shadow-sm hover:shadow-md border border-indigo-100">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
                                 <span class="text-[10px] font-black uppercase tracking-widest">Camera</span>
-                                <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleImageInput(event)">
+                                <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="handleLocalScan(event)">
                             </button>
                             <button onclick="document.getElementById('galleryInput').click(); softVibrate();" class="bg-white text-indigo-700 p-4 rounded-[1.5rem] flex flex-col items-center justify-center gap-2 active:scale-95 transition-all shadow-sm hover:shadow-md border border-indigo-100">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
                                 <span class="text-[10px] font-black uppercase tracking-widest">Gallery</span>
-                                <input type="file" id="galleryInput" accept="image/*" class="hidden" multiple onchange="handleImageInput(event)">
+                                <input type="file" id="galleryInput" accept="image/*" class="hidden" multiple onchange="handleLocalScan(event)">
                             </button>
                         </div>
                     </div>
@@ -303,7 +306,7 @@
 
                 <div id="smartLoader" class="hidden flex items-center justify-center gap-3 p-4 bg-indigo-900 text-white rounded-2xl shadow-xl animate-pop">
                     <div class="loader !border-indigo-400 !border-t-white w-5 h-5"></div>
-                    <span id="loaderText" class="text-[11px] font-black uppercase tracking-widest animate-pulse">Compressing & Extracting Data...</span>
+                    <span id="loaderText" class="text-[11px] font-black uppercase tracking-widest animate-pulse">Running OCR on Device...</span>
                 </div>
 
                 <div class="bg-slate-50 p-5 rounded-[2rem] space-y-4 border border-slate-100">
@@ -374,9 +377,7 @@
     </div>
 
     <script>
-        // --- 1. CONFIGURATION & AI SETUP ---
-        const apiKey = ""; // Injected by execution environment. If running locally, put your Gemini API Key here.
-        
+        // --- DATA & CONFIG ---
         const defaultInventory = [
             { id: 1, name: 'Potato', nameHindi: 'आलू', price: 30, refQty: 1, priceUnit: 'Kg', category: 'Vegetable' },
             { id: 2, name: 'Tomato', nameHindi: 'टमाटर', price: 65, refQty: 1, priceUnit: 'Kg', category: 'Vegetable' },
@@ -423,10 +424,7 @@
             setupTouchGestures();
         };
 
-        function updateStockBadge() {
-            document.getElementById('totalItemsBadge').innerText = 'Stock: ' + inventory.length;
-        }
-
+        function updateStockBadge() { document.getElementById('totalItemsBadge').innerText = 'Stock: ' + inventory.length; }
         function softVibrate() { if (navigator.vibrate) navigator.vibrate(40); }
         function triggerSave() { DataAdapter.save(inventory, sLoc); updateStockBadge(); }
         function handleSearch() { render(); }
@@ -755,129 +753,63 @@
             });
         }
 
-        // --- GEMINI AI INTEGRATION (With Image Compression) ---
-        
-        // Helper function to compress large camera images in the browser
-        async function compressImage(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = event => {
-                    const img = new Image();
-                    img.src = event.target.result;
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 1024;
-                        const MAX_HEIGHT = 1024;
-                        let width = img.width;
-                        let height = img.height;
+        // --- LOCAL OCR (No API Keys) ---
+        async function handleLocalScan(ev) {
+            const file = ev.target.files[0];
+            if (!file) return;
 
-                        if (width > height) {
-                            if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                        } else {
-                            if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                        }
-                        
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        // Output compressed jpeg as base64 without the data URI prefix
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                        resolve(dataUrl.split(',')[1]);
-                    };
-                    img.onerror = error => reject(error);
-                };
-                reader.onerror = error => reject(error);
-            });
-        }
-
-        async function scanImageWithGemini(base64Data, mimeType) {
-            
-            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-
-            const prompt = "Analyze this image. If it's a picture of produce/groceries, identify the items. If it's a handwritten or printed list/bill, extract the item names, prices, and quantities. Return a list of articles. Estimate prices/quantities if missing but reasonable for an Indian market. Provide short English names and Hindi translation if possible.";
-
-            const payload = {
-                contents: [{
-                    role: "user",
-                    parts: [
-                        { text: prompt },
-                        { inlineData: { mimeType: "image/jpeg", data: base64Data } }
-                    ]
-                }],
-                generationConfig: {
-                    responseMimeType: "application/json",
-                    responseSchema: {
-                        type: "OBJECT",
-                        properties: {
-                            articles: {
-                                type: "ARRAY",
-                                items: {
-                                    type: "OBJECT",
-                                    properties: {
-                                        name: { type: "STRING", description: "Short English Name" },
-                                        nameHindi: { type: "STRING" },
-                                        price: { type: "NUMBER", description: "Price in INR" },
-                                        refQty: { type: "NUMBER", description: "Base quantity (e.g. 1, 250)" },
-                                        priceUnit: { type: "STRING", enum: ["Kg", "Gm", "Pcs", "Pkt"] },
-                                        category: { type: "STRING", enum: ["Vegetable", "Fruit", "Grocery"] }
-                                    },
-                                    required: ["name", "price", "refQty", "priceUnit", "category"]
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            
-            const data = await response.json();
-            if (data.error) throw new Error(data.error.message);
-            
-            return JSON.parse(data.candidates[0].content.parts[0].text);
-        }
-
-        async function handleImageInput(ev) {
-            const fs = ev.target.files; if (!fs || fs.length === 0) return;
             const loader = document.getElementById('smartLoader');
-            
             loader.classList.remove('hidden');
             loader.scrollIntoView({ behavior: 'smooth' });
             
-            let addedCount = 0;
-            
-            for (let i = 0; i < fs.length; i++) {
-                try {
-                    // Compress image before sending it to the AI
-                    const compressedB64 = await compressImage(fs[i]);
-                    const resultData = await scanImageWithGemini(compressedB64, fs[i].type);
+            try {
+                // Initialize Tesseract worker
+                const worker = await Tesseract.createWorker('eng');
+                const result = await worker.recognize(file);
+                await worker.terminate();
+                
+                const text = result.data.text;
+                let addedCount = 0;
+
+                // Simple parser for extracting lists (e.g. "Apple 120" or "Onion - 40")
+                const lines = text.split('\n');
+                lines.forEach(line => {
+                    if (line.trim().length < 3) return;
                     
-                    if(resultData && resultData.articles) { 
-                        resultData.articles.forEach(it => { 
-                            inventory.unshift({id: Date.now()+Math.random(), ...it}); 
-                            addedCount++; 
-                        }); 
+                    // Regex looking for: Letters (name) followed by numbers (price)
+                    const match = line.match(/^([a-zA-Z\s]+)[\s:-]+([\d\.]+)/);
+                    if (match) {
+                        const extractedName = match[1].trim();
+                        const extractedPrice = parseFloat(match[2]);
+                        
+                        if (extractedName.length > 2 && !isNaN(extractedPrice)) {
+                            inventory.unshift({
+                                id: Date.now() + Math.random(),
+                                name: extractedName,
+                                nameHindi: "",
+                                price: extractedPrice,
+                                refQty: 1,
+                                priceUnit: "Kg",
+                                category: "Vegetable" // Defaults to Vegetable
+                            });
+                            addedCount++;
+                        }
                     }
-                } catch (e) { 
-                    console.error("AI Error:", e);
-                    notify(`Error: ${e.message.slice(0, 40)}...`); 
+                });
+
+                if(addedCount > 0) {
+                    triggerSave(); render(); renderManagement(); softVibrate();
+                    notify(`${addedCount} Items Extracted locally! ✨`);
+                } else {
+                    notify("No clear prices found in image.");
                 }
+            } catch (err) {
+                console.error("OCR Error:", err);
+                notify("Failed to read text from image.");
             }
-            
-            if(addedCount > 0) { 
-                triggerSave(); render(); renderManagement(); softVibrate();
-                notify(`${addedCount} Items Added by AI ✨`); 
-            }
-            
+
             loader.classList.add('hidden');
-            ev.target.value = ''; // Reset input
+            ev.target.value = '';
         }
 
         function setMCat(cat) { 
@@ -1007,7 +939,3 @@
     </script>
 </body>
 </html>
-
-
-
-```
