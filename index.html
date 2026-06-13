@@ -407,10 +407,10 @@
                     <p class="text-[11px] font-black text-slate-500 uppercase tracking-widest px-2">Inventory Management</p>
                     
                     <div class="flex gap-2 px-1">
-                        <button onclick="exportInventory()" class="flex-1 bg-slate-50 text-slate-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-200 hover:bg-slate-100 transition-all active:scale-95">⬇️ Export</button>
+                        <button onclick="exportInventory()" class="flex-1 bg-slate-50 text-slate-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-200 hover:bg-slate-100 transition-all active:scale-95">⬇️ Export CSV</button>
                         <label class="flex-1 bg-slate-50 text-slate-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-200 hover:bg-slate-100 transition-all active:scale-95 text-center cursor-pointer">
-                            ⬆️ Import
-                            <input type="file" accept=".txt" class="hidden" onchange="importInventory(event)">
+                            ⬆️ Import CSV
+                            <input type="file" accept=".csv" class="hidden" onchange="importInventory(event)">
                         </label>
                         <button onclick="confirmDeleteAll(this)" data-confirm="false" class="flex-[1.5] bg-red-50 text-red-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-red-200 hover:bg-red-100 transition-all active:scale-95">🗑️ Delete All</button>
                     </div>
@@ -1187,22 +1187,40 @@
             notify(`✅ ${added} items saved to Master Stock!`);
         }
 
+        // Helper to parse CSV rows securely (handles commas inside quotes)
+        function parseCSVLine(text) {
+            let ret = [''], i = 0, p = '', s = true;
+            for (let l in text) {
+                let c = text[l];
+                if ('"' === c) {
+                    s = !s;
+                    if ('"' === p) { ret[i] += '"'; c = '-'; } else if ('' === p) c = '-';
+                } else if (s && ',' === c) c = ret[++i] = '';
+                else ret[i] += c;
+                p = c;
+            }
+            return ret;
+        }
+
         window.exportInventory = function() {
             if(inventory.length === 0) return notify("Inventory is empty!");
             
-            let txtData = "Name|HindiName|Price|RefQty|Unit|Category\n";
+            // CSV Excel Format
+            let csvData = "Name,HindiName,Price,RefQty,Unit,Category\n";
             inventory.forEach(item => {
-                txtData += `${item.name}|${item.nameHindi || ""}|${item.price}|${item.refQty}|${item.priceUnit}|${item.category}\n`;
+                const safeName = `"${(item.name || '').replace(/"/g, '""')}"`;
+                const safeHindi = `"${(item.nameHindi || '').replace(/"/g, '""')}"`;
+                csvData += `${safeName},${safeHindi},${item.price},${item.refQty},${item.priceUnit},${item.category}\n`;
             });
             
-            const dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(txtData);
+            const dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent(csvData);
             const dlNode = document.createElement('a');
             dlNode.setAttribute("href", dataStr);
-            dlNode.setAttribute("download", `farmers_gate_backup_${Date.now()}.txt`);
+            dlNode.setAttribute("download", `farmers_gate_backup_${Date.now()}.csv`);
             document.body.appendChild(dlNode);
             dlNode.click();
             dlNode.remove();
-            notify("Text Backup Saved!");
+            notify("CSV/Excel Backup Saved!");
             softVibrate();
         };
 
@@ -1214,20 +1232,21 @@
                 try {
                     const lines = e.target.result.split('\n');
                     const imported = [];
+                    // Start from i=1 to skip the column headers
                     for(let i = 1; i < lines.length; i++) {
                         const line = lines[i].trim();
                         if(!line) continue;
                         
-                        const parts = line.split('|');
+                        const parts = parseCSVLine(line);
                         if(parts.length >= 6) {
                             imported.push({
                                 id: Date.now() + Math.random() + i,
-                                name: parts[0],
-                                nameHindi: parts[1],
+                                name: parts[0].trim(),
+                                nameHindi: parts[1].trim(),
                                 price: parseFloat(parts[2]) || 0,
                                 refQty: parseFloat(parts[3]) || 1,
-                                priceUnit: parts[4],
-                                category: parts[5]
+                                priceUnit: parts[4].trim(),
+                                category: parts[5].trim()
                             });
                         }
                     }
@@ -1237,13 +1256,13 @@
                         triggerSave();
                         render();
                         renderManagement();
-                        notify("Text Backup Restored!");
+                        notify("CSV/Excel Backup Restored!");
                         softVibrate();
                     } else {
-                        notify("Invalid or empty text file!");
+                        notify("Invalid or empty CSV file!");
                     }
                 } catch (err) {
-                    notify("Error reading text file.");
+                    notify("Error reading CSV file.");
                 }
             };
             reader.readAsText(file);
@@ -1419,6 +1438,7 @@
     </script>
 </body>
 </html>
+
 
 
 ```
