@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -74,6 +73,13 @@
             border-color: var(--primary) !important; 
             background: #f0fdf4 !important;
             box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.15);
+            transition: all 0.3s ease;
+        }
+
+        .new-highlight { 
+            border-color: #3b82f6 !important; 
+            background: #eff6ff !important;
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15);
             transition: all 0.3s ease;
         }
 
@@ -202,7 +208,6 @@
 
                     <div class="mt-4 pt-4 border-t border-slate-100 shrink-0 bg-white">
                         
-                        <!-- NEW OFFER & NOTES ACCORDION -->
                         <details class="mb-4 group">
                             <summary class="text-[11px] font-black text-blue-600 uppercase tracking-widest cursor-pointer list-none flex items-center justify-between bg-blue-50 p-4 rounded-2xl border border-blue-100 hover:bg-blue-100 transition-colors select-none">
                                 <div class="flex items-center gap-2">
@@ -406,7 +411,6 @@
                 <div class="space-y-3 pt-4 border-t border-slate-100">
                     <p class="text-[11px] font-black text-slate-500 uppercase tracking-widest px-2">Inventory Management</p>
                     
-                    <!-- NEW CLOUD SYNC MODULE -->
                     <div class="bg-blue-50 p-4 rounded-2xl space-y-3 border border-blue-100 mb-2">
                         <div class="flex justify-between items-center">
                             <p class="text-[11px] font-black text-blue-800 uppercase tracking-widest flex items-center gap-2">
@@ -480,7 +484,15 @@
                 return { loc, inventory };
             },
             async save(inventoryData, locationData) {
-                SafeStorage.set('fg_inventory', JSON.stringify(inventoryData));
+                // Strip out temporary highlight flags before saving
+                const cleanData = inventoryData.map(item => {
+                    const cleanItem = { ...item };
+                    delete cleanItem._isUpdated;
+                    delete cleanItem._isNew;
+                    delete cleanItem._oldPrice;
+                    return cleanItem;
+                });
+                SafeStorage.set('fg_inventory', JSON.stringify(cleanData));
                 SafeStorage.set('fg_loc', locationData);
             }
         };
@@ -492,6 +504,7 @@
         let inventory = [];
         let cart = {};
         let pendingScanItems = [];
+        let highlightTimeout = null;
 
         const HEALTH_QUOTES = [
             "🌿 Eat healthy, live wealthy!",
@@ -583,15 +596,28 @@
 
             filtered.forEach((item, index) => {
                 const card = document.createElement('div');
-                card.className = 'flex items-center justify-between p-3.5 sm:p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300 transform scale-95 opacity-0 animate-pop';
+                // Check for highlight flags
+                let highlightClass = '';
+                let highlightBadge = '';
+                
+                if (item._isUpdated) {
+                    highlightClass = 'edit-highlight';
+                    highlightBadge = `<span class="text-[9px] px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded font-black whitespace-nowrap border border-emerald-200 animate-pulse shadow-sm">Updated (was ₹${item._oldPrice})</span>`;
+                } else if (item._isNew) {
+                    highlightClass = 'new-highlight';
+                    highlightBadge = `<span class="text-[9px] px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded font-black whitespace-nowrap border border-blue-200 animate-pulse shadow-sm">New Item</span>`;
+                }
+
+                card.className = `flex items-center justify-between p-3.5 sm:p-4 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md hover:border-emerald-200 transition-all duration-300 transform scale-95 opacity-0 animate-pop ${highlightClass}`;
                 card.style.animationDelay = `${index * 0.04}s`;
                 card.id = `inv-item-${item.id}`;
                 
                 card.innerHTML = `
                     <div class="flex-1 min-w-0 pr-2">
-                        <div class="flex items-center gap-1.5 mb-1.5">
+                        <div class="flex items-center gap-1.5 mb-1.5 flex-wrap">
                             <h4 class="font-black text-slate-800 text-[14px] uppercase truncate">${item.name}</h4>
                             ${item.nameHindi ? `<span class="text-[9px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded font-bold whitespace-nowrap border border-slate-200">${item.nameHindi}</span>` : ''}
+                            ${highlightBadge}
                         </div>
                         <div class="flex items-center gap-0.5 bg-slate-50 px-2 py-1 rounded-lg w-max border border-slate-100">
                             <span class="text-[10px] font-bold text-emerald-600">₹</span>
@@ -874,7 +900,6 @@
         }
 
         // --- ENHANCED HYBRID SCANNING (AI + LOCAL OCR) ---
-        // ... (Scan functions remain mostly the same) ...
         async function compressImageForAI(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -1132,11 +1157,55 @@
             return ret;
         }
 
+        function clearHighlightsAfterTimeout() {
+            if (highlightTimeout) clearTimeout(highlightTimeout);
+            highlightTimeout = setTimeout(() => {
+                let needsRender = false;
+                inventory.forEach(item => {
+                    if (item._isUpdated || item._isNew) {
+                        delete item._isUpdated;
+                        delete item._isNew;
+                        delete item._oldPrice;
+                        needsRender = true;
+                    }
+                });
+                if (needsRender) render();
+            }, 10000); // 10 seconds timeout
+        }
+
+        // The Smart Comparison logic
+        function compareAndMergeInventory(importedData) {
+            let changesFound = 0;
+            const merged = importedData.map(newItem => {
+                // Find existing item by name (case insensitive)
+                const existingItem = inventory.find(oldItem => 
+                    oldItem.name.toLowerCase().trim() === newItem.name.toLowerCase().trim()
+                );
+
+                if (existingItem) {
+                    // It exists. Keep the old ID to prevent UI jumping
+                    newItem.id = existingItem.id;
+                    
+                    // Check if price changed
+                    if (existingItem.price !== newItem.price) {
+                        newItem._isUpdated = true;
+                        newItem._oldPrice = existingItem.price;
+                        changesFound++;
+                    }
+                } else {
+                    // It's a completely new item
+                    newItem._isNew = true;
+                    changesFound++;
+                }
+                return newItem;
+            });
+
+            return { merged, changesFound };
+        }
+
         function processCSVData(csvText) {
-            // Standardize carriage returns
             const lines = csvText.replace(/\r/g, '').split('\n');
             const imported = [];
-            // Skip the header row (i = 1)
             for(let i = 1; i < lines.length; i++) {
                 const line = lines[i].trim();
                 if(!line) continue;
@@ -1182,9 +1251,18 @@
                 try {
                     const imported = processCSVData(e.target.result);
                     if (imported.length > 0) {
-                        inventory = imported;
-                        triggerSave(); render(); renderManagement();
-                        notify("CSV/Excel Backup Restored!"); softVibrate();
+                        const { merged, changesFound } = compareAndMergeInventory(imported);
+                        inventory = merged;
+                        triggerSave(); 
+                        render(); 
+                        renderManagement();
+                        if(changesFound > 0) {
+                            notify(`Restored! ${changesFound} updates highlighted.`);
+                            clearHighlightsAfterTimeout();
+                        } else {
+                            notify("Backup Restored! No changes found.");
+                        }
+                        softVibrate();
                     } else { notify("Invalid or empty CSV file!"); }
                 } catch (err) { notify("Error reading CSV file."); }
             };
@@ -1204,12 +1282,16 @@
                 const csvText = await response.text();
                 const imported = processCSVData(csvText);
                 if (imported.length > 0) {
-                    inventory = imported;
+                    const { merged, changesFound } = compareAndMergeInventory(imported);
+                    inventory = merged;
                     triggerSave();
                     updateStockBadge();
                     render();
                     renderManagement();
-                    notify("🔄 Auto-synced from Google Sheets!");
+                    if(changesFound > 0) {
+                        notify(`🔄 Auto-sync: ${changesFound} prices updated!`);
+                        clearHighlightsAfterTimeout();
+                    }
                 }
             } catch (err) {
                 console.log("Background sync failed:", err);
@@ -1232,13 +1314,20 @@
                 
                 const imported = processCSVData(csvText);
                 if (imported.length > 0) {
-                    inventory = imported;
+                    const { merged, changesFound } = compareAndMergeInventory(imported);
+                    inventory = merged;
                     SafeStorage.set('fg_sync_url', url);
                     triggerSave();
                     updateStockBadge();
                     render();
                     renderManagement();
-                    notify("✅ Inventory Synced Successfully!");
+                    
+                    if(changesFound > 0) {
+                        notify(`✅ Synced! ${changesFound} items updated/added.`);
+                        clearHighlightsAfterTimeout();
+                    } else {
+                        notify("✅ Synced! No new changes.");
+                    }
                 } else {
                     notify("Empty or invalid CSV data!");
                 }
@@ -1356,5 +1445,3 @@
     </script>
 </body>
 </html>
-
-```
