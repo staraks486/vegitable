@@ -1,4 +1,4 @@
-
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -406,6 +406,25 @@
                 <div class="space-y-3 pt-4 border-t border-slate-100">
                     <p class="text-[11px] font-black text-slate-500 uppercase tracking-widest px-2">Inventory Management</p>
                     
+                    <!-- NEW CLOUD SYNC MODULE -->
+                    <div class="bg-blue-50 p-4 rounded-2xl space-y-3 border border-blue-100 mb-2">
+                        <div class="flex justify-between items-center">
+                            <p class="text-[11px] font-black text-blue-800 uppercase tracking-widest flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg> 
+                                Cloud Sync (Google Sheets)
+                            </p>
+                            <label class="flex items-center gap-1.5 cursor-pointer bg-white px-2 py-1 rounded-lg shadow-sm border border-blue-100 transition-colors hover:bg-blue-100">
+                                <input type="checkbox" id="autoSyncToggle" onchange="toggleAutoSync(this)" class="w-3.5 h-3.5 text-blue-600 rounded">
+                                <span class="text-[9px] font-black text-blue-700 uppercase tracking-widest">Auto-Load</span>
+                            </label>
+                        </div>
+                        <input type="url" id="syncUrl" placeholder="Paste Published CSV Link here..." class="w-full px-3 py-2.5 bg-white border border-blue-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-shadow">
+                        <button onclick="syncFromCloud(event)" class="w-full bg-blue-600 text-white py-3 rounded-xl text-[11px] font-black uppercase tracking-widest shadow-md active:scale-95 transition-all flex justify-center items-center gap-2 hover:bg-blue-700">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21v-5h5"/></svg>
+                            Sync Inventory Now
+                        </button>
+                    </div>
+
                     <div class="flex gap-2 px-1">
                         <button onclick="exportInventory()" class="flex-1 bg-slate-50 text-slate-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-200 hover:bg-slate-100 transition-all active:scale-95">⬇️ Export CSV</button>
                         <label class="flex-1 bg-slate-50 text-slate-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-200 hover:bg-slate-100 transition-all active:scale-95 text-center cursor-pointer">
@@ -494,6 +513,13 @@
             updateStockBadge();
             render(); 
             setupTouchGestures();
+
+            // Background Auto-Sync trigger
+            const autoSync = SafeStorage.get('fg_auto_sync') === 'true';
+            const syncUrl = SafeStorage.get('fg_sync_url');
+            if (autoSync && syncUrl) {
+                backgroundSync(syncUrl);
+            }
         });
 
         function updateStockBadge() { 
@@ -740,6 +766,11 @@
             if(m.classList.contains('hidden')) {
                 m.classList.remove('hidden');
                 document.getElementById('editLoc').value = sLoc; 
+                
+                // Populate Sync values
+                document.getElementById('syncUrl').value = SafeStorage.get('fg_sync_url') || '';
+                document.getElementById('autoSyncToggle').checked = SafeStorage.get('fg_auto_sync') === 'true';
+                
                 renderManagement(); 
                 resetForm();
                 setTimeout(() => {
@@ -843,8 +874,7 @@
         }
 
         // --- ENHANCED HYBRID SCANNING (AI + LOCAL OCR) ---
-        
-        // 1. Better Image Compression specifically tuned to keep text crisp for AI
+        // ... (Scan functions remain mostly the same) ...
         async function compressImageForAI(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -854,24 +884,16 @@
                     img.src = event.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        const MAX_WIDTH = 1600; // Increased resolution for better AI OCR
+                        const MAX_WIDTH = 1600;
                         const MAX_HEIGHT = 1600;
                         let width = img.width;
                         let height = img.height;
-
-                        if (width > height) {
-                            if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
-                        } else {
-                            if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
-                        }
-                        
-                        canvas.width = width;
-                        canvas.height = height;
+                        if (width > height) { if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; } } 
+                        else { if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; } }
+                        canvas.width = width; canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
-                        
-                        const dataUrl = canvas.toDataURL('image/jpeg', 0.9); // High quality
-                        resolve(dataUrl.split(',')[1]);
+                        resolve(canvas.toDataURL('image/jpeg', 0.9).split(',')[1]);
                     };
                     img.onerror = error => reject(error);
                 };
@@ -879,30 +901,19 @@
             });
         }
 
-        // 2. High Contrast B&W Converter with Forgiving Red Ink Eraser for Local Scan
         async function preprocessImageForLocalOCR(file) {
             return new Promise((resolve) => {
                 const img = new Image();
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
-                    canvas.width = img.width * 1.2; 
-                    canvas.height = img.height * 1.2;
+                    canvas.width = img.width * 1.2; canvas.height = img.height * 1.2;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                    
                     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
                     const data = imageData.data;
-                    
                     for (let i = 0; i < data.length; i += 4) {
                         const r = data[i], g = data[i + 1], b = data[i + 2];
-                        
-                        // Advanced Red Eraser: Catches pink/faded red pens more accurately
-                        if (r > 100 && r > g * 1.3 && r > b * 1.3) {
-                            data[i] = 255; data[i + 1] = 255; data[i + 2] = 255;
-                            continue;
-                        }
-
-                        // Adjust contrast for sharp text readability
+                        if (r > 100 && r > g * 1.3 && r > b * 1.3) { data[i] = 255; data[i + 1] = 255; data[i + 2] = 255; continue; }
                         const gray = 0.299 * r + 0.587 * g + 0.114 * b;
                         const color = gray > 150 ? 255 : 0; 
                         data[i] = data[i + 1] = data[i + 2] = color;
@@ -914,31 +925,20 @@
             });
         }
 
-        // 3. Scan Controller
         async function startScan(ev) {
             const file = ev.target.files[0];
             if (!file) return;
-
             const useAI = document.getElementById('useAiToggle')?.checked;
-            
             if (useAI) {
-                if (!apiKey) {
-                    notify("API Key missing! Falling back to Local Scanner...");
-                    await doLocalScan(file, ev);
-                } else {
-                    await doAIScan(file, ev);
-                }
-            } else {
-                await doLocalScan(file, ev);
-            }
+                if (!apiKey) { notify("API Key missing! Falling back to Local Scanner..."); await doLocalScan(file, ev); } 
+                else { await doAIScan(file, ev); }
+            } else { await doLocalScan(file, ev); }
         }
 
-        // 4. Stricter, More Accurate AI Scan
         async function doAIScan(file, ev) {
             const loader = document.getElementById('smartLoader');
             const progress = document.getElementById('scanProgress');
             const loaderText = document.getElementById('loaderText');
-
             loader.classList.remove('hidden');
             loader.scrollIntoView({ behavior: 'smooth' });
             progress.style.width = '20%';
@@ -947,11 +947,9 @@
                 loaderText.innerText = "Enhancing HD Image for AI...";
                 const base64 = await compressImageForAI(file);
                 progress.style.width = '50%';
-                
                 loaderText.innerText = "Gemini AI Analyzing Data...";
                 
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-
                 const prompt = "Act as an expert billing clerk. Analyze this image of a handwritten or printed list/bill. Extract item names, prices, and quantities with HIGH ACCURACY. CRITICAL RULES: 1) Look very closely at numbers. 2) Accurately associate prices with their respective items on the exact same line. 3) If an item has a red cross (❌) drawn over it, a red mark, or is crossed out, IGNORE IT COMPLETELY. 4) Estimate base quantities (refQty) if missing but reasonable for an Indian market. Return a list of articles.";
 
                 const payload = {
@@ -961,21 +959,7 @@
                         responseSchema: {
                             type: "OBJECT",
                             properties: {
-                                articles: {
-                                    type: "ARRAY",
-                                    items: {
-                                        type: "OBJECT",
-                                        properties: {
-                                            name: { type: "STRING" },
-                                            nameHindi: { type: "STRING" },
-                                            price: { type: "NUMBER" },
-                                            refQty: { type: "NUMBER" },
-                                            priceUnit: { type: "STRING", enum: ["Kg", "Gm", "Pcs", "Pkt"] },
-                                            category: { type: "STRING", enum: ["Vegetable", "Fruit", "Grocery"] }
-                                        },
-                                        required: ["name", "price", "refQty", "priceUnit", "category"]
-                                    }
-                                }
+                                articles: { type: "ARRAY", items: { type: "OBJECT", properties: { name: { type: "STRING" }, nameHindi: { type: "STRING" }, price: { type: "NUMBER" }, refQty: { type: "NUMBER" }, priceUnit: { type: "STRING", enum: ["Kg", "Gm", "Pcs", "Pkt"] }, category: { type: "STRING", enum: ["Vegetable", "Fruit", "Grocery"] } }, required: ["name", "price", "refQty", "priceUnit", "category"] } }
                             }
                         }
                     }
@@ -991,48 +975,28 @@
                 pendingScanItems = [];
                 if(resultData && resultData.articles) {
                     resultData.articles.forEach((item, index) => {
-                        pendingScanItems.push({
-                            id: 'pend_ai_' + Date.now() + index,
-                            name: item.name,
-                            nameHindi: item.nameHindi || "",
-                            price: item.price,
-                            refQty: item.refQty || 1,
-                            priceUnit: item.priceUnit || "Kg",
-                            category: item.category || "Vegetable"
-                        });
+                        pendingScanItems.push({ id: 'pend_ai_' + Date.now() + index, name: item.name, nameHindi: item.nameHindi || "", price: item.price, refQty: item.refQty || 1, priceUnit: item.priceUnit || "Kg", category: item.category || "Vegetable" });
                     });
                 }
 
                 progress.style.width = '100%';
                 setTimeout(() => {
                     loader.classList.add('hidden');
-                    if(pendingScanItems.length > 0) {
-                        showScanReview();
-                        softVibrate();
-                        notify(`AI Extracted ${pendingScanItems.length} items! Please review.`);
-                    } else {
-                        notify("AI could not find valid items.");
-                    }
+                    if(pendingScanItems.length > 0) { showScanReview(); softVibrate(); notify(`AI Extracted ${pendingScanItems.length} items! Please review.`); } 
+                    else { notify("AI could not find valid items."); }
                     if(ev) ev.target.value = '';
                 }, 500);
-
             } catch (err) {
-                console.error("AI Error:", err);
-                notify("AI Scan Failed: " + err.message.slice(0,40));
-                loader.classList.add('hidden');
-                if(ev) ev.target.value = '';
+                console.error("AI Error:", err); notify("AI Scan Failed: " + err.message.slice(0,40));
+                loader.classList.add('hidden'); if(ev) ev.target.value = '';
             }
         }
 
-        // 5. Smarter RegEx Parsing for Local Scan
         async function doLocalScan(file, ev) {
             const loader = document.getElementById('smartLoader');
             const progress = document.getElementById('scanProgress');
             const loaderText = document.getElementById('loaderText');
-            
-            loader.classList.remove('hidden');
-            loader.scrollIntoView({ behavior: 'smooth' });
-            progress.style.width = '10%';
+            loader.classList.remove('hidden'); loader.scrollIntoView({ behavior: 'smooth' }); progress.style.width = '10%';
             
             try {
                 loaderText.innerText = "Erasing Red Marks & Enhancing...";
@@ -1052,24 +1016,19 @@
                 const lines = text.split('\n');
 
                 lines.forEach((line, index) => {
-                    // Better cleaning: allow basic price formatting symbols like rs, /-, etc.
                     let cleaned = line.replace(/[^\w\s\.\,\₹\-\/]/g, ' ').trim();
                     if (cleaned.length < 3) return;
                     
                     const lower = cleaned.toLowerCase();
                     if (/total|tax|date|time|gst|cash|change|amount|balance/.test(lower)) return;
 
-                    // Words (ignoring small/unit words)
                     const words = cleaned.match(/[A-Za-z]{3,}/g);
                     let validWords = words ? words.filter(w => !/^(inr|mrp|qty|kg|gm|pcs|pkt|rate|price|rs|rupee)$/i.test(w)) : [];
-                    
-                    // Smarter Price RegEx: Catches 120, 120/-, Rs120, 120.00
                     const nums = cleaned.match(/\b\d+([.,]\d{1,2})?\b/g);
                     
                     if (validWords.length > 0 && nums && nums.length > 0) {
                         let itemName = validWords.join(' ');
                         itemName = itemName.charAt(0).toUpperCase() + itemName.slice(1).toLowerCase();
-                        
                         let priceCandidate = parseFloat(nums[nums.length - 1].replace(',', '.'));
                         
                         if (priceCandidate > 0 && priceCandidate < 5000) {
@@ -1077,15 +1036,7 @@
                             if (/apple|banana|mango|grape|orange|kiwi|melon|berry|papaya/i.test(itemName)) cat = 'Fruit';
                             else if (/rice|sugar|salt|oil|flour|bread|milk|dal|pulse|tea|coffee/i.test(itemName)) cat = 'Grocery';
 
-                            pendingScanItems.push({
-                                id: 'pend_loc_' + Date.now() + index,
-                                name: itemName,
-                                nameHindi: "",
-                                price: priceCandidate,
-                                refQty: 1,
-                                priceUnit: "Kg",
-                                category: cat
-                            });
+                            pendingScanItems.push({ id: 'pend_loc_' + Date.now() + index, name: itemName, nameHindi: "", price: priceCandidate, refQty: 1, priceUnit: "Kg", category: cat });
                         }
                     }
                 });
@@ -1093,25 +1044,17 @@
                 progress.style.width = '100%';
                 setTimeout(() => {
                     loader.classList.add('hidden');
-                    if(pendingScanItems.length > 0) {
-                        showScanReview();
-                        softVibrate();
-                        notify(`Found ${pendingScanItems.length} potential items! Please review.`);
-                    } else {
-                        notify("Could not find clear items. Try AI or a flatter photo.");
-                    }
+                    if(pendingScanItems.length > 0) { showScanReview(); softVibrate(); notify(`Found ${pendingScanItems.length} potential items! Please review.`); } 
+                    else { notify("Could not find clear items. Try AI or a flatter photo."); }
                     if(ev) ev.target.value = '';
                 }, 500);
 
             } catch (err) {
-                console.error("OCR Error:", err);
-                notify("Failed to process image locally.");
-                loader.classList.add('hidden');
-                if(ev) ev.target.value = '';
+                console.error("OCR Error:", err); notify("Failed to process image locally.");
+                loader.classList.add('hidden'); if(ev) ev.target.value = '';
             }
         }
 
-        // --- SCAN REVIEW UI FUNCTIONS ---
         function showScanReview() {
             const container = document.getElementById('scanReviewContainer');
             const list = document.getElementById('scanReviewList');
@@ -1147,11 +1090,7 @@
         window.deletePendingItem = function(index) {
             softVibrate();
             pendingScanItems.splice(index, 1);
-            if(pendingScanItems.length === 0) {
-                cancelScanReview();
-            } else {
-                showScanReview();
-            }
+            if(pendingScanItems.length === 0) { cancelScanReview(); } else { showScanReview(); }
         }
 
         window.cancelScanReview = function() {
@@ -1166,28 +1105,19 @@
             pendingScanItems.forEach(item => {
                 if(item.name.trim() !== "" && item.price > 0) {
                     inventory.unshift({
-                        id: Date.now() + Math.random(),
-                        name: item.name.trim(),
-                        nameHindi: "",
-                        price: item.price,
-                        refQty: 1,
-                        priceUnit: "Kg",
-                        category: item.category
+                        id: Date.now() + Math.random(), name: item.name.trim(), nameHindi: "", price: item.price, refQty: 1, priceUnit: "Kg", category: item.category
                     });
                     added++;
                 }
             });
-            
-            triggerSave(); 
-            render(); 
-            renderManagement(); 
-            
+            triggerSave(); render(); renderManagement(); 
             document.getElementById('scanReviewContainer').classList.add('hidden');
             pendingScanItems = [];
             notify(`✅ ${added} items saved to Master Stock!`);
         }
 
-        // Helper to parse CSV rows securely (handles commas inside quotes)
+        // --- CSV PARSING & CLOUD SYNC LOGIC ---
+
         function parseCSVLine(text) {
             let ret = [''], i = 0, p = '', s = true;
             for (let l in text) {
@@ -1202,26 +1132,46 @@
             return ret;
         }
 
+        function processCSVData(csvText) {
+            // Standardize carriage returns
+            const lines = csvText.replace(/\r/g, '').split('\n');
+            const imported = [];
+            // Skip the header row (i = 1)
+            for(let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if(!line) continue;
+                
+                const parts = parseCSVLine(line);
+                if(parts.length >= 6) {
+                    imported.push({
+                        id: Date.now() + Math.random() + i,
+                        name: parts[0].trim(),
+                        nameHindi: parts[1].trim() || "",
+                        price: parseFloat(parts[2]) || 0,
+                        refQty: parseFloat(parts[3]) || 1,
+                        priceUnit: parts[4].trim() || "Kg",
+                        category: parts[5].trim() || "Vegetable"
+                    });
+                }
+            }
+            return imported;
+        }
+
         window.exportInventory = function() {
             if(inventory.length === 0) return notify("Inventory is empty!");
-            
-            // CSV Excel Format
             let csvData = "Name,HindiName,Price,RefQty,Unit,Category\n";
             inventory.forEach(item => {
                 const safeName = `"${(item.name || '').replace(/"/g, '""')}"`;
                 const safeHindi = `"${(item.nameHindi || '').replace(/"/g, '""')}"`;
                 csvData += `${safeName},${safeHindi},${item.price},${item.refQty},${item.priceUnit},${item.category}\n`;
             });
-            
             const dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent(csvData);
             const dlNode = document.createElement('a');
             dlNode.setAttribute("href", dataStr);
             dlNode.setAttribute("download", `farmers_gate_backup_${Date.now()}.csv`);
             document.body.appendChild(dlNode);
-            dlNode.click();
-            dlNode.remove();
-            notify("CSV/Excel Backup Saved!");
-            softVibrate();
+            dlNode.click(); dlNode.remove();
+            notify("CSV/Excel Backup Saved!"); softVibrate();
         };
 
         window.importInventory = function(event) {
@@ -1230,215 +1180,181 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 try {
-                    const lines = e.target.result.split('\n');
-                    const imported = [];
-                    // Start from i=1 to skip the column headers
-                    for(let i = 1; i < lines.length; i++) {
-                        const line = lines[i].trim();
-                        if(!line) continue;
-                        
-                        const parts = parseCSVLine(line);
-                        if(parts.length >= 6) {
-                            imported.push({
-                                id: Date.now() + Math.random() + i,
-                                name: parts[0].trim(),
-                                nameHindi: parts[1].trim(),
-                                price: parseFloat(parts[2]) || 0,
-                                refQty: parseFloat(parts[3]) || 1,
-                                priceUnit: parts[4].trim(),
-                                category: parts[5].trim()
-                            });
-                        }
-                    }
-                    
+                    const imported = processCSVData(e.target.result);
                     if (imported.length > 0) {
                         inventory = imported;
-                        triggerSave();
-                        render();
-                        renderManagement();
-                        notify("CSV/Excel Backup Restored!");
-                        softVibrate();
-                    } else {
-                        notify("Invalid or empty CSV file!");
-                    }
-                } catch (err) {
-                    notify("Error reading CSV file.");
-                }
+                        triggerSave(); render(); renderManagement();
+                        notify("CSV/Excel Backup Restored!"); softVibrate();
+                    } else { notify("Invalid or empty CSV file!"); }
+                } catch (err) { notify("Error reading CSV file."); }
             };
             reader.readAsText(file);
             event.target.value = '';
         };
 
+        window.toggleAutoSync = function(el) {
+            SafeStorage.set('fg_auto_sync', el.checked);
+            if(el.checked) notify("Auto-sync on load enabled!");
+        };
+
+        window.backgroundSync = async function(url) {
+            try {
+                const response = await fetch(url);
+                if (!response.ok) return;
+                const csvText = await response.text();
+                const imported = processCSVData(csvText);
+                if (imported.length > 0) {
+                    inventory = imported;
+                    triggerSave();
+                    updateStockBadge();
+                    render();
+                    renderManagement();
+                    notify("🔄 Auto-synced from Google Sheets!");
+                }
+            } catch (err) {
+                console.log("Background sync failed:", err);
+            }
+        };
+
+        window.syncFromCloud = async function(event) {
+            softVibrate();
+            const url = document.getElementById('syncUrl').value.trim();
+            if (!url) return notify("Please paste a CSV link first");
+            
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<div class="loader w-4 h-4 !border-blue-300 !border-t-white"></div> Syncing...`;
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error("Invalid link");
+                const csvText = await response.text();
+                
+                const imported = processCSVData(csvText);
+                if (imported.length > 0) {
+                    inventory = imported;
+                    SafeStorage.set('fg_sync_url', url);
+                    triggerSave();
+                    updateStockBadge();
+                    render();
+                    renderManagement();
+                    notify("✅ Inventory Synced Successfully!");
+                } else {
+                    notify("Empty or invalid CSV data!");
+                }
+            } catch (err) {
+                notify("Sync Failed. Check link format.");
+                console.error(err);
+            } finally {
+                btn.innerHTML = originalText;
+            }
+        };
+
         window.confirmDeleteAll = function(btn) {
             softVibrate();
             if(btn.dataset.confirm === "true") {
-                inventory = [];
-                triggerSave();
-                renderManagement();
-                render();
+                inventory = []; triggerSave(); renderManagement(); render();
                 notify("All stock deleted!");
-                btn.dataset.confirm = "false";
-                btn.innerHTML = "🗑️ Delete All";
-                btn.classList.remove('bg-red-600', 'text-white');
-                btn.classList.add('bg-red-50', 'text-red-600');
+                btn.dataset.confirm = "false"; btn.innerHTML = "🗑️ Delete All";
+                btn.classList.remove('bg-red-600', 'text-white'); btn.classList.add('bg-red-50', 'text-red-600');
             } else {
-                btn.dataset.confirm = "true";
-                btn.innerHTML = "Click again to confirm!";
-                btn.classList.remove('bg-red-50', 'text-red-600');
-                btn.classList.add('bg-red-600', 'text-white');
+                btn.dataset.confirm = "true"; btn.innerHTML = "Click again to confirm!";
+                btn.classList.remove('bg-red-50', 'text-red-600'); btn.classList.add('bg-red-600', 'text-white');
                 setTimeout(() => {
                     if(btn.dataset.confirm === "true") {
-                        btn.dataset.confirm = "false";
-                        btn.innerHTML = "🗑️ Delete All";
-                        btn.classList.remove('bg-red-600', 'text-white');
-                        btn.classList.add('bg-red-50', 'text-red-600');
+                        btn.dataset.confirm = "false"; btn.innerHTML = "🗑️ Delete All";
+                        btn.classList.remove('bg-red-600', 'text-white'); btn.classList.add('bg-red-50', 'text-red-600');
                     }
                 }, 3000);
             }
         };
 
         function setMCat(cat) { 
-            softVibrate();
-            manualCat = cat; 
-            document.querySelectorAll('.mcat').forEach(b => {
-                b.className = 'mcat flex-1 rounded-xl bg-transparent text-slate-500 text-[11px] font-extrabold uppercase py-2 transition-all hover:bg-white hover:shadow-sm'; 
-            });
+            softVibrate(); manualCat = cat; 
+            document.querySelectorAll('.mcat').forEach(b => { b.className = 'mcat flex-1 rounded-xl bg-transparent text-slate-500 text-[11px] font-extrabold uppercase py-2 transition-all hover:bg-white hover:shadow-sm'; });
             const b = cat==='Vegetable'?'mcVeg':cat==='Fruit'?'mcFruit':'mcGroc'; 
-            if(document.getElementById(b)) {
-                document.getElementById(b).className = 'mcat flex-1 rounded-xl bg-emerald-600 text-white text-[11px] font-extrabold uppercase py-2 shadow-md transform scale-105'; 
-            }
+            if(document.getElementById(b)) { document.getElementById(b).className = 'mcat flex-1 rounded-xl bg-emerald-600 text-white text-[11px] font-extrabold uppercase py-2 shadow-md transform scale-105'; }
         }
         
         function updateSettings() { 
-            softVibrate();
-            sLoc = document.getElementById('editLoc').value || "Main Branch"; 
+            softVibrate(); sLoc = document.getElementById('editLoc').value || "Main Branch"; 
             document.getElementById('displayLoc').innerText = sLoc; 
             triggerSave(); notify("Identity Saved"); 
         }
         
         function sendInvoice() {
-            softVibrate();
-            const items = Object.values(cart); if(items.length===0) return notify("Empty Bill");
-            
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-            const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+            softVibrate(); const items = Object.values(cart); if(items.length===0) return notify("Empty Bill");
+            const now = new Date(); const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
 
             let msg = `🛒 *FARMER'S GATE - BILL*\n📍 _${sLoc}_\n📅 _${dateStr} | ${timeStr}_\n--------------------\n`;
             items.forEach(i => msg += `✅ *${i.name}*\n   ${i.qty}${i.unit} @ ₹${i.basePrice}/${i.dSQ}${i.dSU} = *₹${i.totalPrice.toFixed(2)}*\n`);
             
-            const discountInput = document.getElementById('discountInput');
-            let discount = parseFloat(discountInput?.value) || 0;
-            
+            const discountInput = document.getElementById('discountInput'); let discount = parseFloat(discountInput?.value) || 0;
             msg += `--------------------\n`;
             if (discount > 0) { msg += `🎁 *Discount Applied: -₹${discount.toFixed(2)}*\n`; }
             msg += `💰 *GRAND TOTAL: ₹${document.getElementById('grandTotal').innerText.replace('₹','')}*\n\n`;
             
             const paymentInfo = document.getElementById('paymentInfo')?.value.trim();
             if (paymentInfo) { msg += `💳 *Payment Info (UPI/QR):* ${paymentInfo}\n\n`; }
-
             const customOfferMsg = document.getElementById('customOfferMsg')?.value.trim();
             if (customOfferMsg) { msg += `⭐ *OFFER: ${customOfferMsg}* ⭐\n\n`; }
             
-            msg += `🙏 *Thank you for choosing Farmer's Gate!*\n`;
-            msg += `_${HEALTH_QUOTES[Math.floor(Math.random() * HEALTH_QUOTES.length)]}_`;
-            
+            msg += `🙏 *Thank you for choosing Farmer's Gate!*\n_${HEALTH_QUOTES[Math.floor(Math.random() * HEALTH_QUOTES.length)]}_`;
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
         function buildReceipt() {
-            const items = Object.values(cart);
-            if(items.length === 0) return false;
-            
+            const items = Object.values(cart); if(items.length === 0) return false;
             const now = new Date();
             document.getElementById('receiptLoc').innerText = sLoc;
             document.getElementById('receiptDate').innerText = `${now.toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'})} | ${now.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit',hour12:true})}`;
             
-            const rItems = document.getElementById('receiptItems');
-            rItems.innerHTML = '';
-            items.forEach(i => {
-                rItems.innerHTML += `<div class="flex justify-between items-start mb-1"><div class="pr-2"><span class="font-bold">${i.name}</span><br><span class="text-[10px] text-gray-600">${i.qty}${i.unit} x ₹${i.basePrice}/${i.dSQ}${i.dSU}</span></div><span class="font-bold">₹${i.totalPrice.toFixed(2)}</span></div>`;
-            });
+            const rItems = document.getElementById('receiptItems'); rItems.innerHTML = '';
+            items.forEach(i => { rItems.innerHTML += `<div class="flex justify-between items-start mb-1"><div class="pr-2"><span class="font-bold">${i.name}</span><br><span class="text-[10px] text-gray-600">${i.qty}${i.unit} x ₹${i.basePrice}/${i.dSQ}${i.dSU}</span></div><span class="font-bold">₹${i.totalPrice.toFixed(2)}</span></div>`; });
 
-            const discount = parseFloat(document.getElementById('discountInput')?.value) || 0;
-            const dRow = document.getElementById('receiptDiscountRow');
-            if(discount > 0) {
-                dRow.classList.remove('hidden');
-                document.getElementById('receiptDiscount').innerText = `-₹${discount.toFixed(2)}`;
-            } else { dRow.classList.add('hidden'); }
+            const discount = parseFloat(document.getElementById('discountInput')?.value) || 0; const dRow = document.getElementById('receiptDiscountRow');
+            if(discount > 0) { dRow.classList.remove('hidden'); document.getElementById('receiptDiscount').innerText = `-₹${discount.toFixed(2)}`; } 
+            else { dRow.classList.add('hidden'); }
 
             document.getElementById('receiptTotal').innerText = document.getElementById('grandTotal').innerText;
 
-            const pInfo = document.getElementById('paymentInfo')?.value.trim();
-            const pDiv = document.getElementById('receiptPaymentInfo');
-            if(pInfo) { pDiv.innerText = `UPI/Scan: ${pInfo}`; pDiv.classList.remove('hidden'); }
-            else { pDiv.classList.add('hidden'); }
+            const pInfo = document.getElementById('paymentInfo')?.value.trim(); const pDiv = document.getElementById('receiptPaymentInfo');
+            if(pInfo) { pDiv.innerText = `UPI/Scan: ${pInfo}`; pDiv.classList.remove('hidden'); } else { pDiv.classList.add('hidden'); }
 
-            const customMsg = document.getElementById('customOfferMsg')?.value.trim();
-            const offerBox = document.getElementById('receiptOfferBox');
-            if(customMsg) { 
-                document.getElementById('receiptCustomMsg').innerText = customMsg;
-                offerBox.classList.remove('hidden');
-            } else { 
-                offerBox.classList.add('hidden');
-            }
+            const customMsg = document.getElementById('customOfferMsg')?.value.trim(); const offerBox = document.getElementById('receiptOfferBox');
+            if(customMsg) { document.getElementById('receiptCustomMsg').innerText = customMsg; offerBox.classList.remove('hidden'); } 
+            else { offerBox.classList.add('hidden'); }
             
             document.getElementById('receiptHealthQuote').innerText = HEALTH_QUOTES[Math.floor(Math.random() * HEALTH_QUOTES.length)];
-            
             return true;
         }
 
         async function generateBill(type) {
-            softVibrate();
-            if(!buildReceipt()) return notify("Empty Bill");
-            
-            notify("Generating File...");
-            const printArea = document.getElementById('printArea');
-            
+            softVibrate(); if(!buildReceipt()) return notify("Empty Bill");
+            notify("Generating File..."); const printArea = document.getElementById('printArea');
             try {
                 const canvas = await html2canvas(printArea, { scale: 2, backgroundColor: "#ffffff" });
-                const imgData = canvas.toDataURL('image/png');
-                const stamp = Date.now();
-                
+                const imgData = canvas.toDataURL('image/png'); const stamp = Date.now();
                 if(type === 'image') {
-                    const link = document.createElement('a');
-                    link.download = `Farmers_Gate_Bill_${stamp}.png`;
-                    link.href = imgData;
-                    link.click();
-                    notify("Image Downloaded");
-                } 
-                else if(type === 'pdf') {
-                    const { jsPDF } = window.jspdf;
-                    const pdfWidth = 80;
-                    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                    const link = document.createElement('a'); link.download = `Farmers_Gate_Bill_${stamp}.png`;
+                    link.href = imgData; link.click(); notify("Image Downloaded");
+                } else if(type === 'pdf') {
+                    const { jsPDF } = window.jspdf; const pdfWidth = 80; const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
                     const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: [pdfWidth, pdfHeight] });
-                    
-                    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-                    pdf.save(`Farmers_Gate_Bill_${stamp}.pdf`);
-                    notify("PDF Downloaded");
+                    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight); pdf.save(`Farmers_Gate_Bill_${stamp}.pdf`); notify("PDF Downloaded");
                 }
             } catch(e) { console.error(e); notify("Error generating file"); }
         }
         
         function notify(m) { 
-            const t = document.getElementById('toast'); 
-            const msgEl = document.getElementById('toastMsg');
+            const t = document.getElementById('toast'); const msgEl = document.getElementById('toastMsg');
             if(!t || !msgEl) return;
-
-            msgEl.innerText = m; 
-            
-            t.classList.remove('translate-y-4', 'opacity-0');
-            t.style.opacity = '1'; 
-            
+            msgEl.innerText = m; t.classList.remove('translate-y-4', 'opacity-0'); t.style.opacity = '1'; 
             if(window.toastTimer) clearTimeout(window.toastTimer);
-            window.toastTimer = setTimeout(() => {
-                t.classList.add('translate-y-4', 'opacity-0');
-            }, 3000); 
+            window.toastTimer = setTimeout(() => { t.classList.add('translate-y-4', 'opacity-0'); }, 3000); 
         }
     </script>
 </body>
 </html>
-
-
 
 ```
