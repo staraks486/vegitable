@@ -6,12 +6,12 @@
     <title>Farmer's Gate PRO</title>
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Image & PDF Generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
-    <!-- Tesseract.js for Local, No-API-Key Text Extraction -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
@@ -90,7 +90,6 @@
 </head>
 <body class="p-2 md:p-6 h-screen flex flex-col overflow-hidden">
 
-    <!-- Hidden Thermal Receipt Template -->
     <div id="printArea">
         <div class="text-center mb-4">
             <h2 class="text-xl font-black uppercase mb-1">Farmer's Gate</h2>
@@ -114,7 +113,6 @@
             <span id="receiptTotal">₹0.00</span>
         </div>
         
-        <!-- Offer Banner in Receipt -->
         <div id="receiptOfferBox" class="hidden border-2 border-black border-dashed p-2 text-center my-3 rounded">
             <span class="font-black text-sm uppercase">⭐ SPECIAL OFFER ⭐</span>
             <p id="receiptCustomMsg" class="text-xs font-bold mt-1"></p>
@@ -130,7 +128,6 @@
     </div>
 
     <div class="max-w-7xl mx-auto w-full flex-1 flex flex-col min-h-0">
-        <!-- Header -->
         <header class="flex items-center justify-between mb-4 px-2 shrink-0 pt-2">
             <div class="flex items-center gap-4">
                 <button onclick="toggleAddModal()" class="bg-slate-900 text-white p-2.5 rounded-2xl shadow-lg active:scale-90 transition-transform flex items-center justify-center">
@@ -148,7 +145,6 @@
             </div>
         </header>
 
-        <!-- Search & Filters -->
         <div class="grid grid-cols-1 md:grid-cols-12 gap-3 mb-4 shrink-0 px-1">
             <div class="md:col-span-7 flex gap-2">
                 <div class="relative flex-1 group">
@@ -166,10 +162,8 @@
             </div>
         </div>
 
-        <!-- Main Workspace -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0">
             
-            <!-- Left: Inventory List -->
             <div class="lg:col-span-7 flex flex-col min-h-0 bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden">
                 <div class="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-slate-50/50 shrink-0">
                     <h2 id="categoryTitle" class="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">Master Stock</h2>
@@ -183,10 +177,8 @@
                 </div>
             </div>
 
-            <!-- Cart Overlay Background (Mobile) -->
             <div id="cartOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity duration-300 opacity-0" onclick="toggleCart()"></div>
 
-            <!-- Right: Active Cart Panel -->
             <div id="cartPanel" class="fixed inset-x-0 bottom-0 z-50 transform translate-y-full transition-transform duration-400 cubic-bezier(0.4, 0, 0.2, 1) lg:relative lg:translate-y-0 lg:col-span-5 lg:z-auto h-[88vh] lg:h-full flex flex-col shadow-[0_-10px_40px_rgba(0,0,0,0.1)] lg:shadow-none">
                 <div class="glass-panel rounded-t-[2.5rem] lg:rounded-[2rem] p-5 sm:p-6 lg:border-t lg:border-slate-200 flex flex-col bg-white h-full relative">
                     
@@ -263,7 +255,6 @@
         </div>
     </div>
 
-    <!-- Floating Mobile Checkout Button -->
     <div id="floatingCartBtn" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-7 py-4 rounded-full shadow-2xl flex items-center gap-4 z-40 lg:hidden cursor-pointer transform translate-y-[150%] transition-transform duration-400 cubic-bezier(0.175, 0.885, 0.32, 1.275) active:scale-95" onclick="toggleCart()">
         <div class="flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
@@ -273,7 +264,6 @@
         <span id="floatingCartTotal" class="font-black text-emerald-400 whitespace-nowrap text-lg">₹0</span>
     </div>
 
-    <!-- Modals & Overlays -->
     <div id="addModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-end sm:items-center justify-center sm:p-4 z-[100] transition-opacity duration-300 opacity-0">
         <div class="bg-white rounded-t-[2.5rem] sm:rounded-[2.5rem] w-full max-w-2xl p-6 sm:p-8 shadow-2xl flex flex-col max-h-[90vh] sm:max-h-[95vh] transform transition-transform duration-300 translate-y-full sm:translate-y-0" id="modalContent">
             
@@ -291,7 +281,6 @@
 
             <div class="space-y-6 overflow-y-auto custom-scrollbar pr-2 pb-6">
                 
-                <!-- Scanner UI block -->
                 <div class="bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-[2rem] border border-blue-100 relative overflow-hidden">
                     <div class="absolute top-0 right-0 p-4 opacity-10">
                         <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M3 15h6"/><path d="M3 18h6"/><path d="M3 21h6"/></svg>
@@ -334,7 +323,6 @@
                     </div>
                 </div>
 
-                <!-- REVIEW SCANNED ITEMS UI -->
                 <div id="scanReviewContainer" class="hidden bg-yellow-50 border border-yellow-200 p-5 rounded-[2rem] animate-pop">
                     <div class="flex justify-between items-center mb-4">
                         <h4 class="text-xs font-black text-yellow-800 uppercase tracking-widest flex items-center gap-2">
@@ -346,8 +334,7 @@
                     <p class="text-[10px] text-yellow-700 font-bold mb-3">Delete items you don't want to save to Master Stock.</p>
                     
                     <div id="scanReviewList" class="space-y-2 mb-4 max-h-48 overflow-y-auto custom-scrollbar pr-2">
-                        <!-- Populated dynamically -->
-                    </div>
+                        </div>
                     
                     <div class="flex gap-2 mt-4">
                         <button onclick="cancelScanReview()" class="flex-1 bg-white text-yellow-700 border border-yellow-300 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform">Cancel</button>
@@ -366,7 +353,6 @@
                     </div>
                 </div>
 
-                <!-- Manual Article Setup -->
                 <div class="bg-white border border-slate-200 p-5 sm:p-6 rounded-[2.5rem] shadow-sm space-y-5">
                     <p id="formTitle" class="text-[12px] font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="text-emerald-500"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
@@ -430,10 +416,10 @@
                     </div>
 
                     <div class="flex gap-2 px-1">
-                        <button onclick="exportInventory()" class="flex-1 bg-slate-50 text-slate-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-200 hover:bg-slate-100 transition-all active:scale-95">⬇️ Export CSV</button>
+                        <button onclick="exportInventoryExcel()" class="flex-1 bg-slate-50 text-slate-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-200 hover:bg-slate-100 transition-all active:scale-95">⬇️ Export Excel</button>
                         <label class="flex-1 bg-slate-50 text-slate-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-200 hover:bg-slate-100 transition-all active:scale-95 text-center cursor-pointer">
-                            ⬆️ Import CSV
-                            <input type="file" accept=".csv" class="hidden" onchange="importInventory(event)">
+                            ⬆️ Import Excel
+                            <input type="file" accept=".xlsx, .xls, .csv" class="hidden" onchange="importExcel(event)">
                         </label>
                         <button onclick="confirmDeleteAll(this)" data-confirm="false" class="flex-[1.5] bg-red-50 text-red-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-red-200 hover:bg-red-100 transition-all active:scale-95">🗑️ Delete All</button>
                     </div>
@@ -444,7 +430,6 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-24 lg:bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 bg-slate-900 text-white rounded-full shadow-2xl opacity-0 transition-all duration-300 pointer-events-none z-[200] font-bold text-[11px] uppercase tracking-widest flex items-center gap-3 transform translate-y-4 max-w-[90vw]">
         <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_#34d399] shrink-0"></div>
         <span id="toastMsg" class="whitespace-nowrap overflow-hidden text-ellipsis">Success</span>
@@ -527,7 +512,7 @@
             render(); 
             setupTouchGestures();
 
-            // Background Auto-Sync trigger
+            // Background Auto-Sync trigger (for Google Sheets CSV link)
             const autoSync = SafeStorage.get('fg_auto_sync') === 'true';
             const syncUrl = SafeStorage.get('fg_sync_url');
             if (autoSync && syncUrl) {
@@ -1028,420 +1013,4 @@
                 const enhancedImage = await preprocessImageForLocalOCR(file);
                 progress.style.width = '40%';
                 
-                loaderText.innerText = "Extracting Text Data...";
-                const worker = await Tesseract.createWorker('eng');
-                const result = await worker.recognize(enhancedImage);
-                await worker.terminate();
-                progress.style.width = '80%';
-                
-                loaderText.innerText = "Parsing Items & Prices...";
-                const text = result.data.text;
-                
-                pendingScanItems = [];
-                const lines = text.split('\n');
-
-                lines.forEach((line, index) => {
-                    let cleaned = line.replace(/[^\w\s\.\,\₹\-\/]/g, ' ').trim();
-                    if (cleaned.length < 3) return;
-                    
-                    const lower = cleaned.toLowerCase();
-                    if (/total|tax|date|time|gst|cash|change|amount|balance/.test(lower)) return;
-
-                    const words = cleaned.match(/[A-Za-z]{3,}/g);
-                    let validWords = words ? words.filter(w => !/^(inr|mrp|qty|kg|gm|pcs|pkt|rate|price|rs|rupee)$/i.test(w)) : [];
-                    const nums = cleaned.match(/\b\d+([.,]\d{1,2})?\b/g);
-                    
-                    if (validWords.length > 0 && nums && nums.length > 0) {
-                        let itemName = validWords.join(' ');
-                        itemName = itemName.charAt(0).toUpperCase() + itemName.slice(1).toLowerCase();
-                        let priceCandidate = parseFloat(nums[nums.length - 1].replace(',', '.'));
-                        
-                        if (priceCandidate > 0 && priceCandidate < 5000) {
-                            let cat = 'Vegetable';
-                            if (/apple|banana|mango|grape|orange|kiwi|melon|berry|papaya/i.test(itemName)) cat = 'Fruit';
-                            else if (/rice|sugar|salt|oil|flour|bread|milk|dal|pulse|tea|coffee/i.test(itemName)) cat = 'Grocery';
-
-                            pendingScanItems.push({ id: 'pend_loc_' + Date.now() + index, name: itemName, nameHindi: "", price: priceCandidate, refQty: 1, priceUnit: "Kg", category: cat });
-                        }
-                    }
-                });
-
-                progress.style.width = '100%';
-                setTimeout(() => {
-                    loader.classList.add('hidden');
-                    if(pendingScanItems.length > 0) { showScanReview(); softVibrate(); notify(`Found ${pendingScanItems.length} potential items! Please review.`); } 
-                    else { notify("Could not find clear items. Try AI or a flatter photo."); }
-                    if(ev) ev.target.value = '';
-                }, 500);
-
-            } catch (err) {
-                console.error("OCR Error:", err); notify("Failed to process image locally.");
-                loader.classList.add('hidden'); if(ev) ev.target.value = '';
-            }
-        }
-
-        function showScanReview() {
-            const container = document.getElementById('scanReviewContainer');
-            const list = document.getElementById('scanReviewList');
-            document.getElementById('scanCountBadge').innerText = `${pendingScanItems.length} Found`;
-            
-            list.innerHTML = '';
-            pendingScanItems.forEach((item, index) => {
-                const el = document.createElement('div');
-                el.className = 'flex items-center gap-2 bg-white p-2.5 rounded-xl border border-yellow-200 animate-pop';
-                el.innerHTML = `
-                    <div class="flex-1 min-w-0 flex gap-2">
-                        <input type="text" value="${item.name}" onchange="updatePendingItem(${index}, 'name', this.value)" class="w-full bg-slate-50 px-2 py-1.5 rounded-lg text-xs font-bold text-slate-800 outline-none focus:ring-2 focus:ring-yellow-400 border border-slate-100">
-                    </div>
-                    <div class="flex items-center gap-1 bg-slate-50 px-2 py-1.5 rounded-lg border border-slate-100">
-                        <span class="text-[10px] font-bold text-emerald-600">₹</span>
-                        <input type="number" value="${item.price}" onchange="updatePendingItem(${index}, 'price', this.value)" class="w-10 bg-transparent text-xs font-black outline-none p-0 text-slate-800">
-                    </div>
-                    <button onclick="deletePendingItem(${index})" class="bg-red-50 text-red-500 p-2 rounded-lg hover:bg-red-500 hover:text-white transition-colors">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg>
-                    </button>
-                `;
-                list.appendChild(el);
-            });
-            container.classList.remove('hidden');
-            container.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        window.updatePendingItem = function(index, field, value) {
-            if(field === 'price') pendingScanItems[index].price = parseFloat(value) || 0;
-            else pendingScanItems[index].name = value;
-        }
-
-        window.deletePendingItem = function(index) {
-            softVibrate();
-            pendingScanItems.splice(index, 1);
-            if(pendingScanItems.length === 0) { cancelScanReview(); } else { showScanReview(); }
-        }
-
-        window.cancelScanReview = function() {
-            pendingScanItems = [];
-            document.getElementById('scanReviewContainer').classList.add('hidden');
-            notify("Scan discarded.");
-        }
-
-        window.saveReviewedItems = function() {
-            softVibrate();
-            let added = 0;
-            pendingScanItems.forEach(item => {
-                if(item.name.trim() !== "" && item.price > 0) {
-                    inventory.unshift({
-                        id: Date.now() + Math.random(), name: item.name.trim(), nameHindi: "", price: item.price, refQty: 1, priceUnit: "Kg", category: item.category
-                    });
-                    added++;
-                }
-            });
-            triggerSave(); render(); renderManagement(); 
-            document.getElementById('scanReviewContainer').classList.add('hidden');
-            pendingScanItems = [];
-            notify(`✅ ${added} items saved to Master Stock!`);
-        }
-
-        // --- CSV PARSING & CLOUD SYNC LOGIC ---
-
-        function parseCSVLine(text) {
-            let ret = [''], i = 0, p = '', s = true;
-            for (let l in text) {
-                let c = text[l];
-                if ('"' === c) {
-                    s = !s;
-                    if ('"' === p) { ret[i] += '"'; c = '-'; } else if ('' === p) c = '-';
-                } else if (s && ',' === c) c = ret[++i] = '';
-                else ret[i] += c;
-                p = c;
-            }
-            return ret;
-        }
-
-        function clearHighlightsAfterTimeout() {
-            if (highlightTimeout) clearTimeout(highlightTimeout);
-            highlightTimeout = setTimeout(() => {
-                let needsRender = false;
-                inventory.forEach(item => {
-                    if (item._isUpdated || item._isNew) {
-                        delete item._isUpdated;
-                        delete item._isNew;
-                        delete item._oldPrice;
-                        needsRender = true;
-                    }
-                });
-                if (needsRender) render();
-            }, 10000); // 10 seconds timeout
-        }
-
-        // The Smart Comparison logic
-        function compareAndMergeInventory(importedData) {
-            let changesFound = 0;
-            const merged = importedData.map(newItem => {
-                // Find existing item by name (case insensitive)
-                const existingItem = inventory.find(oldItem => 
-                    oldItem.name.toLowerCase().trim() === newItem.name.toLowerCase().trim()
-                );
-
-                if (existingItem) {
-                    // It exists. Keep the old ID to prevent UI jumping
-                    newItem.id = existingItem.id;
-                    
-                    // Check if price changed
-                    if (existingItem.price !== newItem.price) {
-                        newItem._isUpdated = true;
-                        newItem._oldPrice = existingItem.price;
-                        changesFound++;
-                    }
-                } else {
-                    // It's a completely new item
-                    newItem._isNew = true;
-                    changesFound++;
-                }
-                return newItem;
-            });
-
-            return { merged, changesFound };
-        }
-
-        function processCSVData(csvText) {
-            const lines = csvText.replace(/\r/g, '').split('\n');
-            const imported = [];
-            for(let i = 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if(!line) continue;
-                
-                const parts = parseCSVLine(line);
-                if(parts.length >= 6) {
-                    imported.push({
-                        id: Date.now() + Math.random() + i,
-                        name: parts[0].trim(),
-                        nameHindi: parts[1].trim() || "",
-                        price: parseFloat(parts[2]) || 0,
-                        refQty: parseFloat(parts[3]) || 1,
-                        priceUnit: parts[4].trim() || "Kg",
-                        category: parts[5].trim() || "Vegetable"
-                    });
-                }
-            }
-            return imported;
-        }
-
-        window.exportInventory = function() {
-            if(inventory.length === 0) return notify("Inventory is empty!");
-            let csvData = "Name,HindiName,Price,RefQty,Unit,Category\n";
-            inventory.forEach(item => {
-                const safeName = `"${(item.name || '').replace(/"/g, '""')}"`;
-                const safeHindi = `"${(item.nameHindi || '').replace(/"/g, '""')}"`;
-                csvData += `${safeName},${safeHindi},${item.price},${item.refQty},${item.priceUnit},${item.category}\n`;
-            });
-            const dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent(csvData);
-            const dlNode = document.createElement('a');
-            dlNode.setAttribute("href", dataStr);
-            dlNode.setAttribute("download", `farmers_gate_backup_${Date.now()}.csv`);
-            document.body.appendChild(dlNode);
-            dlNode.click(); dlNode.remove();
-            notify("CSV/Excel Backup Saved!"); softVibrate();
-        };
-
-        window.importInventory = function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const imported = processCSVData(e.target.result);
-                    if (imported.length > 0) {
-                        const { merged, changesFound } = compareAndMergeInventory(imported);
-                        inventory = merged;
-                        triggerSave(); 
-                        render(); 
-                        renderManagement();
-                        if(changesFound > 0) {
-                            notify(`Restored! ${changesFound} updates highlighted.`);
-                            clearHighlightsAfterTimeout();
-                        } else {
-                            notify("Backup Restored! No changes found.");
-                        }
-                        softVibrate();
-                    } else { notify("Invalid or empty CSV file!"); }
-                } catch (err) { notify("Error reading CSV file."); }
-            };
-            reader.readAsText(file);
-            event.target.value = '';
-        };
-
-        window.toggleAutoSync = function(el) {
-            SafeStorage.set('fg_auto_sync', el.checked);
-            if(el.checked) notify("Auto-sync on load enabled!");
-        };
-
-        window.backgroundSync = async function(url) {
-            try {
-                const response = await fetch(url);
-                if (!response.ok) return;
-                const csvText = await response.text();
-                const imported = processCSVData(csvText);
-                if (imported.length > 0) {
-                    const { merged, changesFound } = compareAndMergeInventory(imported);
-                    inventory = merged;
-                    triggerSave();
-                    updateStockBadge();
-                    render();
-                    renderManagement();
-                    if(changesFound > 0) {
-                        notify(`🔄 Auto-sync: ${changesFound} prices updated!`);
-                        clearHighlightsAfterTimeout();
-                    }
-                }
-            } catch (err) {
-                console.log("Background sync failed:", err);
-            }
-        };
-
-        window.syncFromCloud = async function(event) {
-            softVibrate();
-            const url = document.getElementById('syncUrl').value.trim();
-            if (!url) return notify("Please paste a CSV link first");
-            
-            const btn = event.currentTarget;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = `<div class="loader w-4 h-4 !border-blue-300 !border-t-white"></div> Syncing...`;
-            
-            try {
-                const response = await fetch(url);
-                if (!response.ok) throw new Error("Invalid link");
-                const csvText = await response.text();
-                
-                const imported = processCSVData(csvText);
-                if (imported.length > 0) {
-                    const { merged, changesFound } = compareAndMergeInventory(imported);
-                    inventory = merged;
-                    SafeStorage.set('fg_sync_url', url);
-                    triggerSave();
-                    updateStockBadge();
-                    render();
-                    renderManagement();
-                    
-                    if(changesFound > 0) {
-                        notify(`✅ Synced! ${changesFound} items updated/added.`);
-                        clearHighlightsAfterTimeout();
-                    } else {
-                        notify("✅ Synced! No new changes.");
-                    }
-                } else {
-                    notify("Empty or invalid CSV data!");
-                }
-            } catch (err) {
-                notify("Sync Failed. Check link format.");
-                console.error(err);
-            } finally {
-                btn.innerHTML = originalText;
-            }
-        };
-
-        window.confirmDeleteAll = function(btn) {
-            softVibrate();
-            if(btn.dataset.confirm === "true") {
-                inventory = []; triggerSave(); renderManagement(); render();
-                notify("All stock deleted!");
-                btn.dataset.confirm = "false"; btn.innerHTML = "🗑️ Delete All";
-                btn.classList.remove('bg-red-600', 'text-white'); btn.classList.add('bg-red-50', 'text-red-600');
-            } else {
-                btn.dataset.confirm = "true"; btn.innerHTML = "Click again to confirm!";
-                btn.classList.remove('bg-red-50', 'text-red-600'); btn.classList.add('bg-red-600', 'text-white');
-                setTimeout(() => {
-                    if(btn.dataset.confirm === "true") {
-                        btn.dataset.confirm = "false"; btn.innerHTML = "🗑️ Delete All";
-                        btn.classList.remove('bg-red-600', 'text-white'); btn.classList.add('bg-red-50', 'text-red-600');
-                    }
-                }, 3000);
-            }
-        };
-
-        function setMCat(cat) { 
-            softVibrate(); manualCat = cat; 
-            document.querySelectorAll('.mcat').forEach(b => { b.className = 'mcat flex-1 rounded-xl bg-transparent text-slate-500 text-[11px] font-extrabold uppercase py-2 transition-all hover:bg-white hover:shadow-sm'; });
-            const b = cat==='Vegetable'?'mcVeg':cat==='Fruit'?'mcFruit':'mcGroc'; 
-            if(document.getElementById(b)) { document.getElementById(b).className = 'mcat flex-1 rounded-xl bg-emerald-600 text-white text-[11px] font-extrabold uppercase py-2 shadow-md transform scale-105'; }
-        }
-        
-        function updateSettings() { 
-            softVibrate(); sLoc = document.getElementById('editLoc').value || "Main Branch"; 
-            document.getElementById('displayLoc').innerText = sLoc; 
-            triggerSave(); notify("Identity Saved"); 
-        }
-        
-        function sendInvoice() {
-            softVibrate(); const items = Object.values(cart); if(items.length===0) return notify("Empty Bill");
-            const now = new Date(); const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }); const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
-
-            let msg = `🛒 *FARMER'S GATE - BILL*\n📍 _${sLoc}_\n📅 _${dateStr} | ${timeStr}_\n--------------------\n`;
-            items.forEach(i => msg += `✅ *${i.name}*\n   ${i.qty}${i.unit} @ ₹${i.basePrice}/${i.dSQ}${i.dSU} = *₹${i.totalPrice.toFixed(2)}*\n`);
-            
-            const discountInput = document.getElementById('discountInput'); let discount = parseFloat(discountInput?.value) || 0;
-            msg += `--------------------\n`;
-            if (discount > 0) { msg += `🎁 *Discount Applied: -₹${discount.toFixed(2)}*\n`; }
-            msg += `💰 *GRAND TOTAL: ₹${document.getElementById('grandTotal').innerText.replace('₹','')}*\n\n`;
-            
-            const paymentInfo = document.getElementById('paymentInfo')?.value.trim();
-            if (paymentInfo) { msg += `💳 *Payment Info (UPI/QR):* ${paymentInfo}\n\n`; }
-            const customOfferMsg = document.getElementById('customOfferMsg')?.value.trim();
-            if (customOfferMsg) { msg += `⭐ *OFFER: ${customOfferMsg}* ⭐\n\n`; }
-            
-            msg += `🙏 *Thank you for choosing Farmer's Gate!*\n_${HEALTH_QUOTES[Math.floor(Math.random() * HEALTH_QUOTES.length)]}_`;
-            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
-        }
-
-        function buildReceipt() {
-            const items = Object.values(cart); if(items.length === 0) return false;
-            const now = new Date();
-            document.getElementById('receiptLoc').innerText = sLoc;
-            document.getElementById('receiptDate').innerText = `${now.toLocaleDateString('en-IN', {day:'2-digit',month:'short',year:'numeric'})} | ${now.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit',hour12:true})}`;
-            
-            const rItems = document.getElementById('receiptItems'); rItems.innerHTML = '';
-            items.forEach(i => { rItems.innerHTML += `<div class="flex justify-between items-start mb-1"><div class="pr-2"><span class="font-bold">${i.name}</span><br><span class="text-[10px] text-gray-600">${i.qty}${i.unit} x ₹${i.basePrice}/${i.dSQ}${i.dSU}</span></div><span class="font-bold">₹${i.totalPrice.toFixed(2)}</span></div>`; });
-
-            const discount = parseFloat(document.getElementById('discountInput')?.value) || 0; const dRow = document.getElementById('receiptDiscountRow');
-            if(discount > 0) { dRow.classList.remove('hidden'); document.getElementById('receiptDiscount').innerText = `-₹${discount.toFixed(2)}`; } 
-            else { dRow.classList.add('hidden'); }
-
-            document.getElementById('receiptTotal').innerText = document.getElementById('grandTotal').innerText;
-
-            const pInfo = document.getElementById('paymentInfo')?.value.trim(); const pDiv = document.getElementById('receiptPaymentInfo');
-            if(pInfo) { pDiv.innerText = `UPI/Scan: ${pInfo}`; pDiv.classList.remove('hidden'); } else { pDiv.classList.add('hidden'); }
-
-            const customMsg = document.getElementById('customOfferMsg')?.value.trim(); const offerBox = document.getElementById('receiptOfferBox');
-            if(customMsg) { document.getElementById('receiptCustomMsg').innerText = customMsg; offerBox.classList.remove('hidden'); } 
-            else { offerBox.classList.add('hidden'); }
-            
-            document.getElementById('receiptHealthQuote').innerText = HEALTH_QUOTES[Math.floor(Math.random() * HEALTH_QUOTES.length)];
-            return true;
-        }
-
-        async function generateBill(type) {
-            softVibrate(); if(!buildReceipt()) return notify("Empty Bill");
-            notify("Generating File..."); const printArea = document.getElementById('printArea');
-            try {
-                const canvas = await html2canvas(printArea, { scale: 2, backgroundColor: "#ffffff" });
-                const imgData = canvas.toDataURL('image/png'); const stamp = Date.now();
-                if(type === 'image') {
-                    const link = document.createElement('a'); link.download = `Farmers_Gate_Bill_${stamp}.png`;
-                    link.href = imgData; link.click(); notify("Image Downloaded");
-                } else if(type === 'pdf') {
-                    const { jsPDF } = window.jspdf; const pdfWidth = 80; const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-                    const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: [pdfWidth, pdfHeight] });
-                    pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight); pdf.save(`Farmers_Gate_Bill_${stamp}.pdf`); notify("PDF Downloaded");
-                }
-            } catch(e) { console.error(e); notify("Error generating file"); }
-        }
-        
-        function notify(m) { 
-            const t = document.getElementById('toast'); const msgEl = document.getElementById('toastMsg');
-            if(!t || !msgEl) return;
-            msgEl.innerText = m; t.classList.remove('translate-y-4', 'opacity-0'); t.style.opacity = '1'; 
-            if(window.toastTimer) clearTimeout(window.toastTimer);
-            window.toastTimer = setTimeout(() => { t.classList.add('translate-y-4', 'opacity-0'); }, 3000); 
-        }
-    </script>
-</body>
-</html>
+                loader
