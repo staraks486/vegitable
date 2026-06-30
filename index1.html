@@ -291,26 +291,26 @@
             <!-- Cart Overlay (Mobile) -->
             <div id="cartOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity duration-300 opacity-0" onclick="toggleCart()"></div>
 
-            <!-- RIGHT PANEL: ACTIVE CART -->
-            <div id="cartPanel" class="fixed inset-x-0 bottom-0 z-50 transform translate-y-full transition-transform duration-300 ease-out lg:relative lg:translate-y-0 lg:col-span-5 lg:z-auto h-[88vh] lg:h-full flex flex-col shadow-[0_-10px_40px_rgba(0,0,0,0.1)] lg:shadow-none">
-                <div class="glass-panel rounded-t-[2.5rem] lg:rounded-[2rem] p-5 sm:p-6 lg:border flex flex-col bg-white h-full relative overflow-hidden">
+            <!-- Right: Active Cart Panel -->
+            <div id="cartPanel" class="fixed inset-x-0 bottom-0 z-50 transform translate-y-full transition-transform duration-400 cubic-bezier(0.4, 0, 0.2, 1) lg:relative lg:translate-y-0 lg:col-span-5 lg:z-auto h-[88vh] lg:h-full flex flex-col shadow-[0_-10px_40px_rgba(0,0,0,0.1)] lg:shadow-none">
+                <div class="glass-panel rounded-t-[2.5rem] lg:rounded-[2rem] p-5 sm:p-6 lg:border-t lg:border-slate-200 flex flex-col bg-white h-full relative">
                     
                     <div id="cartHandle" class="w-16 h-1.5 bg-slate-300 rounded-full mx-auto mb-5 lg:hidden swipe-handle"></div>
                     
-                    <div class="flex justify-between items-center mb-3 shrink-0">
+                    <div class="flex justify-between items-center mb-4 shrink-0">
                         <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600">
+                            <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                             </div>
-                            <h2 class="text-xs font-black text-slate-800 uppercase tracking-widest">Active Invoice</h2>
+                            <h2 class="text-sm font-black text-slate-800 uppercase tracking-widest">Active Order</h2>
                         </div>
-                        <button onclick="clearCart()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 active:scale-95 transition-all p-2 rounded-xl" title="Clear Bill">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                        <button onclick="clearCart()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 active:scale-90 transition-all p-2 rounded-xl">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
                         </button>
                     </div>
 
                     <!-- Multiple Customers Tabs Container -->
-                    <div class="flex items-center gap-2 mb-3 shrink-0 border-b border-slate-150 pb-2">
+                    <div class="flex items-center gap-2 mb-3 shrink-0 border-b border-slate-100 pb-2">
                         <div id="customerTabsList" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-1 py-1">
                             <!-- Populated Dynamically via load and render functions -->
                         </div>
@@ -565,50 +565,10 @@
 
     <!-- SCRIPT DECK -->
     <script>
-        // Web Audio Synthesizer for System Feedback
-        const AudioSynthesizer = {
-            ctx: null,
-            enabled: true,
-            init() {
-                if (!this.ctx) {
-                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-                }
-            },
-            playScan() {
-                if (!this.enabled) return;
-                try {
-                    this.init();
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(1400, this.ctx.currentTime); // Quick haptic scan pulse
-                    gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    osc.start();
-                    osc.stop(this.ctx.currentTime + 0.05);
-                } catch (e) { console.warn("Audio Context blocked or not supported."); }
-            },
-            playSuccess() {
-                if (!this.enabled) return;
-                try {
-                    this.init();
-                    const osc = this.ctx.createOscillator();
-                    const gain = this.ctx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(900, this.ctx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(1350, this.ctx.currentTime + 0.15);
-                    gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.18);
-                    osc.connect(gain);
-                    gain.connect(this.ctx.destination);
-                    osc.start();
-                    osc.stop(this.ctx.currentTime + 0.18);
-                } catch (e) {}
-            }
-        };
+        // --- DATA & CONFIG ---
+        const apiKey = ""; // Injected by execution environment
 
+        // Exponential backoff fetch function for robust API calls
         async function fetchWithBackoff(url, options) {
             const delays = [1000, 2000, 4000, 8000, 16000];
             for (let i = 0; i <= delays.length; i++) {
@@ -650,16 +610,14 @@
 
         const DataAdapter = {
             async load() {
-                const loc = SafeStorage.get('fg_loc') || "Main Hub, Patiala";
+                const loc = SafeStorage.get('fg_loc') || "Main Branch";
                 const invStr = SafeStorage.get('fg_inventory');
                 const lastUpdatedStr = SafeStorage.get('fg_last_updated');
-                const key = SafeStorage.get('fg_api_key') || "";
-                const audioSet = SafeStorage.get('fg_audio_enabled') !== "false";
-                const transStr = SafeStorage.get('fg_transactions') || "[]";
-                
                 const inventory = invStr ? JSON.parse(invStr) : defaultInventory;
-                const qtyPatterns = JSON.parse(SafeStorage.get('fg_qty_patterns') || "{}");
-                const transactions = JSON.parse(transStr);
+                
+                // Load Quantity Patterns
+                const patternsStr = SafeStorage.get('fg_qty_patterns');
+                const qtyPatterns = patternsStr ? JSON.parse(patternsStr) : {};
 
                 // Load multi-customer parameters
                 const customersStr = SafeStorage.get('fg_customers') || "[]";
@@ -673,28 +631,25 @@
                 }
                 let activeCustomerId = activeCustId || customers[0].id;
                 
-                return { 
-                    loc, inventory, lastUpdatedStr, qtyPatterns, key, audioSet, transactions,
-                    customers, activeCustomerId
-                };
+                return { loc, inventory, lastUpdatedStr, qtyPatterns, customers, activeCustomerId };
             },
-            async save(inventoryData, locationData, keyData, audioData, transData, customersData, activeCustomerIdData) {
+            async save(inventoryData, locationData, customersData, activeCustomerIdData) {
                 SafeStorage.set('fg_inventory', JSON.stringify(inventoryData));
                 SafeStorage.set('fg_loc', locationData);
-                SafeStorage.set('fg_api_key', keyData);
-                SafeStorage.set('fg_audio_enabled', audioData ? "true" : "false");
-                SafeStorage.set('fg_transactions', JSON.stringify(transData));
                 
                 // Save multi-customer list
                 SafeStorage.set('fg_customers', JSON.stringify(customersData));
                 SafeStorage.set('fg_active_customer_id', activeCustomerIdData);
-                
+
                 const nowStr = new Date().toISOString();
                 SafeStorage.set('fg_last_updated', nowStr);
                 updateDateDisplay(nowStr);
 
+                // Remove notification once task is completed
                 const banner = document.getElementById('dailyReminderBanner');
-                if (banner) banner.classList.add('hidden');
+                if (banner && !banner.classList.contains('hidden')) {
+                    banner.classList.add('hidden');
+                }
             }
         };
 
@@ -702,13 +657,10 @@
         let manualCat = 'Vegetable';
         let editingId = null;
         let sLoc = "Loading...";
-        let customApiKey = "";
         let inventory = [];
         let cart = {};
         let pendingScanItems = [];
-        let quantityPatterns = {};
-        let transactions = [];
-        let currentWorkspace = 'shop';
+        let quantityPatterns = {}; // Stores observed quantity patterns
 
         // Multi-customer queues
         let customers = [];
@@ -731,7 +683,7 @@
             "🥦 Fresh veggies for a fresh mind!",
             "💚 Health is the greatest wealth!",
             "🥗 Nourish to flourish!",
-            "🍅 Fresh from the organic farms of Patiala!"
+            "🍅 Fresh from farm to keep you strong!"
         ];
 
         document.addEventListener('DOMContentLoaded', async () => { 
@@ -739,21 +691,14 @@
             sLoc = data.loc;
             inventory = data.inventory;
             quantityPatterns = data.qtyPatterns;
-            customApiKey = data.key;
-            AudioSynthesizer.enabled = data.audioSet;
-            transactions = data.transactions;
             
             // Populating customer state
             customers = data.customers;
             activeCustomerId = data.activeCustomerId;
-            
+
             const locEl = document.getElementById('displayLoc');
             if(locEl) locEl.innerText = sLoc;
-
-            const apiKeyEl = document.getElementById('geminiApiKey');
-            if(apiKeyEl) apiKeyEl.value = customApiKey;
             
-            updateAudioButtonUI();
             updateDateDisplay(data.lastUpdatedStr);
             updateStockBadge();
 
@@ -778,12 +723,12 @@
                 setupTouchGestures();
             }, 100);
 
+            // Offline Mode Setup
             window.addEventListener('online', updateNetworkStatus);
             window.addEventListener('offline', updateNetworkStatus);
             updateNetworkStatus();
 
             checkDailyUpdate(data.lastUpdatedStr);
-            recalculateAnalytics();
         });
 
         function saveActiveCustomerState() {
@@ -853,8 +798,7 @@
             
             // Switch active view if we removed the currently viewed tab
             if (activeCustomerId === customerId) {
-                const nextActiveIndex = index === 0 ? 0 : index - 1;
-                const nextActiveId = customers[nextActiveIndex].id;
+                const nextActiveId = customers[index === 0 ? 0 : index - 1].id;
                 loadCustomerState(nextActiveId);
             } else {
                 renderCustomerTabs();
@@ -951,7 +895,7 @@
 
                 // Delete tab button
                 const closeBtn = document.createElement('button');
-                closeBtn.className = 'text-slate-400 hover:text-red-600 transition-colors shrink-0 ml-0.5 font-extrabold text-[12px] h-4 w-4 flex items-center justify-center rounded-full';
+                closeBtn.className = 'text-slate-400 hover:text-red-650 transition-colors shrink-0 ml-0.5 font-extrabold text-[12px] h-4 w-4 flex items-center justify-center rounded-full';
                 closeBtn.innerHTML = '&times;';
                 closeBtn.title = 'Close Cart';
                 closeBtn.onclick = (e) => {
@@ -994,7 +938,7 @@
             const banner = document.getElementById('dailyReminderBanner');
             if (banner) banner.classList.add('hidden');
             SafeStorage.set('fg_dismissed_date', new Date().toDateString());
-            notify("Alert muted for today.");
+            notify("Notification dismissed for today.");
         }
 
         function updateDateDisplay(dateStr) {
@@ -1021,99 +965,15 @@
         }
 
         function updateStockBadge() { 
-            const el = document.getElementById('itemCount');
-            if(el) el.innerText = inventory.length + ' Articles'; 
+            const el = document.getElementById('totalItemsBadge');
+            if(el) el.innerText = 'Stock: ' + inventory.length; 
         }
 
-        function toggleAudio() {
-            AudioSynthesizer.enabled = !AudioSynthesizer.enabled;
-            updateAudioButtonUI();
-            triggerSave();
-            notify(AudioSynthesizer.enabled ? "Scan Beep Enabled 🔊" : "Scan Beep Muted 🔇");
-            softVibrate();
-        }
-
-        function updateAudioButtonUI() {
-            const btn = document.getElementById('audioToggleBtn');
-            const icon = document.getElementById('audioIcon');
-            if (AudioSynthesizer.enabled) {
-                btn.className = "bg-emerald-50 text-emerald-700 border border-emerald-200 p-2.5 rounded-2xl active:scale-95 transition-all flex items-center justify-center";
-                icon.innerHTML = `<path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>`;
-            } else {
-                btn.className = "bg-slate-50 text-slate-450 border border-slate-200 p-2.5 rounded-2xl active:scale-95 transition-all flex items-center justify-center";
-                icon.innerHTML = `<path d="M11 5 6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>`;
-            }
-        }
-
-        function switchView(view) {
-            softVibrate();
-            currentWorkspace = view;
-            const btnShop = document.getElementById('btnViewShop');
-            const btnInsights = document.getElementById('btnViewInsights');
-            const shopWorkspace = document.getElementById('shopWorkspace');
-            const insightsWorkspace = document.getElementById('insightsWorkspace');
-            const searchRow = document.getElementById('searchFilterRow');
-
-            if (view === 'shop') {
-                btnShop.className = "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase transition-all bg-white text-slate-900 shadow-sm";
-                btnInsights.className = "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase transition-all text-slate-500 hover:text-slate-900";
-                shopWorkspace.classList.remove('hidden');
-                insightsWorkspace.classList.add('hidden');
-                if (searchRow) searchRow.classList.remove('hidden');
-            } else {
-                btnInsights.className = "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase transition-all bg-white text-slate-900 shadow-sm";
-                btnShop.className = "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase transition-all text-slate-500 hover:text-slate-900";
-                shopWorkspace.classList.add('hidden');
-                insightsWorkspace.classList.remove('hidden');
-                if (searchRow) searchRow.classList.add('hidden');
-                recalculateAnalytics();
-            }
-        }
-
-        let translateTimeout;
-        function debouncedTranslate(sourceId, targetId, langPair) {
-            clearTimeout(translateTimeout);
-            translateTimeout = setTimeout(() => {
-                autoTranslate(sourceId, targetId, langPair);
-            }, 800);
-        }
-
-        async function autoTranslate(sourceId, targetId, langPair) {
-            if (!navigator.onLine) return;
-            const sourceEl = document.getElementById(sourceId);
-            const targetEl = document.getElementById(targetId);
-            const loader = document.getElementById('translateLoader');
-            const text = sourceEl.value.trim();
-
-            if (!text || targetEl.value.trim() !== '') return;
-
-            if (langPair === 'en|hi' && englishToHindiMap[text.toLowerCase()]) {
-                targetEl.value = englishToHindiMap[text.toLowerCase()];
-                return;
-            }
-
-            try {
-                if(loader) loader.classList.remove('hidden');
-                const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`);
-                const data = await response.json();
-                if (data && data.responseData && data.responseData.translatedText) {
-                    let translated = data.responseData.translatedText;
-                    if(translated.toLowerCase() !== text.toLowerCase()) {
-                        targetEl.value = translated;
-                    }
-                }
-            } catch (err) {
-                console.error("Translation error", err);
-            } finally {
-                if(loader) loader.classList.add('hidden');
-            }
-        }
-
-        function softVibrate() { if (navigator.vibrate) navigator.vibrate(30); }
+        function softVibrate() { if (navigator.vibrate) navigator.vibrate(40); }
         
         function triggerSave() { 
             saveActiveCustomerState();
-            DataAdapter.save(inventory, sLoc, customApiKey, AudioSynthesizer.enabled, transactions, customers, activeCustomerId); 
+            DataAdapter.save(inventory, sLoc, customers, activeCustomerId); 
             updateStockBadge(); 
         }
         
