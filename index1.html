@@ -364,11 +364,11 @@
                                 <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
                                 Share WhatsApp
                             </button>
-                            <button onclick="generateBill('image')" class="bg-blue-50 text-blue-700 px-3 rounded-xl font-black text-[10px] uppercase tracking-wider border border-blue-200 active:scale-95 transition-all hover:bg-blue-100 flex flex-col items-center justify-center gap-0.5 group">
+                            <button onclick="generateBill('image')" class="bg-blue-50 text-blue-700 px-3 rounded-xl font-black text-[10px] uppercase tracking-wider border border-blue-200 active:scale-95 transition-all hover:bg-blue-100 flex flex-col items-center justify-center gap-0.5 group" title="Save as Image">
                                 <svg class="group-hover:scale-105 transition-transform" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
                                 Image
                             </button>
-                            <button onclick="generateBill('pdf')" class="bg-rose-50 text-rose-700 px-3 rounded-xl font-black text-[10px] uppercase tracking-wider border border-rose-200 active:scale-95 transition-all hover:bg-rose-100 flex flex-col items-center justify-center gap-0.5 group">
+                            <button onclick="generateBill('pdf')" class="bg-rose-50 text-rose-700 px-3 rounded-xl font-black text-[10px] uppercase tracking-wider border border-rose-200 active:scale-95 transition-all hover:bg-rose-100 flex flex-col items-center justify-center gap-0.5 group" title="Save as PDF">
                                 <svg class="group-hover:scale-105 transition-transform" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 18H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2h-5"/><path d="m14 14-4 4-4-4"/><path d="M10 18v-8"/></svg>
                                 PDF
                             </button>
@@ -565,7 +565,50 @@
 
     <!-- SCRIPT DECK -->
     <script>
-        // --- DATA & CONFIG ---
+        // Web Audio Synthesizer for Tactile Haptic System Feedback
+        const AudioSynthesizer = {
+            ctx: null,
+            enabled: true,
+            init() {
+                if (!this.ctx) {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                }
+            },
+            playScan() {
+                if (!this.enabled) return;
+                try {
+                    this.init();
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(1400, this.ctx.currentTime); // Haptic quick high frequency beep
+                    gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.05);
+                } catch (e) { console.warn("Audio Context blocked or unsupported."); }
+            },
+            playSuccess() {
+                if (!this.enabled) return;
+                try {
+                    this.init();
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(900, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(1350, this.ctx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.18);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.18);
+                } catch (e) {}
+            }
+        };
+
         const apiKey = ""; // Injected by execution environment
 
         // Exponential backoff fetch function for robust API calls
@@ -613,11 +656,13 @@
                 const loc = SafeStorage.get('fg_loc') || "Main Branch";
                 const invStr = SafeStorage.get('fg_inventory');
                 const lastUpdatedStr = SafeStorage.get('fg_last_updated');
-                const inventory = invStr ? JSON.parse(invStr) : defaultInventory;
+                const key = SafeStorage.get('fg_api_key') || "";
+                const audioSet = SafeStorage.get('fg_audio_enabled') !== "false";
+                const transStr = SafeStorage.get('fg_transactions') || "[]";
                 
-                // Load Quantity Patterns
-                const patternsStr = SafeStorage.get('fg_qty_patterns');
-                const qtyPatterns = patternsStr ? JSON.parse(patternsStr) : {};
+                const inventory = invStr ? JSON.parse(invStr) : defaultInventory;
+                const qtyPatterns = JSON.parse(SafeStorage.get('fg_qty_patterns') || "{}");
+                const transactions = JSON.parse(transStr);
 
                 // Load multi-customer parameters
                 const customersStr = SafeStorage.get('fg_customers') || "[]";
@@ -631,11 +676,14 @@
                 }
                 let activeCustomerId = activeCustId || customers[0].id;
                 
-                return { loc, inventory, lastUpdatedStr, qtyPatterns, customers, activeCustomerId };
+                return { loc, inventory, lastUpdatedStr, qtyPatterns, key, audioSet, transactions, customers, activeCustomerId };
             },
-            async save(inventoryData, locationData, customersData, activeCustomerIdData) {
+            async save(inventoryData, locationData, keyData, audioData, transData, customersData, activeCustomerIdData) {
                 SafeStorage.set('fg_inventory', JSON.stringify(inventoryData));
                 SafeStorage.set('fg_loc', locationData);
+                SafeStorage.set('fg_api_key', keyData);
+                SafeStorage.set('fg_audio_enabled', audioData ? "true" : "false");
+                SafeStorage.set('fg_transactions', JSON.stringify(transData));
                 
                 // Save multi-customer list
                 SafeStorage.set('fg_customers', JSON.stringify(customersData));
@@ -657,10 +705,13 @@
         let manualCat = 'Vegetable';
         let editingId = null;
         let sLoc = "Loading...";
+        let customApiKey = "";
         let inventory = [];
         let cart = {};
         let pendingScanItems = [];
         let quantityPatterns = {}; // Stores observed quantity patterns
+        let transactions = [];
+        let currentWorkspace = 'shop';
 
         // Multi-customer queues
         let customers = [];
@@ -691,6 +742,9 @@
             sLoc = data.loc;
             inventory = data.inventory;
             quantityPatterns = data.qtyPatterns;
+            customApiKey = data.key;
+            AudioSynthesizer.enabled = data.audioSet;
+            transactions = data.transactions;
             
             // Populating customer state
             customers = data.customers;
@@ -698,7 +752,11 @@
 
             const locEl = document.getElementById('displayLoc');
             if(locEl) locEl.innerText = sLoc;
+
+            const apiKeyEl = document.getElementById('geminiApiKey');
+            if(apiKeyEl) apiKeyEl.value = customApiKey;
             
+            updateAudioButtonUI();
             updateDateDisplay(data.lastUpdatedStr);
             updateStockBadge();
 
@@ -729,6 +787,7 @@
             updateNetworkStatus();
 
             checkDailyUpdate(data.lastUpdatedStr);
+            recalculateAnalytics();
         });
 
         function saveActiveCustomerState() {
@@ -883,7 +942,7 @@
 
                 // Inline Rename Edit button
                 const editBtn = document.createElement('button');
-                editBtn.className = 'opacity-40 hover:opacity-100 p-0.5 rounded transition-opacity shrink-0';
+                editBtn.className = 'opacity-45 hover:opacity-100 p-0.5 rounded transition-opacity shrink-0';
                 editBtn.title = 'Double-click tab or tap here to rename';
                 editBtn.onclick = (e) => {
                     e.stopPropagation();
@@ -969,11 +1028,97 @@
             if(el) el.innerText = 'Stock: ' + inventory.length; 
         }
 
+        function toggleAudio() {
+            AudioSynthesizer.enabled = !AudioSynthesizer.enabled;
+            updateAudioButtonUI();
+            triggerSave();
+            notify(AudioSynthesizer.enabled ? "Scan Feedback Enabled 🔊" : "Scan Feedback Muted 🔇");
+            softVibrate();
+        }
+
+        function updateAudioButtonUI() {
+            const btn = document.getElementById('audioToggleBtn');
+            const icon = document.getElementById('audioIcon');
+            if (AudioSynthesizer.enabled) {
+                btn.className = "bg-emerald-50 text-emerald-700 border border-emerald-200 p-2.5 rounded-2xl active:scale-95 transition-all flex items-center justify-center";
+                icon.innerHTML = `<path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>`;
+            } else {
+                btn.className = "bg-slate-50 text-slate-500 border border-slate-200 p-2.5 rounded-2xl active:scale-95 transition-all flex items-center justify-center";
+                icon.innerHTML = `<path d="M11 5 6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>`;
+            }
+        }
+
+        function switchView(view) {
+            softVibrate();
+            currentWorkspace = view;
+            const btnShop = document.getElementById('btnViewShop');
+            const btnInsights = document.getElementById('btnViewInsights');
+            const shopWorkspace = document.getElementById('shopWorkspace');
+            const insightsWorkspace = document.getElementById('insightsWorkspace');
+            const searchRow = document.getElementById('searchFilterRow');
+
+            if (view === 'shop') {
+                btnShop.className = "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase transition-all bg-white text-slate-900 shadow-sm";
+                btnInsights.className = "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase transition-all text-slate-500 hover:text-slate-900";
+                shopWorkspace.classList.remove('hidden');
+                insightsWorkspace.classList.add('hidden');
+                if (searchRow) searchRow.classList.remove('hidden');
+            } else {
+                btnInsights.className = "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase transition-all bg-white text-slate-900 shadow-sm";
+                btnShop.className = "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase transition-all text-slate-500 hover:text-slate-900";
+                shopWorkspace.classList.add('hidden');
+                insightsWorkspace.classList.remove('hidden');
+                if (searchRow) searchRow.classList.add('hidden');
+                recalculateAnalytics();
+            }
+        }
+
+        let translateTimeout;
+        function debouncedTranslate(sourceId, targetId, langPair) {
+            clearTimeout(translateTimeout);
+            translateTimeout = setTimeout(() => {
+                autoTranslate(sourceId, targetId, langPair);
+            }, 800);
+        }
+
+        async function autoTranslate(sourceId, targetId, langPair) {
+            if (!navigator.onLine) return;
+
+            const sourceEl = document.getElementById(sourceId);
+            const targetEl = document.getElementById(targetId);
+            const loader = document.getElementById('translateLoader');
+            const text = sourceEl.value.trim();
+
+            if (!text || targetEl.value.trim() !== '') return;
+
+            if (langPair === 'en|hi' && englishToHindiMap[text.toLowerCase()]) {
+                targetEl.value = englishToHindiMap[text.toLowerCase()];
+                return;
+            }
+
+            try {
+                if(loader) loader.classList.remove('hidden');
+                const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`);
+                const data = await response.json();
+                
+                if (data && data.responseData && data.responseData.translatedText) {
+                    let translated = data.responseData.translatedText;
+                    if(translated.toLowerCase() !== text.toLowerCase()) {
+                        targetEl.value = translated;
+                    }
+                }
+            } catch (err) {
+                console.error("Translation API error:", err);
+            } finally {
+                if(loader) loader.classList.add('hidden');
+            }
+        }
+
         function softVibrate() { if (navigator.vibrate) navigator.vibrate(40); }
         
         function triggerSave() { 
             saveActiveCustomerState();
-            DataAdapter.save(inventory, sLoc, customers, activeCustomerId); 
+            DataAdapter.save(inventory, sLoc, customApiKey, AudioSynthesizer.enabled, transactions, customers, activeCustomerId); 
             updateStockBadge(); 
         }
         
@@ -1344,7 +1489,7 @@
             const formTitle = document.getElementById('formTitle');
             const saveBtn = document.getElementById('saveBtn');
             if(formTitle) formTitle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="text-emerald-500"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Manual Setup`; 
-            if(saveBtn) saveBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Update Master Stock`; 
+            if(saveBtn) saveBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Update Master Stock`; 
             const cBtn = document.getElementById('cancelEditBtn');
             if(cBtn) cBtn.classList.add('hidden'); 
             const catLabel = document.getElementById('catLabel');
