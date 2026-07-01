@@ -89,6 +89,13 @@
         .swipe-handle { cursor: grab; }
         .swipe-handle:active { cursor: grabbing; }
         .list-enter-active { transition: all 0.25s ease-out; }
+
+        /* High-fidelity fluid scaling for premium mobile and ultra-wide screens */
+        @media (max-width: 480px) {
+            body { padding: 4px !important; }
+            h1 { font-size: 1.15rem !important; }
+            .category-pill { padding-left: 0.75rem !important; padding-right: 0.75rem !important; font-size: 9px !important; }
+        }
     </style>
 </head>
 <body class="p-2 md:p-6 h-screen flex flex-col overflow-hidden">
@@ -172,7 +179,7 @@
             
             <!-- Center: Title -->
             <div class="col-span-6 text-center flex flex-col items-center justify-center">
-                <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 leading-none whitespace-nowrap">Farmer's <span class="text-emerald-500">Gate</span> <span class="bg-slate-900 text-emerald-400 text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase align-middle ml-1">PRO</span></h1>
+                <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 leading-none whitespace-nowrap">Farmer's <span class="text-emerald-500">Gate</span> <span class="bg-slate-900 text-emerald-400 text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase align-middle ml-1">PRO</span><span class="text-[9px] font-extrabold text-slate-400 ml-1.5 tracking-wider align-middle">v2.5.0</span></h1>
                 <p id="displayLoc" class="text-[9px] sm:text-[10px] text-slate-500 font-bold uppercase mt-1 tracking-widest truncate max-w-full">Loading...</p>
             </div>
             
@@ -288,6 +295,133 @@
                         </div>
                     </div>
 
+                    <!-- DAILY SALES CLOSING CLOSING & DENOMINATION AUDITOR -->
+                    <div class="bg-gradient-to-br from-slate-900 to-slate-950 text-white border border-slate-800 p-5 rounded-[2rem] space-y-4 shadow-xl">
+                        <div class="flex justify-between items-center pb-2 border-b border-slate-850">
+                            <div>
+                                <h3 class="text-xs font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
+                                    Daily Sales Closing Auditor
+                                </h3>
+                                <p class="text-[9px] text-slate-400 font-bold uppercase mt-0.5">Register Audit & Note Denomination Reconciliation</p>
+                            </div>
+                            <button onclick="shareClosingReportToWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                                Share WhatsApp
+                            </button>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- Revenue Metrics Inputs -->
+                            <div class="space-y-3 bg-slate-850/50 p-4 rounded-xl border border-slate-800">
+                                <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-800 pb-1">Register Transactions</p>
+                                <div class="grid grid-cols-2 gap-2 text-xs">
+                                    <div>
+                                        <label class="text-[9px] font-bold text-slate-400 block mb-1">CASH SALE (₹)</label>
+                                        <input type="number" id="closingCash" oninput="calculateClosingSales()" placeholder="0" class="w-full bg-slate-900 border border-slate-750 px-2 py-1.5 rounded text-white font-extrabold outline-none focus:border-emerald-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-[9px] font-bold text-slate-400 block mb-1">CARD SALE (₹)</label>
+                                        <input type="number" id="closingCard" oninput="calculateClosingSales()" placeholder="0" class="w-full bg-slate-900 border border-slate-750 px-2 py-1.5 rounded text-white font-extrabold outline-none focus:border-emerald-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-[9px] font-bold text-slate-400 block mb-1">UPI SALE (₹)</label>
+                                        <input type="number" id="closingUpi" oninput="calculateClosingSales()" placeholder="0" class="w-full bg-slate-900 border border-slate-750 px-2 py-1.5 rounded text-white font-extrabold outline-none focus:border-emerald-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-[9px] font-bold text-emerald-400 block mb-1">TOTAL SALES (₹)</label>
+                                        <div id="closingTotalSales" class="w-full bg-slate-850 px-2 py-1.5 rounded text-emerald-400 font-black text-sm">₹0.00</div>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2 text-xs pt-1">
+                                    <div>
+                                        <label class="text-[9px] font-bold text-rose-400 block mb-1">EXPENSES (₹)</label>
+                                        <input type="number" id="closingExpenses" oninput="calculateClosingSales()" placeholder="0" class="w-full bg-slate-900 border border-slate-750 px-2 py-1.5 rounded text-white font-extrabold outline-none focus:border-emerald-500">
+                                    </div>
+                                    <div>
+                                        <label class="text-[9px] font-bold text-rose-400 block mb-1">STORE PURCHASE (₹)</label>
+                                        <input type="number" id="closingPurchase" oninput="calculateClosingSales()" placeholder="0" class="w-full bg-slate-900 border border-slate-750 px-2 py-1.5 rounded text-white font-extrabold outline-none focus:border-emerald-500">
+                                    </div>
+                                </div>
+                                <div class="bg-slate-900 p-2.5 rounded border border-slate-800 mt-2 flex justify-between items-center">
+                                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Net Cash Closing:</span>
+                                    <span id="closingNetRevenue" class="font-black text-sm text-emerald-400">₹0.00</span>
+                                </div>
+                            </div>
+
+                            <!-- Note Denominations Selector -->
+                            <div class="space-y-3 bg-slate-850/50 p-4 rounded-xl border border-slate-800">
+                                <div class="flex justify-between items-center border-b border-slate-800 pb-1">
+                                    <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Note Denominations</p>
+                                    <span id="denomAuditBadge" class="text-[8px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold uppercase tracking-wider">Unbalanced</span>
+                                </div>
+                                <div class="grid grid-cols-3 gap-x-2 gap-y-1.5 text-[10px]">
+                                    <div class="flex items-center gap-1 justify-between">
+                                        <span class="font-bold text-slate-400">₹500 x</span>
+                                        <input type="number" id="den_500" oninput="calculateDenominations()" placeholder="0" class="w-10 bg-slate-900 border border-slate-750 px-1 py-1 rounded text-white text-center font-bold outline-none">
+                                    </div>
+                                    <div class="flex items-center gap-1 justify-between">
+                                        <span class="font-bold text-slate-400">₹200 x</span>
+                                        <input type="number" id="den_200" oninput="calculateDenominations()" placeholder="0" class="w-10 bg-slate-900 border border-slate-750 px-1 py-1 rounded text-white text-center font-bold outline-none">
+                                    </div>
+                                    <div class="flex items-center gap-1 justify-between">
+                                        <span class="font-bold text-slate-400">₹100 x</span>
+                                        <input type="number" id="den_100" oninput="calculateDenominations()" placeholder="0" class="w-10 bg-slate-900 border border-slate-750 px-1 py-1 rounded text-white text-center font-bold outline-none">
+                                    </div>
+                                    <div class="flex items-center gap-1 justify-between">
+                                        <span class="font-bold text-slate-400">₹50 x</span>
+                                        <input type="number" id="den_50" oninput="calculateDenominations()" placeholder="0" class="w-10 bg-slate-900 border border-slate-750 px-1 py-1 rounded text-white text-center font-bold outline-none">
+                                    </div>
+                                    <div class="flex items-center gap-1 justify-between">
+                                        <span class="font-bold text-slate-400">₹20 x</span>
+                                        <input type="number" id="den_20" oninput="calculateDenominations()" placeholder="0" class="w-10 bg-slate-900 border border-slate-750 px-1 py-1 rounded text-white text-center font-bold outline-none">
+                                    </div>
+                                    <div class="flex items-center gap-1 justify-between">
+                                        <span class="font-bold text-slate-400">₹10 x</span>
+                                        <input type="number" id="den_10" oninput="calculateDenominations()" placeholder="0" class="w-10 bg-slate-900 border border-slate-750 px-1 py-1 rounded text-white text-center font-bold outline-none">
+                                    </div>
+                                    <div class="flex items-center gap-1 justify-between">
+                                        <span class="font-bold text-slate-400">₹5 x</span>
+                                        <input type="number" id="den_5" oninput="calculateDenominations()" placeholder="0" class="w-10 bg-slate-900 border border-slate-750 px-1 py-1 rounded text-white text-center font-bold outline-none">
+                                    </div>
+                                    <div class="flex items-center gap-1 justify-between">
+                                        <span class="font-bold text-slate-400">₹2 x</span>
+                                        <input type="number" id="den_2" oninput="calculateDenominations()" placeholder="0" class="w-10 bg-slate-900 border border-slate-750 px-1 py-1 rounded text-white text-center font-bold outline-none">
+                                    </div>
+                                    <div class="flex items-center gap-1 justify-between">
+                                        <span class="font-bold text-slate-400">₹1 x</span>
+                                        <input type="number" id="den_1" oninput="calculateDenominations()" placeholder="0" class="w-10 bg-slate-900 border border-slate-750 px-1 py-1 rounded text-white text-center font-bold outline-none">
+                                    </div>
+                                </div>
+                                <div class="bg-slate-900 p-2.5 rounded border border-slate-800 mt-2 flex justify-between items-center">
+                                    <span class="text-[9px] font-black text-slate-400 uppercase tracking-wider">Denomination Total:</span>
+                                    <span id="denomTotalValue" class="font-black text-sm text-emerald-400">₹0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STOCK REQUIREMENT ACCORDION PLANNER -->
+                    <div class="bg-slate-50 border border-slate-200 p-5 rounded-[2rem] space-y-4">
+                        <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+                            <div>
+                                <h3 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v18M3 12h18"/></svg>
+                                    🥦 Stock Requirements Planner
+                                </h3>
+                                <p class="text-[9px] text-slate-500 font-bold uppercase mt-0.5">Vegetables and Fruits Ordering Ledger</p>
+                            </div>
+                            <button onclick="shareStockRequirementsToWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                                Send To WhatsApp
+                            </button>
+                        </div>
+                        
+                        <div id="stockRequirementsGrid" class="space-y-4 max-h-96 overflow-y-auto custom-scrollbar pr-1">
+                            <!-- Populated Dynamically via Script Grouping Vegetables and Fruits -->
+                        </div>
+                    </div>
+
                     <!-- Recent Receipts Ledger -->
                     <div class="space-y-3">
                         <div class="flex justify-between items-center">
@@ -390,6 +524,13 @@
                 </div>
             </div>
         </div>
+
+        <!-- Premium Adaptive Footer Attribution -->
+        <footer class="mt-3 py-2 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest shrink-0 border-t border-slate-100/60 select-none flex flex-wrap items-center justify-center gap-1">
+            <span>Farmer's Gate PRO v2.5.0</span>
+            <span class="text-slate-300">•</span>
+            <span>Developed by <span class="text-slate-700 font-extrabold">Arvind Kumar Shukla</span></span>
+        </footer>
     </div>
 
     <!-- Floating Mobile Checkout Trigger Button -->
@@ -474,45 +615,17 @@
                         </label>
 
                         <div class="grid grid-cols-2 gap-3">
-                            <button onclick="document.getElementById('cameraInput').click();" class="bg-white hover:bg-slate-50 text-indigo-700 p-3.5 rounded-[1.25rem] flex flex-col items-center justify-center gap-1.5 active:scale-95 transition-all shadow-sm border border-indigo-100">
+                            <button onclick="document.getElementById('cameraInput').click();" class="bg-white hover:bg-slate-50 text-indigo-700 p-3.5 rounded-[1.25rem] flex flex-col items-center justify-center gap-1.5 active:scale-95 transition-all shadow-sm border border-indigo-100" title="Camera scan">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
                                 <span class="text-[9px] font-black uppercase tracking-widest">Capture Photo</span>
                                 <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="startScan(event)">
                             </button>
-                            <button onclick="document.getElementById('galleryInput').click();" class="bg-white hover:bg-slate-50 text-indigo-700 p-3.5 rounded-[1.25rem] flex flex-col items-center justify-center gap-1.5 active:scale-95 transition-all shadow-sm border border-indigo-100">
+                            <button onclick="document.getElementById('galleryInput').click();" class="bg-white hover:bg-slate-50 text-indigo-700 p-3.5 rounded-[1.25rem] flex flex-col items-center justify-center gap-1.5 active:scale-95 transition-all shadow-sm border border-indigo-100" title="Gallery upload">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
                                 <span class="text-[9px] font-black uppercase tracking-widest">Photo Gallery</span>
                                 <input type="file" id="galleryInput" accept="image/*" class="hidden" multiple onchange="startScan(event)">
                             </button>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Live Scanner Processing Overlay Indicator -->
-                <div id="smartLoader" class="hidden flex flex-col items-center justify-center p-5 bg-indigo-950 text-white rounded-[2rem] shadow-xl animate-pop">
-                    <div class="loader !border-indigo-500 !border-t-white w-6 h-6 mb-3"></div>
-                    <span id="loaderText" class="text-[10px] font-black uppercase tracking-widest text-center">Processing Document...</span>
-                    <div class="w-full bg-indigo-900 rounded-full h-1.5 mt-3 overflow-hidden">
-                        <div id="scanProgress" class="bg-indigo-400 h-1.5 rounded-full w-0 transition-all duration-300"></div>
-                    </div>
-                </div>
-
-                <!-- REVIEW SCANNED ITEMS -->
-                <div id="scanReviewContainer" class="hidden bg-yellow-50/50 border border-yellow-200 p-5 rounded-[2rem] animate-pop">
-                    <div class="flex justify-between items-center mb-3">
-                        <h4 class="text-xs font-black text-yellow-800 uppercase tracking-widest flex items-center gap-1.5">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 12h20"/><path d="M12 2v20"/></svg>
-                            Confirm Extracted Data
-                        </h4>
-                        <span id="scanCountBadge" class="bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded text-[9px] font-black">0 found</span>
-                    </div>
-                    <p class="text-[9px] text-yellow-700 font-bold mb-3">Review values before saving to master system.</p>
-                    
-                    <div id="scanReviewList" class="space-y-2 mb-4 max-h-48 overflow-y-auto custom-scrollbar pr-1"></div>
-                    
-                    <div class="flex gap-2">
-                        <button onclick="cancelScanReview()" class="flex-1 bg-white text-yellow-800 border border-yellow-300 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider active:scale-95 transition-all">Cancel</button>
-                        <button onclick="saveReviewedItems()" class="flex-[2] bg-yellow-500 text-yellow-950 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider active:scale-95 transition-all shadow-md">Approve & Save</button>
                     </div>
                 </div>
 
@@ -594,11 +707,17 @@
 
                     <div id="manageList" class="space-y-2 mt-2"></div>
                 </div>
+
+                <!-- Console Author & Version Attribution Footer -->
+                <div class="text-center py-4 border-t border-slate-150 mt-6 select-none">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Farmer's Gate Console v2.5.0</p>
+                    <p class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mt-1.5">Developed by <span class="text-slate-700 font-extrabold">Arvind Kumar Shukla</span></p>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Translucent Ultra-Premium Toast Notification -->
+    <!-- Translucent Ultra-Premium Toast Notification (Glass-styled and reduced to 1.2s duration) -->
     <div id="toast" class="fixed bottom-24 lg:bottom-10 left-1/2 -translate-x-1/2 px-5 py-3 bg-slate-900/60 backdrop-blur-xl border border-white/10 text-white rounded-2xl shadow-xl opacity-0 transition-all duration-300 pointer-events-none z-[200] font-bold text-[10px] uppercase tracking-wider flex items-center gap-2.5 transform translate-y-4 max-w-[90vw]">
         <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_#34d399] shrink-0"></div>
         <span id="toastMsg" class="whitespace-nowrap overflow-hidden text-ellipsis">System Online</span>
@@ -697,6 +816,7 @@
                 const key = SafeStorage.get('fg_api_key') || "";
                 const audioSet = SafeStorage.get('fg_audio_enabled') !== "false";
                 const transStr = SafeStorage.get('fg_transactions') || "[]";
+                const sheetUrlSaved = SafeStorage.get('fg_sheet_url') || "";
                 
                 const inventory = invStr ? JSON.parse(invStr) : defaultInventory;
                 const qtyPatterns = JSON.parse(SafeStorage.get('fg_qty_patterns') || "{}");
@@ -714,14 +834,17 @@
                 }
                 let activeCustomerId = activeCustId || customers[0].id;
                 
-                return { loc, inventory, lastUpdatedStr, qtyPatterns, key, audioSet, transactions, customers, activeCustomerId };
+                return { loc, inventory, lastUpdatedStr, qtyPatterns, key, audioSet, transactions, customers, activeCustomerId, sheetUrlSaved };
             },
-            async save(inventoryData, locationData, keyData, audioData, transData, customersData, activeCustomerIdData) {
+            async save(inventoryData, locationData, keyData, audioData, transData, customersData, activeCustomerIdData, sheetUrlData = "") {
                 SafeStorage.set('fg_inventory', JSON.stringify(inventoryData));
                 SafeStorage.set('fg_loc', locationData);
                 SafeStorage.set('fg_api_key', keyData);
                 SafeStorage.set('fg_audio_enabled', audioData ? "true" : "false");
                 SafeStorage.set('fg_transactions', JSON.stringify(transData));
+                if (sheetUrlData) {
+                    SafeStorage.set('fg_sheet_url', sheetUrlData);
+                }
                 
                 // Save customer states
                 SafeStorage.set('fg_customers', JSON.stringify(customersData));
@@ -749,10 +872,14 @@
         let quantityPatterns = {};
         let transactions = [];
         let currentWorkspace = 'shop';
+        let savedSheetUrl = "";
 
         // Multi-customer parameters
         let customers = [];
         let activeCustomerId = '';
+
+        // Stock Requirements Tracker
+        let stockRequirements = {};
 
         const englishToHindiMap = {
             'potato': 'आलू', 'tomato': 'टमाटर', 'onion': 'प्याज', 'apple': 'सेब', 'banana': 'केला',
@@ -782,6 +909,7 @@
             customApiKey = data.key;
             AudioSynthesizer.enabled = data.audioSet;
             transactions = data.transactions;
+            savedSheetUrl = data.sheetUrlSaved;
             
             // Populating multi-customer states
             customers = data.customers;
@@ -792,6 +920,11 @@
 
             const apiKeyEl = document.getElementById('geminiApiKey');
             if(apiKeyEl) apiKeyEl.value = customApiKey;
+
+            const sheetUrlEl = document.getElementById('sheetUrlInput');
+            if (sheetUrlEl && savedSheetUrl) {
+                sheetUrlEl.value = savedSheetUrl;
+            }
             
             updateAudioButtonUI();
             updateDateDisplay(data.lastUpdatedStr);
@@ -815,6 +948,7 @@
                 renderCustomerTabs();
                 render(); 
                 setupTouchGestures();
+                renderStockRequirements();
             }, 100);
 
             window.addEventListener('online', updateNetworkStatus);
@@ -987,11 +1121,11 @@
                     startRenameCustomer(cust.id, e);
                 };
                 editBtn.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="text-slate-505"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="text-slate-500"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                 `;
 
                 const closeBtn = document.createElement('button');
-                closeBtn.className = 'text-slate-400 hover:text-red-650 transition-colors shrink-0 ml-0.5 font-extrabold text-[12px] h-4 w-4 flex items-center justify-center rounded-full';
+                closeBtn.className = 'text-slate-400 hover:text-red-500 transition-colors shrink-0 ml-0.5 font-extrabold text-[12px] h-4 w-4 flex items-center justify-center rounded-full';
                 closeBtn.innerHTML = '&times;';
                 closeBtn.title = 'Close Tab';
                 closeBtn.onclick = (e) => {
@@ -1010,23 +1144,23 @@
             });
         }
 
-        
-        // Google Sheets Integration with Published Web & Shared File Fallbacks
+        // Google Sheets Integration - Saving spreadsheet URL on trigger
         async function syncGoogleSheet() {
             softVibrate();
             const sheetUrl = document.getElementById('sheetUrlInput').value.trim();
             if (!sheetUrl) return notify("Please enter a Google Sheets URL");
 
+            savedSheetUrl = sheetUrl;
+            SafeStorage.set('fg_sheet_url', sheetUrl);
+
             let exportUrl = "";
 
-            // Check if it is a "Publish to web" URL which contains sandboxed path /d/e/
             if (sheetUrl.includes('/d/e/')) {
                 const matches = sheetUrl.match(/\/d\/e\/([a-zA-Z0-9-_]+)/);
                 if (matches && matches[1]) {
                     const publishId = matches[1];
                     exportUrl = `https://docs.google.com/spreadsheets/d/e/${publishId}/pub?output=csv`;
                 } else {
-                    // Fallback: If they already pasted the direct CSV output link
                     if (sheetUrl.includes('/pub?')) {
                         exportUrl = sheetUrl.replace(/output=[a-z]+/, 'output=csv');
                         if (!exportUrl.includes('output=csv')) {
@@ -1039,7 +1173,6 @@
                     }
                 }
             } else {
-                // Standard "Anyone with link can view" sharing URL
                 const matches = sheetUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
                 if (!matches || !matches[1]) return notify("Invalid Google Sheets URL format");
                 const spreadsheetId = matches[1];
@@ -1062,7 +1195,7 @@
                 loaderText.innerText = "Parsing spreadsheet columns...";
                 
                 const csvText = await response.text();
-                parseSpreadsheetData(csvText, true); // true for CSV format
+                parseSpreadsheetData(csvText, true); 
                 
                 progress.style.width = "100%";
                 setTimeout(() => {
@@ -1078,7 +1211,7 @@
             }
         }
 
-        // Handlers for bulk uploaded files (.xlsx, .ods, .csv, .tsv, .pdf, .gsheet)
+        // Handlers for bulk uploaded files
         async function handleBulkSyncFile(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1094,7 +1227,6 @@
             const fileExtension = file.name.split('.').pop().toLowerCase();
 
             try {
-                // If the user uploaded a local Google Sheet link pointer (.gsheet shortcut file)
                 if (fileExtension === 'gsheet') {
                     const reader = new FileReader();
                     reader.onload = async function(e) {
@@ -1115,7 +1247,6 @@
                     return;
                 }
 
-                // If document is PDF
                 if (fileExtension === 'pdf') {
                     progress.style.width = "40%";
                     loaderText.innerText = "Extracting text from PDF file pages...";
@@ -1154,7 +1285,6 @@
                     return;
                 }
 
-                // Excel/ODS/CSV/TSV SheetJS Reader
                 const fileReader = new FileReader();
                 fileReader.onload = function(e) {
                     try {
@@ -1169,7 +1299,6 @@
                         progress.style.width = "80%";
                         loaderText.innerText = "Parsing spreadsheet rows...";
                         
-                        // Convert to JSON
                         const json = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
                         processImportedRows(json);
 
@@ -1195,7 +1324,6 @@
             }
         }
 
-        // CSV parsing fallback converter
         function parseSpreadsheetData(dataText, isCSV) {
             try {
                 const workbook = XLSX.read(dataText, {type: 'string'});
@@ -1208,11 +1336,9 @@
             }
         }
 
-        // Process tabular rows normalized from SheetJS JSON
         function processImportedRows(rows) {
             if (!rows || rows.length === 0) return notify("Document sheet is empty");
 
-            // Look for headers (Name, HindiName, Price, RefQty, Unit, Category) via case-insensitive keys
             const mapColumnKeys = (row) => {
                 const schema = { name: '', nameHindi: '', price: 0, refQty: 1, priceUnit: 'Kg', category: 'Vegetable' };
                 const rowKeys = Object.keys(row);
@@ -1253,16 +1379,14 @@
                 triggerSave();
                 render();
                 renderManagement();
+                renderStockRequirements();
                 notify(`Successfully synced ${parsed.length} master inventory items!`);
             } else {
                 notify("Could not map items. Verify column headers match: Name, Price, Category");
             }
         }
 
-        // Parse structured inventory lists from PDF text blocks
         function parseInventoryFromText(textText) {
-            // Searches text block sequentially using regular expression rules
-            // Matches: [Item Name] [Hindi Name (Optional)] [Price] [RefQty (Optional)] [Unit] [Category (Optional)]
             const lines = textText.split('\n');
             const parsed = [];
 
@@ -1270,9 +1394,7 @@
                 const cleaned = line.replace(/[^\w\s\.\,\₹\-\/]/g, ' ').trim();
                 if (cleaned.length < 5) return;
 
-                // Split words and values
                 const parts = cleaned.split(/\s+/);
-                // Look for price elements
                 const priceMatch = cleaned.match(/₹?\s?(\d+([.,]\d{1,2})?)/);
                 if (!priceMatch) return;
 
@@ -1289,7 +1411,6 @@
                     } else if (/vegetable|veggies|fruit|grocery/i.test(low)) {
                         category = normalizeCategory(p);
                     } else if (isNaN(p) && !/₹/i.test(p)) {
-                        // Check if unicode matches Hindi characters
                         if (/[\u0900-\u097F]/.test(p)) {
                             hindiName = p;
                         } else {
@@ -1317,6 +1438,7 @@
                 triggerSave();
                 render();
                 renderManagement();
+                renderStockRequirements();
                 notify(`Imported ${parsed.length} items from PDF text list!`);
             } else {
                 notify("No structured items found. Verify text clarity.");
@@ -1483,7 +1605,7 @@
         
         function triggerSave() { 
             saveActiveCustomerState();
-            DataAdapter.save(inventory, sLoc, customApiKey, AudioSynthesizer.enabled, transactions, customers, activeCustomerId); 
+            DataAdapter.save(inventory, sLoc, customApiKey, AudioSynthesizer.enabled, transactions, customers, activeCustomerId, savedSheetUrl); 
             updateStockBadge(); 
         }
         
@@ -1705,7 +1827,7 @@
                                 ${item.name}
                                 <span class="text-[8px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded uppercase tracking-widest hidden sm:inline-block">${item.category.substring(0,3)}</span>
                             </p>
-                            <p class="text-[10px] text-slate-505 font-bold uppercase mt-1 tracking-wider"><span class="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded mr-1">${item.qty}${item.unit}</span>@ ₹${item.basePrice}/${item.dSQ}${item.dSU}</p>
+                            <p class="text-[10px] text-slate-550 font-bold uppercase mt-1 tracking-wider"><span class="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded mr-1">${item.qty}${item.unit}</span>@ ₹${item.basePrice}/${item.dSQ}${item.dSU}</p>
                         </div>
                         <div class="flex items-center gap-1.5 shrink-0">
                             <span class="font-black text-sm text-slate-900 mr-1 tabular-nums">₹${item.totalPrice.toFixed(2)}</span>
@@ -1846,7 +1968,7 @@
             } else { 
                 inventory.push({id: Date.now(), name: n, nameHindi: document.getElementById('newHindi').value, price: parseFloat(p), refQty: parseFloat(r), priceUnit: u, category: manualCat}); 
             }
-            triggerSave(); render(); renderManagement(); resetForm(); notify("Master Stock Updated");
+            triggerSave(); render(); renderManagement(); resetForm(); renderStockRequirements(); notify("Master Stock Updated");
         }
 
         function resetForm() { 
@@ -1905,7 +2027,7 @@
                     catItems.forEach(it => {
                         const isDup = counts[it.name.toLowerCase().trim()] > 1;
                         const el = document.createElement('div'); el.className = `flex items-center justify-between p-3.5 bg-white border rounded-xl shadow-sm mb-2 ${isDup ? 'border-red-200 bg-rose-50/20' : 'border-slate-200'}`;
-                        el.innerHTML = `<div class="min-w-0 flex-1 py-1"><div><div class="flex items-center flex-wrap gap-2"><span class="text-xs font-black text-slate-800 truncate uppercase">${it.name}</span><select onchange="changeItemCategory(${it.id}, this.value)" class="text-[9px] font-bold text-slate-500 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 outline-none cursor-pointer hover:bg-slate-100 focus:border-emerald-400"><option value="Vegetable" ${it.category==='Vegetable'?'selected':''}>Veg</option><option value="Fruit" ${it.category==='Fruit'?'selected':''}>Fruit</option><option value="Grocery" ${it.category==='Grocery'?'selected':''}>Groc</option></select>${isDup ? '<span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-red-100 text-red-700">DUP</span>' : ''}</div><span class="text-[11px] text-emerald-600 font-extrabold mt-1 block">₹${it.price}/${it.refQty}${it.priceUnit}</span></div></div><div class="flex gap-1.5"><button onclick="editArticle(${it.id})" class="bg-slate-50 text-slate-505 p-2 rounded-lg border border-slate-200 hover:text-blue-600 hover:bg-blue-50 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button><button onclick="inventory=inventory.filter(i=>i.id!=${it.id});triggerSave();renderManagement();render();notify('Deleted')" class="bg-slate-50 text-slate-505 p-2 rounded-lg border border-slate-200 hover:text-red-600 hover:bg-red-50 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>`;
+                        el.innerHTML = `<div class="min-w-0 flex-1 py-1"><div><div class="flex items-center flex-wrap gap-2"><span class="text-xs font-black text-slate-800 truncate uppercase">${it.name}</span><select onchange="changeItemCategory(${it.id}, this.value)" class="text-[9px] font-bold text-slate-500 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 outline-none cursor-pointer hover:bg-slate-100 focus:border-emerald-400"><option value="Vegetable" ${it.category==='Vegetable'?'selected':''}>Veg</option><option value="Fruit" ${it.category==='Fruit'?'selected':''}>Fruit</option><option value="Grocery" ${it.category==='Grocery'?'selected':''}>Groc</option></select>${isDup ? '<span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-red-100 text-red-700">DUP</span>' : ''}</div><span class="text-[11px] text-emerald-600 font-extrabold mt-1 block">₹${it.price}/${it.refQty}${it.priceUnit}</span></div></div><div class="flex gap-1.5"><button onclick="editArticle(${it.id})" class="bg-slate-50 text-slate-550 p-2 rounded-lg border border-slate-200 hover:text-blue-600 hover:bg-blue-50 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button><button onclick="inventory=inventory.filter(i=>i.id!=${it.id});triggerSave();renderManagement();render();renderStockRequirements();notify('Deleted')" class="bg-slate-50 text-slate-550 p-2 rounded-lg border border-slate-200 hover:text-red-600 hover:bg-red-50 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>`;
                         div.appendChild(el);
                     });
                 }
@@ -1920,6 +2042,7 @@
                 triggerSave();
                 renderManagement();
                 render();
+                renderStockRequirements();
                 notify("Class designation moved");
             }
         };
@@ -2185,6 +2308,217 @@
             }
         }
 
+        // SCAN REVIEW LEDGER
+        function showScanReview() {
+            const container = document.getElementById('scanReviewContainer');
+            const list = document.getElementById('scanReviewList');
+            document.getElementById('scanCountBadge').innerText = `${pendingScanItems.length} Found`;
+            
+            list.innerHTML = '';
+            pendingScanItems.forEach((item, index) => {
+                const el = document.createElement('div');
+                el.className = 'flex items-center gap-2 bg-white p-2 rounded-xl border border-yellow-200 animate-pop';
+                el.innerHTML = `
+                    <div class="flex-1 min-w-0 flex flex-col gap-1.5">
+                        <input type="text" value="${item.name}" onchange="updatePendingItem(${index}, 'name', this.value)" class="w-full bg-slate-50 px-2 py-1.5 rounded-lg text-xs font-bold text-slate-800 outline-none border border-slate-100">
+                        <select onchange="updatePendingItem(${index}, 'category', this.value)" class="w-max text-[9px] font-bold text-slate-505 bg-white border border-slate-200 rounded px-1 py-0.5 outline-none cursor-pointer">
+                            <option value="Vegetable" ${item.category==='Vegetable'?'selected':''}>Vegetable</option>
+                            <option value="Fruit" ${item.category==='Fruit'?'selected':''}>Fruit</option>
+                            <option value="Grocery" ${item.category==='Grocery'?'selected':''}>Grocery</option>
+                        </select>
+                    </div>
+                    <div class="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100 h-full">
+                        <span class="text-[9px] font-bold text-emerald-600">₹</span>
+                        <input type="number" value="${item.price}" onchange="updatePendingItem(${index}, 'price', this.value)" class="w-10 bg-transparent text-xs font-black outline-none p-0 text-slate-800">
+                    </div>
+                    <button onclick="deletePendingItem(${index})" class="bg-rose-50 text-rose-500 p-2 rounded-lg hover:bg-rose-500 hover:text-white transition-colors h-full">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                    </button>
+                `;
+                list.appendChild(el);
+            });
+            container.classList.remove('hidden');
+            container.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        window.updatePendingItem = function(index, field, value) {
+            if(field === 'price') pendingScanItems[index].price = parseFloat(value) || 0;
+            else if(field === 'category') pendingScanItems[index].category = value;
+            else pendingScanItems[index].name = value;
+        }
+
+        window.deletePendingItem = function(index) {
+            softVibrate();
+            pendingScanItems.splice(index, 1);
+            if(pendingScanItems.length === 0) {
+                cancelScanReview();
+            } else {
+                showScanReview();
+            }
+        }
+
+        window.cancelScanReview = function() {
+            pendingScanItems = [];
+            document.getElementById('scanReviewContainer').classList.add('hidden');
+            notify("Pending buffer cleared");
+        }
+
+        window.saveReviewedItems = function() {
+            softVibrate();
+            let added = 0;
+            pendingScanItems.forEach(item => {
+                if(item.name.trim() !== "" && item.price > 0) {
+                    inventory.unshift({
+                        id: Date.now() + Math.random(),
+                        name: item.name.trim(),
+                        nameHindi: "",
+                        price: item.price,
+                        refQty: 1,
+                        priceUnit: "Kg",
+                        category: item.category
+                    });
+                    added++;
+                }
+            });
+            
+            triggerSave(); 
+            render(); 
+            renderManagement(); 
+            renderStockRequirements();
+            
+            document.getElementById('scanReviewContainer').classList.add('hidden');
+            pendingScanItems = [];
+            notify(`${added} items saved successfully.`);
+        }
+
+        function parseCSVLine(text) {
+            let ret = [''], i = 0, p = '', s = true;
+            for (let l in text) {
+                let c = text[l];
+                if ('"' === c) {
+                    s = !s;
+                    if ('"' === p) { ret[i] += '"'; c = '-'; } else if ('' === p) c = '-';
+                } else if (s && ',' === c) c = ret[++i] = '';
+                else ret[i] += c;
+                p = c;
+            }
+            return ret;
+        }
+
+        window.exportInventory = function() {
+            if(inventory.length === 0) return notify("Inventory is empty!");
+            
+            let csvData = "Name,HindiName,Price,RefQty,Unit,Category\n";
+            inventory.forEach(item => {
+                const safeName = `"${(item.name || '').replace(/"/g, '""')}"`;
+                const safeHindi = `"${(item.nameHindi || '').replace(/"/g, '""')}"`;
+                csvData += `${safeName},${safeHindi},${item.price},${item.refQty},${item.priceUnit},${item.category}\n`;
+            });
+            
+            const dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent(csvData);
+            const dlNode = document.createElement('a');
+            dlNode.setAttribute("href", dataStr);
+            dlNode.setAttribute("download", `farmers_gate_backup_${Date.now()}.csv`);
+            document.body.appendChild(dlNode);
+            dlNode.click();
+            dlNode.remove();
+            notify("CSV/Excel Backup Saved!");
+            softVibrate();
+        };
+
+        window.importInventory = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const lines = e.target.result.split('\n');
+                    const imported = [];
+                    for(let i = 1; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if(!line) continue;
+                        
+                        const parts = parseCSVLine(line);
+                        if(parts.length >= 6) {
+                            imported.push({
+                                id: Date.now() + Math.random() + i,
+                                name: parts[0].trim(),
+                                nameHindi: parts[1].trim(),
+                                price: parseFloat(parts[2]) || 0,
+                                refQty: parseFloat(parts[3]) || 1,
+                                priceUnit: parts[4].trim(),
+                                category: parts[5].trim()
+                            });
+                        }
+                    }
+                    
+                    if (imported.length > 0) {
+                        inventory = imported;
+                        triggerSave();
+                        render();
+                        renderManagement();
+                        renderStockRequirements();
+                        notify("CSV/Excel Backup Restored!");
+                        softVibrate();
+                    } else {
+                        notify("Invalid or empty CSV file!");
+                    }
+                } catch (err) {
+                    notify("Error reading CSV file.");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        };
+
+        window.confirmDeleteAll = function(btn) {
+            softVibrate();
+            if(btn.dataset.confirm === "true") {
+                inventory = [];
+                triggerSave();
+                renderManagement();
+                render();
+                renderStockRequirements();
+                notify("All stock deleted!");
+                btn.dataset.confirm = "false";
+                btn.innerHTML = "🗑️ Delete All";
+                btn.className = "flex-1 bg-rose-50 text-rose-600 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider border border-rose-200";
+            } else {
+                btn.dataset.confirm = "true";
+                btn.innerHTML = "Click again to confirm!";
+                btn.className = "flex-1 bg-red-650 text-white py-2 rounded-xl text-[9px] font-black uppercase tracking-wider border border-red-700 shadow-sm";
+                setTimeout(() => {
+                    if(btn.dataset.confirm === "true") {
+                        btn.dataset.confirm = "false";
+                        btn.innerHTML = "🗑️ Delete All";
+                        btn.className = "flex-1 bg-rose-50 text-rose-600 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider border border-rose-200";
+                    }
+                }, 3000);
+            }
+        };
+
+        function setMCat(cat) { 
+            softVibrate();
+            manualCat = cat; 
+            document.querySelectorAll('.mcat').forEach(b => {
+                b.className = 'mcat flex-1 rounded-lg bg-transparent text-slate-505 text-[11px] font-black uppercase py-1.5 transition-all'; 
+            });
+            const b = cat==='Vegetable'?'mcVeg':cat==='Fruit'?'mcFruit':'mcGroc'; 
+            if(document.getElementById(b)) {
+                document.getElementById(b).className = 'mcat flex-1 rounded-lg bg-emerald-600 text-white text-[11px] font-black uppercase py-1.5 shadow-md scale-105'; 
+            }
+        }
+        
+        function updateSettings() { 
+            softVibrate();
+            sLoc = document.getElementById('editLoc').value || "Main Hub, Patiala"; 
+            customApiKey = document.getElementById('geminiApiKey').value.trim();
+            document.getElementById('displayLoc').innerText = sLoc; 
+            triggerSave(); 
+            notify("Configuration parameters updated."); 
+        }
+
+        // SALES LEDGER & BUSINESS INSIGHTS COMPUTATION
         function logTransaction(finalTotal, discountValue, totalItems) {
             const timestamp = new Date();
             const record = {
@@ -2198,7 +2532,7 @@
             };
             
             transactions.unshift(record);
-            if (transactions.length > 50) transactions.pop(); // Keep index safe
+            if (transactions.length > 50) transactions.pop(); 
             triggerSave();
             recalculateAnalytics();
         }
@@ -2230,7 +2564,7 @@
             document.getElementById('catSalesFruit').innerText = `₹${catFruit.toFixed(2)}`;
             document.getElementById('catSalesGroc').innerText = `₹${catGroc.toFixed(2)}`;
 
-            const maxCat = Math.max(catVeg, catFruit, catGroc, 1); // Avoid div by zero
+            const maxCat = Math.max(catVeg, catFruit, catGroc, 1); 
             document.getElementById('barVeg').style.width = `${(catVeg / maxCat) * 100}%`;
             document.getElementById('barFruit').style.width = `${(catFruit / maxCat) * 100}%`;
             document.getElementById('barGroc').style.width = `${(catGroc / maxCat) * 100}%`;
@@ -2254,7 +2588,7 @@
                 row.innerHTML = `
                     <div>
                         <p class="font-extrabold text-slate-800 uppercase tracking-wide">TXID: ${t.id.substring(3,9)} <span class="text-[9px] font-bold text-slate-400">@ ${t.time}</span></p>
-                        <p class="text-[10px] text-slate-505 font-bold uppercase mt-0.5">${t.itemsCount} Articles • Disc ₹${t.discount.toFixed(0)}</p>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase mt-0.5">${t.itemsCount} Articles • Disc ₹${t.discount.toFixed(0)}</p>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="font-black text-slate-900 text-sm">₹${t.amount.toFixed(2)}</span>
@@ -2281,7 +2615,7 @@
                     qty: item.qty,
                     totalPrice: item.val,
                     unit: item.unit,
-                    basePrice: item.val / item.qty,
+                    basePrice: item.val / item.qty, 
                     dSQ: 1,
                     dSU: item.unit,
                     category: item.cat
@@ -2307,7 +2641,7 @@
             recalculateAnalytics();
             notify("Ledger History Cleared.");
         }
-
+        
         function sendInvoice() {
             softVibrate();
             const items = Object.values(cart); if(items.length===0) return notify("Cart Ledger Empty");
@@ -2334,9 +2668,11 @@
             if (customOfferMsg) { msg += `⭐ *OFFER: ${customOfferMsg}* ⭐\n\n`; }
             
             msg += `🙏 *Thank you for visiting Farmer's Gate!*\n`;
-            msg += `_${HEALTH_QUOTES[Math.floor(Math.random() * HEALTH_QUOTES.length)]}_`;
+            msg += `_${HEALTH_QUOTES[Math.floor(Math.random() * HEALTH_QUOTES.length)]}_\n\n`;
+            msg += `_Developed by Arvind Kumar Shukla_`;
             
             logTransaction(parseFloat(finalTotalStr), discount, items.length);
+
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
@@ -2419,7 +2755,233 @@
                 }
             } catch(e) { console.error(e); notify("Graphic generation failed"); }
         }
-        
+
+        // DAILY SALES CLOSING RECONCILIATION & WHATSAPP EXPORTER
+        let totalClosingSaleCalculated = 0;
+        let totalDenominationsCalculated = 0;
+
+        window.calculateClosingSales = function() {
+            const cash = parseFloat(document.getElementById('closingCash').value) || 0;
+            const card = parseFloat(document.getElementById('closingCard').value) || 0;
+            const upi = parseFloat(document.getElementById('closingUpi').value) || 0;
+            const exp = parseFloat(document.getElementById('closingExpenses').value) || 0;
+            const pur = parseFloat(document.getElementById('closingPurchase').value) || 0;
+
+            totalClosingSaleCalculated = cash + card + upi;
+            const netCash = cash - exp - pur;
+
+            document.getElementById('closingTotalSales').innerText = `₹${totalClosingSaleCalculated.toFixed(2)}`;
+            document.getElementById('closingNetRevenue').innerText = `₹${netCash.toFixed(2)}`;
+            
+            reconcileDenominations(cash);
+        }
+
+        window.calculateDenominations = function() {
+            const d500 = (parseInt(document.getElementById('den_500').value) || 0) * 500;
+            const d200 = (parseInt(document.getElementById('den_200').value) || 0) * 200;
+            const d100 = (parseInt(document.getElementById('den_100').value) || 0) * 100;
+            const d50 = (parseInt(document.getElementById('den_50').value) || 0) * 50;
+            const d20 = (parseInt(document.getElementById('den_20').value) || 0) * 20;
+            const d10 = (parseInt(document.getElementById('den_10').value) || 0) * 10;
+            const d5 = (parseInt(document.getElementById('den_5').value) || 0) * 5;
+            const d2 = (parseInt(document.getElementById('den_2').value) || 0) * 2;
+            const d1 = (parseInt(document.getElementById('den_1').value) || 0) * 1;
+
+            totalDenominationsCalculated = d500 + d200 + d100 + d50 + d20 + d10 + d5 + d2 + d1;
+            document.getElementById('denomTotalValue').innerText = `₹${totalDenominationsCalculated.toFixed(2)}`;
+
+            const cash = parseFloat(document.getElementById('closingCash').value) || 0;
+            reconcileDenominations(cash);
+        }
+
+        function reconcileDenominations(cashInput) {
+            const badge = document.getElementById('denomAuditBadge');
+            if (!badge) return;
+
+            if (cashInput === 0 && totalDenominationsCalculated === 0) {
+                badge.innerText = "Empty Register";
+                badge.className = "text-[8px] px-1.5 py-0.5 rounded bg-slate-500/20 text-slate-300 font-bold uppercase tracking-wider";
+                return;
+            }
+
+            const difference = totalDenominationsCalculated - cashInput;
+            if (difference === 0) {
+                badge.innerText = "✅ Audited & Balanced";
+                badge.className = "text-[8px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 font-bold uppercase tracking-wider animate-pulse";
+            } else if (difference > 0) {
+                badge.innerText = `⚠️ Surplus: +₹${difference.toFixed(0)}`;
+                badge.className = "text-[8px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold uppercase tracking-wider";
+            } else {
+                badge.innerText = `❌ Shortage: -₹${Math.abs(difference).toFixed(0)}`;
+                badge.className = "text-[8px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300 font-bold uppercase tracking-wider";
+            }
+        }
+
+        window.shareClosingReportToWhatsApp = function() {
+            softVibrate();
+            const cash = parseFloat(document.getElementById('closingCash').value) || 0;
+            const card = parseFloat(document.getElementById('closingCard').value) || 0;
+            const upi = parseFloat(document.getElementById('closingUpi').value) || 0;
+            const exp = parseFloat(document.getElementById('closingExpenses').value) || 0;
+            const pur = parseFloat(document.getElementById('closingPurchase').value) || 0;
+
+            const d500 = parseInt(document.getElementById('den_500').value) || 0;
+            const d200 = parseInt(document.getElementById('den_200').value) || 0;
+            const d100 = parseInt(document.getElementById('den_100').value) || 0;
+            const d50 = parseInt(document.getElementById('den_50').value) || 0;
+            const d20 = parseInt(document.getElementById('den_20').value) || 0;
+            const d10 = parseInt(document.getElementById('den_10').value) || 0;
+            const d5 = parseInt(document.getElementById('den_5').value) || 0;
+            const d2 = parseInt(document.getElementById('den_2').value) || 0;
+            const d1 = parseInt(document.getElementById('den_1').value) || 0;
+
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+            const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+            let msg = `📊 *FARMER'S GATE - DAILY closing REPORT* 📊\n`;
+            msg += `📍 _Branch: ${sLoc}_\n`;
+            msg += `📅 _Date: ${dateStr} | ${timeStr}_\n`;
+            msg += `---------------------\n\n`;
+            msg += `💰 *SALES SUMMARY:*\n`;
+            msg += `• Cash Sales: ₹${cash.toFixed(2)}\n`;
+            msg += `• UPI Sales: ₹${upi.toFixed(2)}\n`;
+            msg += `• Card Sales: ₹${card.toFixed(2)}\n`;
+            msg += `⭐ *Total Sales: ₹${totalClosingSaleCalculated.toFixed(2)}*\n\n`;
+            msg += `💸 *OUTFLOWS & PURCHASES:*\n`;
+            msg += `• Daily Expenses: ₹${exp.toFixed(2)}\n`;
+            msg += `• Store Purchases: ₹${pur.toFixed(2)}\n`;
+            msg += `📉 *Net Drawer Cash:* ₹${(cash - exp - pur).toFixed(2)}\n\n`;
+
+            msg += `💵 *CASH NOTE RECONCILIATION:*\n`;
+            if (d500) msg += `• ₹500 x ${d500} = ₹${d500 * 500}\n`;
+            if (d200) msg += `• ₹200 x ${d200} = ₹${d200 * 200}\n`;
+            if (d100) msg += `• ₹100 x ${d100} = ₹${d100 * 100}\n`;
+            if (d50) msg += `• ₹50 x ${d50} = ₹${d50 * 50}\n`;
+            if (d20) msg += `• ₹20 x ${d20} = ₹${d20 * 20}\n`;
+            if (d10) msg += `• ₹10 x ${d10} = ₹${d10 * 10}\n`;
+            if (d5) msg += `• ₹5 x ${d5} = ₹${d5 * 5}\n`;
+            if (d2) msg += `• ₹2 x ${d2} = ₹${d2 * 2}\n`;
+            if (d1) msg += `• ₹1 x ${d1} = ₹${d1 * 1}\n`;
+            msg += `⭐ *Denominations Value: ₹${totalDenominationsCalculated.toFixed(2)}*\n\n`;
+
+            const diff = totalDenominationsCalculated - cash;
+            if (diff === 0) {
+                msg += `✅ *Drawer Status: Balanced & Audited*\n\n`;
+            } else {
+                msg += `⚠️ *Drawer Status: Discrepancy detected (${diff > 0 ? "Surplus" : "Shortage"} of ₹${Math.abs(diff).toFixed(0)})*\n\n`;
+            }
+
+            msg += `🙏 Developed by Arvind Kumar Shukla\n`;
+            msg += `_Farmer's Gate PRO v2.5.0_`;
+
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        // STOCK REQUIREMENT CONCURRENT COUNTERS & WHATSAPP EXPORTER
+        window.renderStockRequirements = function() {
+            const container = document.getElementById('stockRequirementsGrid');
+            if (!container) return;
+            container.innerHTML = '';
+
+            const veggies = inventory.filter(i => i.category === 'Vegetable').sort((a,b) => a.name.localeCompare(b.name));
+            const fruits = inventory.filter(i => i.category === 'Fruit').sort((a,b) => a.name.localeCompare(b.name));
+
+            if (veggies.length === 0 && fruits.length === 0) {
+                container.innerHTML = `<p class="text-center py-6 text-slate-400 text-xs font-semibold uppercase">No vegetables or fruits in master list</p>`;
+                return;
+            }
+
+            const buildSection = (title, items) => {
+                if (items.length === 0) return '';
+                let html = `<div class="space-y-2">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-1">${title}</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">`;
+
+                items.forEach(item => {
+                    const reqQty = stockRequirements[item.id] || 0;
+                    html += `
+                        <div class="flex items-center justify-between p-2.5 bg-white border border-slate-100 rounded-xl shadow-sm gap-2">
+                            <div class="min-w-0 flex-1">
+                                <p class="text-xs font-bold text-slate-800 uppercase truncate">${item.name}</p>
+                                ${item.nameHindi ? `<span class="text-[8px] font-bold text-slate-400 bg-slate-100 border px-1 rounded">${item.nameHindi}</span>` : ''}
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <button onclick="adjustRequirement(${item.id}, -1)" class="w-7 h-7 bg-slate-100 text-slate-700 hover:bg-slate-200 font-black rounded-lg text-xs flex items-center justify-center transition-colors shadow-sm">-</button>
+                                <input type="number" id="reqInput-${item.id}" value="${reqQty}" onchange="setRequirement(${item.id}, this.value)" class="w-10 text-center font-black text-xs bg-slate-50 border border-slate-200 rounded-lg p-1 outline-none focus:border-emerald-500">
+                                <button onclick="adjustRequirement(${item.id}, 1)" class="w-7 h-7 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white font-black rounded-lg text-xs flex items-center justify-center transition-colors shadow-sm">+</button>
+                                <span class="text-[9px] font-black text-slate-400 uppercase w-6">${item.priceUnit}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                html += `</div></div>`;
+                return html;
+            };
+
+            container.innerHTML += buildSection("🥬 VEGETABLES", veggies);
+            container.innerHTML += buildSection("🍎 FRUITS", fruits);
+        }
+
+        window.adjustRequirement = function(id, offset) {
+            softVibrate();
+            let current = stockRequirements[id] || 0;
+            current = Math.max(0, current + offset);
+            stockRequirements[id] = current;
+            const input = document.getElementById(`reqInput-${id}`);
+            if (input) input.value = current;
+        }
+
+        window.setRequirement = function(id, val) {
+            let num = parseInt(val) || 0;
+            num = Math.max(0, num);
+            stockRequirements[id] = num;
+        }
+
+        window.shareStockRequirementsToWhatsApp = function() {
+            softVibrate();
+            const entries = Object.entries(stockRequirements).filter(([id, val]) => val > 0);
+            if (entries.length === 0) return notify("No active stock requirements set!");
+
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+            const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+            let msg = `🥦 *FARMER'S GATE - STOCK REQUISITION* 🍎\n`;
+            msg += `📍 _Requisitioning from Branch: ${sLoc}_\n`;
+            msg += `📅 _Date: ${dateStr} | ${timeStr}_\n`;
+            msg += `---------------------\n\n`;
+
+            let vegLines = "";
+            let fruitLines = "";
+
+            entries.forEach(([id, val]) => {
+                const item = inventory.find(i => i.id == id);
+                if (item) {
+                    const line = `• *${item.name}* ${item.nameHindi ? `(${item.nameHindi})` : ''} - *${val} ${item.priceUnit}*\n`;
+                    if (item.category === 'Vegetable') {
+                        vegLines += line;
+                    } else if (item.category === 'Fruit') {
+                        fruitLines += line;
+                    }
+                }
+            });
+
+            if (vegLines) {
+                msg += `🥦 *VEGETABLES:*\n${vegLines}\n`;
+            }
+            if (fruitLines) {
+                msg += `🍎 *FRUITS:*\n${fruitLines}\n`;
+            }
+
+            msg += `---------------------\n`;
+            msg += `🙏 Request Compiled by Arvind Kumar Shukla\n`;
+            msg += `_Farmer's Gate PRO v2.5.0_`;
+
+            window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
         function notify(m) { 
             const t = document.getElementById('toast'); 
             const msgEl = document.getElementById('toastMsg');
@@ -2430,10 +2992,9 @@
             t.style.opacity = '1'; 
             
             if(window.toastTimer) clearTimeout(window.toastTimer);
-            // Reduced to a snappy 1400ms duration for rapid and clean market transactions
             window.toastTimer = setTimeout(() => {
                 t.classList.add('translate-y-4', 'opacity-0');
-            }, 1400); 
+            }, 1200); 
         }
     </script>
 </body>
