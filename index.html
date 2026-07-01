@@ -403,22 +403,74 @@
 
                     <!-- STOCK REQUIREMENT ACCORDION PLANNER -->
                     <div class="bg-slate-50 border border-slate-200 p-5 rounded-[2rem] space-y-4">
-                        <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+                        <div class="flex justify-between items-center pb-2 border-b border-slate-200 flex-wrap gap-2">
                             <div>
                                 <h3 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v18M3 12h18"/></svg>
                                     🥦 Stock Requirements Planner
                                 </h3>
-                                <p class="text-[9px] text-slate-500 font-bold uppercase mt-0.5">Vegetables and Fruits Ordering Ledger</p>
+                                <p class="text-[9px] text-slate-505 font-bold uppercase mt-0.5">Vegetables and Fruits Ordering Ledger</p>
                             </div>
-                            <button onclick="shareStockRequirementsToWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                                Send To WhatsApp
-                            </button>
+                            <div class="flex items-center gap-1.5">
+                                <button onclick="togglePlannerQuickAdd()" class="bg-blue-50 text-blue-700 border border-blue-105 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+                                    Create New Item
+                                </button>
+                                <button onclick="shareStockRequirementsToWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                                    Send To WhatsApp
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Direct option-selector to add stock request by choosing a master inventory article -->
+                        <div class="bg-white p-3.5 rounded-2xl border border-slate-200 space-y-2">
+                            <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Add Stock Request By Option</label>
+                            <div class="flex gap-2">
+                                <select id="plannerSelectOption" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl text-xs py-2 px-3 font-semibold outline-none cursor-pointer text-slate-800 focus:ring-2 focus:ring-emerald-400 transition-all">
+                                    <option value="">-- Choose Vegetable or Fruit --</option>
+                                </select>
+                                <button onclick="addStockRequestByOption()" class="bg-slate-900 hover:bg-slate-800 text-white px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shadow-sm shrink-0 active:scale-95">Add Request</button>
+                            </div>
+                        </div>
+
+                        <!-- Quick Add Planner Item Form -->
+                        <div id="quickAddPlannerForm" class="hidden bg-white border border-slate-200 p-4 rounded-2xl space-y-3 animate-pop">
+                            <p class="text-[10px] font-black text-slate-500 uppercase tracking-wider">Quick Add New Requisition Article</p>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input type="text" id="plannerNewName" placeholder="Item Name (English)" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold outline-none focus:ring-2 focus:ring-emerald-400">
+                                <input type="text" id="plannerNewHindi" placeholder="हिंदी नाम (e.g. लहसुन)" class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold outline-none focus:ring-2 focus:ring-emerald-400">
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div>
+                                    <label class="text-[8px] font-bold text-slate-400 block mb-1">CATEGORY</label>
+                                    <select id="plannerNewCat" class="w-full bg-slate-50 border border-slate-200 rounded-lg text-[10px] py-1.5 px-2 font-black uppercase outline-none cursor-pointer">
+                                        <option value="Vegetable">Vegetable</option>
+                                        <option value="Fruit">Fruit</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[8px] font-bold text-slate-400 block mb-1">UNIT</label>
+                                    <select id="plannerNewUnit" class="w-full bg-slate-50 border border-slate-200 rounded-lg text-[10px] py-1.5 px-2 font-black uppercase outline-none cursor-pointer">
+                                        <option value="Kg">Kg</option>
+                                        <option value="Gm">Gm</option>
+                                        <option value="Pcs">Pcs</option>
+                                        <option value="Pkt">Pkt</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[8px] font-bold text-slate-400 block mb-1">EST. PRICE (₹)</label>
+                                    <input type="number" id="plannerNewPrice" value="50" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold outline-none focus:ring-2 focus:ring-emerald-400">
+                                </div>
+                            </div>
+                            <div class="flex gap-2 pt-1">
+                                <button onclick="togglePlannerQuickAdd()" class="flex-1 bg-slate-100 text-slate-655 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all">Cancel</button>
+                                <button onclick="submitPlannerQuickAdd()" class="flex-[2] bg-emerald-600 text-white py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all shadow-sm">Add & Plan</button>
+                            </div>
                         </div>
                         
                         <div id="stockRequirementsGrid" class="space-y-4 max-h-96 overflow-y-auto custom-scrollbar pr-1">
-                            <!-- Populated Dynamically via Script Grouping Vegetables and Fruits -->
+                            <!-- Populated Dynamically via Script -->
                         </div>
                     </div>
 
@@ -2884,22 +2936,51 @@
             if (!container) return;
             container.innerHTML = '';
 
-            const veggies = inventory.filter(i => i.category === 'Vegetable').sort((a,b) => a.name.localeCompare(b.name));
-            const fruits = inventory.filter(i => i.category === 'Fruit').sort((a,b) => a.name.localeCompare(b.name));
+            // Populate the dropdown selector with eligible master vegetables and fruits
+            const select = document.getElementById('plannerSelectOption');
+            if (select) {
+                const currentValue = select.value;
+                select.innerHTML = '<option value="">-- Choose Vegetable or Fruit --</option>';
+                const eligibleItems = inventory.filter(i => i.category === 'Vegetable' || i.category === 'Fruit')
+                                               .sort((a,b) => a.name.localeCompare(b.name));
+                eligibleItems.forEach(item => {
+                    const opt = document.createElement('option');
+                    opt.value = item.id;
+                    opt.innerText = `${item.name} ${item.nameHindi ? `(${item.nameHindi})` : ''} [${item.priceUnit}]`;
+                    select.appendChild(opt);
+                });
+                select.value = currentValue;
+            }
+
+            const veggies = [];
+            const fruits = [];
+
+            // Gather only items with active non-zero requests
+            Object.entries(stockRequirements).forEach(([id, val]) => {
+                if (val > 0) {
+                    const item = inventory.find(i => i.id == id);
+                    if (item) {
+                        if (item.category === 'Vegetable') veggies.push({ item, val });
+                        else if (item.category === 'Fruit') fruits.push({ item, val });
+                    }
+                }
+            });
 
             if (veggies.length === 0 && fruits.length === 0) {
-                container.innerHTML = `<p class="text-center py-6 text-slate-400 text-xs font-semibold uppercase">No vegetables or fruits in master list</p>`;
+                container.innerHTML = `
+                    <div class="text-center py-10 text-slate-400 font-bold text-[10px] uppercase tracking-wider bg-white rounded-2xl border border-dashed border-slate-200 p-4 animate-pop">
+                        📭 No active stock requests.<br>Select an article from the dropdown above to begin.
+                    </div>`;
                 return;
             }
 
-            const buildSection = (title, items) => {
-                if (items.length === 0) return '';
+            const buildSection = (title, reqList) => {
+                if (reqList.length === 0) return '';
                 let html = `<div class="space-y-2">
                     <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-1">${title}</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">`;
 
-                items.forEach(item => {
-                    const reqQty = stockRequirements[item.id] || 0;
+                reqList.forEach(({ item, val }) => {
                     html += `
                         <div class="flex items-center justify-between p-2.5 bg-white border border-slate-100 rounded-xl shadow-sm gap-2">
                             <div class="min-w-0 flex-1">
@@ -2908,9 +2989,12 @@
                             </div>
                             <div class="flex items-center gap-1.5 shrink-0">
                                 <button onclick="adjustRequirement(${item.id}, -1)" class="w-7 h-7 bg-slate-100 text-slate-700 hover:bg-slate-200 font-black rounded-lg text-xs flex items-center justify-center transition-colors shadow-sm">-</button>
-                                <input type="number" id="reqInput-${item.id}" value="${reqQty}" onchange="setRequirement(${item.id}, this.value)" class="w-10 text-center font-black text-xs bg-slate-50 border border-slate-200 rounded-lg p-1 outline-none focus:border-emerald-500">
+                                <input type="number" id="reqInput-${item.id}" value="${val}" onchange="setRequirement(${item.id}, this.value)" class="w-10 text-center font-black text-xs bg-slate-50 border border-slate-200 rounded-lg p-1 outline-none focus:border-emerald-500">
                                 <button onclick="adjustRequirement(${item.id}, 1)" class="w-7 h-7 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white font-black rounded-lg text-xs flex items-center justify-center transition-colors shadow-sm">+</button>
                                 <span class="text-[9px] font-black text-slate-400 uppercase w-6">${item.priceUnit}</span>
+                                <button onclick="removeRequirement(${item.id})" class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg transition-colors ml-1" title="Remove request">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                </button>
                             </div>
                         </div>
                     `;
@@ -2924,6 +3008,30 @@
             container.innerHTML += buildSection("🍎 FRUITS", fruits);
         }
 
+        window.addStockRequestByOption = function() {
+            softVibrate();
+            const select = document.getElementById('plannerSelectOption');
+            if (!select) return;
+            const itemId = select.value;
+            if (!itemId) {
+                notify("Select a master list item from options first.");
+                return;
+            }
+            
+            // Initialize or increment active requirement
+            stockRequirements[itemId] = (stockRequirements[itemId] || 0) + 1;
+            renderStockRequirements();
+            notify("Added to requirements board.");
+            select.value = ""; // Reset dropdown option
+        }
+
+        window.removeRequirement = function(id) {
+            softVibrate();
+            stockRequirements[id] = 0;
+            renderStockRequirements();
+            notify("Removed request entry.");
+        }
+
         window.adjustRequirement = function(id, offset) {
             softVibrate();
             let current = stockRequirements[id] || 0;
@@ -2931,12 +3039,18 @@
             stockRequirements[id] = current;
             const input = document.getElementById(`reqInput-${id}`);
             if (input) input.value = current;
+            if (current === 0) {
+                renderStockRequirements(); // Sweep from workspace if zeroed
+            }
         }
 
         window.setRequirement = function(id, val) {
             let num = parseInt(val) || 0;
             num = Math.max(0, num);
             stockRequirements[id] = num;
+            if (num === 0) {
+                renderStockRequirements(); // Refresh to hide zero items
+            }
         }
 
         window.shareStockRequirementsToWhatsApp = function() {
@@ -2980,6 +3094,57 @@
             msg += `_Farmer's Gate PRO v2.5.0_`;
 
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+
+        window.togglePlannerQuickAdd = function() {
+            softVibrate();
+            const form = document.getElementById('quickAddPlannerForm');
+            if(form.classList.contains('hidden')) {
+                form.classList.remove('hidden');
+                document.getElementById('plannerNewName').focus();
+            } else {
+                form.classList.add('hidden');
+                clearPlannerQuickAddForm();
+            }
+        };
+
+        window.submitPlannerQuickAdd = function() {
+            softVibrate();
+            const name = document.getElementById('plannerNewName').value.trim();
+            const hindi = document.getElementById('plannerNewHindi').value.trim();
+            const cat = document.getElementById('plannerNewCat').value;
+            const unit = document.getElementById('plannerNewUnit').value;
+            const price = parseFloat(document.getElementById('plannerNewPrice').value) || 0;
+
+            if(!name) return notify("Item Name is required!");
+
+            const newItem = {
+                id: Date.now() + Math.random(),
+                name: name,
+                nameHindi: hindi,
+                price: price,
+                refQty: 1,
+                priceUnit: unit,
+                category: cat
+            };
+
+            inventory.push(newItem);
+            triggerSave();
+            render();
+            renderManagement();
+            
+            // Set initial requirement to 1 unit so it immediately reflects
+            stockRequirements[newItem.id] = 1;
+            renderStockRequirements();
+
+            togglePlannerQuickAdd();
+            notify(`${name} added to planner & system database!`);
+        };
+
+        function clearPlannerQuickAddForm() {
+            document.getElementById('plannerNewName').value = '';
+            document.getElementById('plannerNewHindi').value = '';
+            document.getElementById('plannerNewPrice').value = '50';
         }
 
         function notify(m) { 
