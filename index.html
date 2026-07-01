@@ -40,6 +40,7 @@
             overscroll-behavior-y: none;
         }
 
+        /* Fluid scrolling limits for desktop container controls */
         .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -98,10 +99,9 @@
         }
     </style>
 </head>
-<body class="p-2 md:p-6 h-screen flex flex-col overflow-hidden">
+<body class="p-2 md:p-4 lg:p-6 h-screen flex flex-col overflow-hidden">
 
     <script>
-        // Set worker options immediately on load for local PDF rendering
         if (typeof pdfjsLib !== 'undefined') {
             pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
         }
@@ -147,7 +147,7 @@
     </div>
 
     <!-- MAIN VIEW CONTAINER -->
-    <div class="max-w-7xl mx-auto w-full flex-1 flex flex-col min-h-0">
+    <div class="max-w-[1600px] mx-auto w-full flex-1 flex flex-col min-h-0">
         
         <!-- Daily Reminder Banner -->
         <div id="dailyReminderBanner" class="hidden bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-3 mb-3 mx-1 flex items-center justify-between shadow-sm animate-pop shrink-0">
@@ -212,10 +212,10 @@
         </div>
 
         <!-- Dynamic Workspaces: Inventory or Analytics -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0 relative">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0 relative mb-4">
             
             <!-- VIEW 1: MAIN REGISTER / SHOP -->
-            <div id="shopWorkspace" class="lg:col-span-7 flex flex-col min-h-0 bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden transition-all duration-300">
+            <div id="shopWorkspace" class="lg:col-span-7 xl:col-span-8 flex flex-col min-h-0 bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden transition-all duration-300">
                 <div class="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-slate-50/50 shrink-0">
                     <h2 id="categoryTitle" class="text-[11px] font-black text-slate-500 uppercase tracking-widest">Master Stock</h2>
                     <div class="flex items-center gap-1.5">
@@ -234,13 +234,13 @@
             </div>
 
             <!-- VIEW 2: INSIGHTS & REPORTS -->
-            <div id="insightsWorkspace" class="hidden lg:col-span-7 flex flex-col min-h-0 bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden transition-all duration-300">
+            <div id="insightsWorkspace" class="hidden lg:col-span-7 xl:col-span-8 flex flex-col min-h-0 bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden transition-all duration-300">
                 <div class="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-slate-50/50 shrink-0">
                     <h2 class="text-[11px] font-black text-slate-500 uppercase tracking-widest">Business Dashboard</h2>
                     <span class="text-[10px] font-bold text-blue-800 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-lg shadow-sm">Live Insights</span>
                 </div>
                 
-                <div class="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
+                <div class="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 space-y-6">
                     <!-- Stat Tiles -->
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                         <div class="bg-emerald-50/60 border border-emerald-100 p-4 rounded-2xl flex flex-col">
@@ -297,7 +297,7 @@
 
                     <!-- DAILY SALES CLOSING CLOSING & DENOMINATION AUDITOR -->
                     <div class="bg-gradient-to-br from-slate-900 to-slate-950 text-white border border-slate-800 p-5 rounded-[2rem] space-y-4 shadow-xl">
-                        <div class="flex justify-between items-center pb-2 border-b border-slate-850">
+                        <div class="flex justify-between items-center pb-2 border-b border-slate-800">
                             <div>
                                 <h3 class="text-xs font-black text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 8v8M8 12h8"/></svg>
@@ -402,29 +402,42 @@
                     </div>
 
                     <!-- STOCK REQUIREMENT ACCORDION PLANNER -->
-                    <div class="bg-slate-50 border border-slate-200 p-5 rounded-[2rem] space-y-4">
+                    <div class="bg-slate-50 border border-slate-200 p-4 sm:p-5 rounded-[2rem] space-y-4">
                         <div class="flex justify-between items-center pb-2 border-b border-slate-200 flex-wrap gap-2">
                             <div>
                                 <h3 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v18M3 12h18"/></svg>
                                     🥦 Stock Requirements Planner
                                 </h3>
-                                <p class="text-[9px] text-slate-505 font-bold uppercase mt-0.5">Vegetables and Fruits Ordering Ledger</p>
+                                <p class="text-[9px] text-slate-500 font-bold uppercase mt-0.5">Vegetables and Fruits Ordering Ledger</p>
                             </div>
-                            <div class="flex items-center gap-1.5">
-                                <button onclick="togglePlannerQuickAdd()" class="bg-blue-50 text-blue-700 border border-blue-105 hover:bg-blue-100 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
-                                    Create New Item
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <button onclick="autoGenerateRequirementsFromHistory()" class="bg-amber-50 text-amber-800 border border-amber-200 hover:bg-amber-100 px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1" title="Generate recommendations based on sales data">
+                                    ✨ Predictive Auto-Fill
                                 </button>
-                                <button onclick="shareStockRequirementsToWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1">
+                                <button onclick="togglePlannerQuickAdd()" class="bg-blue-50 text-blue-700 border border-blue-100 hover:bg-blue-100 px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
+                                    Custom Item
+                                </button>
+                                <button onclick="shareStockRequirementsToWhatsApp()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider active:scale-95 transition-all flex items-center gap-1">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                                    Send To WhatsApp
+                                    Send Requisition
                                 </button>
                             </div>
                         </div>
 
+                        <!-- Filter Tabs: Show Active Requests vs Show Complete Checklist -->
+                        <div class="bg-slate-200/60 p-1 rounded-xl flex gap-1 shadow-inner max-w-md">
+                            <button onclick="setPlannerFilterState('active')" id="btnPlannerActive" class="flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all bg-white text-slate-800 shadow-sm">
+                                📋 Active Requests
+                            </button>
+                            <button onclick="setPlannerFilterState('all')" id="btnPlannerAll" class="flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all text-slate-500 hover:text-slate-800">
+                                🗃️ Show All Checklist
+                            </button>
+                        </div>
+
                         <!-- Direct option-selector to add stock request by choosing a master inventory article -->
-                        <div class="bg-white p-3.5 rounded-2xl border border-slate-200 space-y-2">
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 space-y-2">
                             <label class="text-[9px] font-black text-slate-400 uppercase tracking-widest block">Add Stock Request By Option</label>
                             <div class="flex gap-2">
                                 <select id="plannerSelectOption" class="flex-1 bg-slate-50 border border-slate-200 rounded-xl text-xs py-2 px-3 font-semibold outline-none cursor-pointer text-slate-800 focus:ring-2 focus:ring-emerald-400 transition-all">
@@ -469,19 +482,8 @@
                             </div>
                         </div>
                         
-                        <div id="stockRequirementsGrid" class="space-y-4 max-h-96 overflow-y-auto custom-scrollbar pr-1">
+                        <div id="stockRequirementsGrid" class="space-y-4 max-h-[450px] overflow-y-auto custom-scrollbar pr-1">
                             <!-- Populated Dynamically via Script -->
-                        </div>
-                    </div>
-
-                    <!-- Recent Receipts Ledger -->
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center">
-                            <h3 class="text-xs font-black text-slate-700 uppercase tracking-wider">Recent Transactions</h3>
-                            <button onclick="clearTransactionHistory()" class="text-[10px] font-bold text-red-600 hover:bg-red-50 px-2 py-1 rounded-lg">Clear All</button>
-                        </div>
-                        <div id="transactionsLedger" class="space-y-2 max-h-64 overflow-y-auto custom-scrollbar pr-1">
-                            <p class="text-center py-6 text-slate-400 text-xs font-semibold uppercase">No records generated today</p>
                         </div>
                     </div>
                 </div>
@@ -491,8 +493,8 @@
             <div id="cartOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity duration-300 opacity-0" onclick="toggleCart()"></div>
 
             <!-- RIGHT PANEL: ACTIVE CART WITH MULTI-CUSTOMER TABS -->
-            <div id="cartPanel" class="fixed inset-x-0 bottom-0 z-50 transform translate-y-full transition-transform duration-300 ease-out lg:relative lg:translate-y-0 lg:col-span-5 lg:z-auto h-[88vh] lg:h-full flex flex-col shadow-[0_-10px_40px_rgba(0,0,0,0.1)] lg:shadow-none">
-                <div class="glass-panel rounded-t-[2.5rem] lg:rounded-[2rem] p-5 sm:p-6 lg:border flex flex-col bg-white h-full relative overflow-hidden">
+            <div id="cartPanel" class="fixed inset-x-0 bottom-0 z-50 transform translate-y-full transition-transform duration-300 ease-out lg:relative lg:translate-y-0 lg:col-span-5 xl:col-span-4 lg:z-auto h-[88vh] lg:h-full flex flex-col shadow-[0_-10px_40px_rgba(0,0,0,0.1)] lg:shadow-none">
+                <div class="glass-panel rounded-t-[2.5rem] lg:rounded-[2rem] p-4 sm:p-6 lg:border flex flex-col bg-white h-full relative overflow-hidden">
                     
                     <div id="cartHandle" class="w-16 h-1.5 bg-slate-300 rounded-full mx-auto mb-5 lg:hidden swipe-handle"></div>
                     
@@ -578,7 +580,7 @@
         </div>
 
         <!-- Premium Adaptive Footer Attribution -->
-        <footer class="mt-3 py-2 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest shrink-0 border-t border-slate-100/60 select-none flex flex-wrap items-center justify-center gap-1">
+        <footer class="mt-3 py-2 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest shrink-0 border-t border-slate-100/60 select-none flex wrap items-center justify-center gap-1">
             <span>Farmer's Gate PRO v2.5.0</span>
             <span class="text-slate-300">•</span>
             <span>Developed by <span class="text-slate-700 font-extrabold">Arvind Kumar Shukla</span></span>
@@ -869,6 +871,7 @@
                 const audioSet = SafeStorage.get('fg_audio_enabled') !== "false";
                 const transStr = SafeStorage.get('fg_transactions') || "[]";
                 const sheetUrlSaved = SafeStorage.get('fg_sheet_url') || "";
+                const plannerFilterSaved = SafeStorage.get('fg_planner_filter') || "active";
                 
                 const inventory = invStr ? JSON.parse(invStr) : defaultInventory;
                 const qtyPatterns = JSON.parse(SafeStorage.get('fg_qty_patterns') || "{}");
@@ -877,6 +880,7 @@
                 // Load multi-customer parameters
                 const customersStr = SafeStorage.get('fg_customers') || "[]";
                 const activeCustId = SafeStorage.get('fg_active_customer_id') || "";
+                const stockReqsStr = SafeStorage.get('fg_stock_requirements') || "{}";
                 
                 let customers = JSON.parse(customersStr);
                 if (customers.length === 0) {
@@ -885,15 +889,22 @@
                     ];
                 }
                 let activeCustomerId = activeCustId || customers[0].id;
+                let stockReqs = JSON.parse(stockReqsStr);
                 
-                return { loc, inventory, lastUpdatedStr, qtyPatterns, key, audioSet, transactions, customers, activeCustomerId, sheetUrlSaved };
+                return { 
+                    loc, inventory, lastUpdatedStr, qtyPatterns, key, audioSet, 
+                    transactions, customers, activeCustomerId, sheetUrlSaved, 
+                    stockReqs, plannerFilterSaved 
+                };
             },
-            async save(inventoryData, locationData, keyData, audioData, transData, customersData, activeCustomerIdData, sheetUrlData = "") {
+            async save(inventoryData, locationData, keyData, audioData, transData, customersData, activeCustomerIdData, sheetUrlData = "", stockReqData = {}, plannerFilterVal = "active") {
                 SafeStorage.set('fg_inventory', JSON.stringify(inventoryData));
                 SafeStorage.set('fg_loc', locationData);
                 SafeStorage.set('fg_api_key', keyData);
                 SafeStorage.set('fg_audio_enabled', audioData ? "true" : "false");
                 SafeStorage.set('fg_transactions', JSON.stringify(transData));
+                SafeStorage.set('fg_stock_requirements', JSON.stringify(stockReqData));
+                SafeStorage.set('fg_planner_filter', plannerFilterVal);
                 if (sheetUrlData) {
                     SafeStorage.set('fg_sheet_url', sheetUrlData);
                 }
@@ -930,8 +941,9 @@
         let customers = [];
         let activeCustomerId = '';
 
-        // Stock Requirements Tracker
+        // Stock Requirements Planner States
         let stockRequirements = {};
+        let plannerFilterState = 'active'; // 'active' (show requested) or 'all' (checklist)
 
         const englishToHindiMap = {
             'potato': 'आलू', 'tomato': 'टमाटर', 'onion': 'प्याज', 'apple': 'सेब', 'banana': 'केला',
@@ -962,6 +974,8 @@
             AudioSynthesizer.enabled = data.audioSet;
             transactions = data.transactions;
             savedSheetUrl = data.sheetUrlSaved;
+            stockRequirements = data.stockReqs;
+            plannerFilterState = data.plannerFilterSaved;
             
             // Populating multi-customer states
             customers = data.customers;
@@ -1000,6 +1014,7 @@
                 renderCustomerTabs();
                 render(); 
                 setupTouchGestures();
+                updatePlannerFilterUI();
                 renderStockRequirements();
             }, 100);
 
@@ -1512,152 +1527,14 @@
             return 'Vegetable';
         }
 
-        function checkDailyUpdate(lastUpdatedStr) {
-            const todayStr = new Date().toDateString();
-            const dismissedDate = SafeStorage.get('fg_dismissed_date');
-            if (dismissedDate === todayStr) return;
-
-            let needsUpdate = false;
-            if (!lastUpdatedStr) {
-                needsUpdate = true;
-            } else {
-                const lastDate = new Date(lastUpdatedStr);
-                if (lastDate.toDateString() !== todayStr) needsUpdate = true;
-            }
-
-            if (needsUpdate) {
-                const banner = document.getElementById('dailyReminderBanner');
-                if (banner) banner.classList.remove('hidden');
-            }
-        }
-
-        function dismissDailyReminder() {
-            softVibrate();
-            const banner = document.getElementById('dailyReminderBanner');
-            if (banner) banner.classList.add('hidden');
-            SafeStorage.set('fg_dismissed_date', new Date().toDateString());
-            notify("Notification dismissed for today.");
-        }
-
-        function updateDateDisplay(dateStr) {
-            const badge = document.getElementById('updateDateBadge');
-            if(badge && dateStr) {
-                const d = new Date(dateStr);
-                const today = new Date();
-                let display = d.toLocaleDateString('en-IN', {month:'short', day:'numeric'});
-                if(d.toDateString() === today.toDateString()) {
-                    display = "Today, " + d.toLocaleTimeString('en-IN', {hour:'2-digit', minute:'2-digit'});
-                }
-                badge.innerText = 'Sync: ' + display;
-            }
-        }
-
-        function updateNetworkStatus() {
-            const badge = document.getElementById('offlineBadge');
-            if (navigator.onLine) {
-                if(badge) badge.classList.add('hidden');
-            } else {
-                if(badge) badge.classList.remove('hidden');
-                notify("📱 Offline mode enabled. Systems working normally.");
-            }
-        }
-
         function updateStockBadge() { 
-            const el = document.getElementById('totalItemsBadge');
-            if(el) el.innerText = 'Stock: ' + inventory.length; 
+            const el = document.getElementById('itemCount');
+            if(el) el.innerText = inventory.length + ' Articles'; 
         }
 
-        function toggleAudio() {
-            AudioSynthesizer.enabled = !AudioSynthesizer.enabled;
-            updateAudioButtonUI();
-            triggerSave();
-            notify(AudioSynthesizer.enabled ? "Scan Feedback Enabled 🔊" : "Scan Feedback Muted 🔇");
-            softVibrate();
-        }
-
-        function updateAudioButtonUI() {
-            const btn = document.getElementById('audioToggleBtn');
-            const icon = document.getElementById('audioIcon');
-            if (AudioSynthesizer.enabled) {
-                btn.className = "bg-emerald-50 text-emerald-700 border border-emerald-200 p-2.5 rounded-2xl active:scale-95 transition-all flex items-center justify-center";
-                icon.innerHTML = `<path d="M11 5 6 9H2v6h4l5 4V5z"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/>`;
-            } else {
-                btn.className = "bg-slate-50 text-slate-500 border border-slate-200 p-2.5 rounded-2xl active:scale-95 transition-all flex items-center justify-center";
-                icon.innerHTML = `<path d="M11 5 6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/>`;
-            }
-        }
-
-        function switchView(view) {
-            softVibrate();
-            currentWorkspace = view;
-            const btnShop = document.getElementById('btnViewShop');
-            const btnInsights = document.getElementById('btnViewInsights');
-            const shopWorkspace = document.getElementById('shopWorkspace');
-            const insightsWorkspace = document.getElementById('insightsWorkspace');
-            const searchRow = document.getElementById('searchFilterRow');
-
-            if (view === 'shop') {
-                btnShop.className = "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase transition-all bg-white text-slate-900 shadow-sm";
-                btnInsights.className = "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase transition-all text-slate-500 hover:text-slate-900";
-                shopWorkspace.classList.remove('hidden');
-                insightsWorkspace.classList.add('hidden');
-                if (searchRow) searchRow.classList.remove('hidden');
-            } else {
-                btnInsights.className = "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase transition-all bg-white text-slate-900 shadow-sm";
-                btnShop.className = "px-2.5 py-1 rounded-lg text-[10px] font-black uppercase transition-all text-slate-500 hover:text-slate-900";
-                shopWorkspace.classList.add('hidden');
-                insightsWorkspace.classList.remove('hidden');
-                if (searchRow) searchRow.classList.add('hidden');
-                recalculateAnalytics();
-            }
-        }
-
-        let translateTimeout;
-        function debouncedTranslate(sourceId, targetId, langPair) {
-            clearTimeout(translateTimeout);
-            translateTimeout = setTimeout(() => {
-                autoTranslate(sourceId, targetId, langPair);
-            }, 800);
-        }
-
-        async function autoTranslate(sourceId, targetId, langPair) {
-            if (!navigator.onLine) return;
-
-            const sourceEl = document.getElementById(sourceId);
-            const targetEl = document.getElementById(targetId);
-            const loader = document.getElementById('translateLoader');
-            const text = sourceEl.value.trim();
-
-            if (!text || targetEl.value.trim() !== '') return;
-
-            if (langPair === 'en|hi' && englishToHindiMap[text.toLowerCase()]) {
-                targetEl.value = englishToHindiMap[text.toLowerCase()];
-                return;
-            }
-
-            try {
-                if(loader) loader.classList.remove('hidden');
-                const response = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`);
-                const data = await response.json();
-                
-                if (data && data.responseData && data.responseData.translatedText) {
-                    let translated = data.responseData.translatedText;
-                    if(translated.toLowerCase() !== text.toLowerCase()) {
-                        targetEl.value = translated;
-                    }
-                }
-            } catch (err) {
-                console.error("Translation API error:", err);
-            } finally {
-                if(loader) loader.classList.add('hidden');
-            }
-        }
-
-        function softVibrate() { if (navigator.vibrate) navigator.vibrate(40); }
-        
         function triggerSave() { 
             saveActiveCustomerState();
-            DataAdapter.save(inventory, sLoc, customApiKey, AudioSynthesizer.enabled, transactions, customers, activeCustomerId, savedSheetUrl); 
+            DataAdapter.save(inventory, sLoc, customApiKey, AudioSynthesizer.enabled, transactions, customers, activeCustomerId, savedSheetUrl, stockRequirements, plannerFilterState); 
             updateStockBadge(); 
         }
         
@@ -1669,30 +1546,6 @@
             document.querySelectorAll('.category-pill').forEach(p => p.classList.remove('active'));
             el.classList.add('active');
             render();
-        }
-
-        function startVoiceBilling() {
-            softVibrate();
-            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-            if (!SpeechRecognition) return notify("Speech recognition unsupported on device");
-            
-            const recognition = new SpeechRecognition();
-            recognition.lang = 'en-IN';
-            recognition.interimResults = false;
-            recognition.maxAlternatives = 1;
-
-            recognition.onstart = function() { notify("🎙️ Mic Listening..."); };
-            recognition.onresult = function(event) {
-                const speechResult = event.results[0][0].transcript.toLowerCase().replace(/[\.\,\?]/g, '');
-                const searchInput = document.getElementById('searchInput');
-                if (searchInput) {
-                    searchInput.value = speechResult;
-                    handleSearch();
-                    notify(`Query: "${speechResult}"`);
-                }
-            };
-            recognition.onerror = function() { notify("Voice recognition failed"); };
-            recognition.start();
         }
 
         window.applySuggestion = function(id, qty, unit) {
@@ -2079,7 +1932,7 @@
                     catItems.forEach(it => {
                         const isDup = counts[it.name.toLowerCase().trim()] > 1;
                         const el = document.createElement('div'); el.className = `flex items-center justify-between p-3.5 bg-white border rounded-xl shadow-sm mb-2 ${isDup ? 'border-red-200 bg-rose-50/20' : 'border-slate-200'}`;
-                        el.innerHTML = `<div class="min-w-0 flex-1 py-1"><div><div class="flex items-center flex-wrap gap-2"><span class="text-xs font-black text-slate-800 truncate uppercase">${it.name}</span><select onchange="changeItemCategory(${it.id}, this.value)" class="text-[9px] font-bold text-slate-500 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 outline-none cursor-pointer hover:bg-slate-100 focus:border-emerald-400"><option value="Vegetable" ${it.category==='Vegetable'?'selected':''}>Veg</option><option value="Fruit" ${it.category==='Fruit'?'selected':''}>Fruit</option><option value="Grocery" ${it.category==='Grocery'?'selected':''}>Groc</option></select>${isDup ? '<span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-red-100 text-red-700">DUP</span>' : ''}</div><span class="text-[11px] text-emerald-600 font-extrabold mt-1 block">₹${it.price}/${it.refQty}${it.priceUnit}</span></div></div><div class="flex gap-1.5"><button onclick="editArticle(${it.id})" class="bg-slate-50 text-slate-550 p-2 rounded-lg border border-slate-200 hover:text-blue-600 hover:bg-blue-50 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button><button onclick="inventory=inventory.filter(i=>i.id!=${it.id});triggerSave();renderManagement();render();renderStockRequirements();notify('Deleted')" class="bg-slate-50 text-slate-550 p-2 rounded-lg border border-slate-200 hover:text-red-600 hover:bg-red-50 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>`;
+                        el.innerHTML = `<div class="min-w-0 flex-1 py-1"><div><div class="flex items-center flex-wrap gap-2"><span class="text-xs font-black text-slate-800 truncate uppercase">${it.name}</span><select onchange="changeItemCategory(${it.id}, this.value)" class="text-[9px] font-bold text-slate-505 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 outline-none cursor-pointer hover:bg-slate-100 focus:border-emerald-400"><option value="Vegetable" ${it.category==='Vegetable'?'selected':''}>Veg</option><option value="Fruit" ${it.category==='Fruit'?'selected':''}>Fruit</option><option value="Grocery" ${it.category==='Grocery'?'selected':''}>Groc</option></select>${isDup ? '<span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-red-100 text-red-700">DUP</span>' : ''}</div><span class="text-[11px] text-emerald-600 font-extrabold mt-1 block">₹${it.price}/${it.refQty}${it.priceUnit}</span></div></div><div class="flex gap-1.5"><button onclick="editArticle(${it.id})" class="bg-slate-50 text-slate-550 p-2 rounded-lg border border-slate-200 hover:text-blue-600 hover:bg-blue-50 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button><button onclick="inventory=inventory.filter(i=>i.id!=${it.id});triggerSave();renderManagement();render();renderStockRequirements();notify('Deleted')" class="bg-slate-50 text-slate-550 p-2 rounded-lg border border-slate-200 hover:text-red-600 hover:bg-red-50 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>`;
                         div.appendChild(el);
                     });
                 }
@@ -2443,20 +2296,6 @@
             notify(`${added} items saved successfully.`);
         }
 
-        function parseCSVLine(text) {
-            let ret = [''], i = 0, p = '', s = true;
-            for (let l in text) {
-                let c = text[l];
-                if ('"' === c) {
-                    s = !s;
-                    if ('"' === p) { ret[i] += '"'; c = '-'; } else if ('' === p) c = '-';
-                } else if (s && ',' === c) c = ret[++i] = '';
-                else ret[i] += c;
-                p = c;
-            }
-            return ret;
-        }
-
         window.exportInventory = function() {
             if(inventory.length === 0) return notify("Inventory is empty!");
             
@@ -2553,7 +2392,7 @@
             softVibrate();
             manualCat = cat; 
             document.querySelectorAll('.mcat').forEach(b => {
-                b.className = 'mcat flex-1 rounded-lg bg-transparent text-slate-505 text-[11px] font-black uppercase py-1.5 transition-all'; 
+                b.className = 'mcat flex-1 rounded-lg bg-transparent text-slate-550 text-[11px] font-black uppercase py-1.5 transition-all'; 
             });
             const b = cat==='Vegetable'?'mcVeg':cat==='Fruit'?'mcFruit':'mcGroc'; 
             if(document.getElementById(b)) {
@@ -2644,7 +2483,7 @@
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="font-black text-slate-900 text-sm">₹${t.amount.toFixed(2)}</span>
-                        <button onclick="reprintSavedBill('${t.id}')" class="bg-white border border-slate-200 text-slate-650 p-2 rounded-lg hover:text-emerald-600 active:scale-90 shadow-sm" title="Print/Export Saved Bill">
+                        <button onclick="reprintSavedBill('${t.id}')" class="bg-white border border-slate-200 text-slate-655 p-2 rounded-lg hover:text-emerald-600 active:scale-90 shadow-sm" title="Print/Export Saved Bill">
                             <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M7 8h10M7 12h10M7 16h10"/></svg>
                         </button>
                     </div>
@@ -2891,7 +2730,7 @@
             const dateStr = now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
             const timeStr = now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true });
 
-            let msg = `📊 *FARMER'S GATE - DAILY closing REPORT* 📊\n`;
+            let msg = `📊 *FARMER'S GATE - DAILY CLOSING REPORT* 📊\n`;
             msg += `📍 _Branch: ${sLoc}_\n`;
             msg += `📅 _Date: ${dateStr} | ${timeStr}_\n`;
             msg += `---------------------\n\n`;
@@ -2930,13 +2769,87 @@
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
+        // PREDICTIVE STOCK REQUISITION ENGINES
+        window.autoGenerateRequirementsFromHistory = function() {
+            softVibrate();
+            if (transactions.length === 0) {
+                notify("No sales transaction records compiled yet to execute predictive analytics.");
+                return;
+            }
+
+            // Create temporary aggregation matrices
+            const itemCounts = {};
+            const itemUnits = {};
+            let predictiveAdditions = 0;
+
+            // Loop and compile recent checkout history profiles
+            transactions.forEach(tx => {
+                if (tx.details) {
+                    tx.details.forEach(item => {
+                        // Resolve master stock ID
+                        const match = inventory.find(i => i.name.toLowerCase().trim() === item.name.toLowerCase().trim());
+                        if (match && (match.category === 'Vegetable' || match.category === 'Fruit')) {
+                            itemCounts[match.id] = (itemCounts[match.id] || 0) + (parseFloat(item.qty) || 0);
+                            itemUnits[match.id] = item.unit || match.priceUnit;
+                        }
+                    });
+                }
+            });
+
+            // Iterate and inject mathematical forecasts into requirements array
+            Object.keys(itemCounts).forEach(itemId => {
+                const totalSoldQty = itemCounts[itemId];
+                const activeUnit = itemUnits[itemId];
+
+                // Factor a scaling coefficient based on transactions density
+                let recommendationVal = Math.ceil(totalSoldQty / Math.max(1, transactions.length / 4));
+                
+                // Avoid suggesting zeros
+                if (recommendationVal < 1) recommendationVal = 1;
+
+                // Set value dynamically to requirements register
+                stockRequirements[itemId] = (stockRequirements[itemId] || 0) + recommendationVal;
+                predictiveAdditions++;
+            });
+
+            if (predictiveAdditions > 0) {
+                renderStockRequirements();
+                triggerSave();
+                notify(`✨ Predictive auto-fill injected suggestions for ${predictiveAdditions} items!`);
+            } else {
+                notify("No vegetable or fruit sales observed inside ledger histories.");
+            }
+        };
+
+        window.setPlannerFilterState = function(stateVal) {
+            softVibrate();
+            plannerFilterState = stateVal;
+            updatePlannerFilterUI();
+            renderStockRequirements();
+            triggerSave();
+        };
+
+        function updatePlannerFilterUI() {
+            const btnActive = document.getElementById('btnPlannerActive');
+            const btnAll = document.getElementById('btnPlannerAll');
+            if (!btnActive || !btnAll) return;
+
+            if (plannerFilterState === 'active') {
+                btnActive.className = "flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all bg-white text-slate-800 shadow-sm";
+                btnAll.className = "flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all text-slate-505 hover:text-slate-800";
+            } else {
+                btnAll.className = "flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all bg-white text-slate-800 shadow-sm";
+                btnActive.className = "flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all text-slate-505 hover:text-slate-800";
+            }
+        }
+
         // STOCK REQUIREMENT CONCURRENT COUNTERS & WHATSAPP EXPORTER
         window.renderStockRequirements = function() {
             const container = document.getElementById('stockRequirementsGrid');
             if (!container) return;
             container.innerHTML = '';
 
-            // Populate the dropdown selector with eligible master vegetables and fruits
+            // Populate selection dropdown filter lists
             const select = document.getElementById('plannerSelectOption');
             if (select) {
                 const currentValue = select.value;
@@ -2955,13 +2868,16 @@
             const veggies = [];
             const fruits = [];
 
-            // Gather only items with active non-zero requests
-            Object.entries(stockRequirements).forEach(([id, val]) => {
-                if (val > 0) {
-                    const item = inventory.find(i => i.id == id);
-                    if (item) {
-                        if (item.category === 'Vegetable') veggies.push({ item, val });
-                        else if (item.category === 'Fruit') fruits.push({ item, val });
+            // Compile eligible planner arrays based on active filter state
+            inventory.forEach(item => {
+                if (item.category === 'Vegetable' || item.category === 'Fruit') {
+                    const currentVal = stockRequirements[item.id] || 0;
+
+                    // If 'active', show only values > 0. If 'all', display everything as checklist.
+                    if (plannerFilterState === 'all' || currentVal > 0) {
+                        const targetObj = { item, val: currentVal };
+                        if (item.category === 'Vegetable') veggies.push(targetObj);
+                        else if (item.category === 'Fruit') fruits.push(targetObj);
                     }
                 }
             });
@@ -2969,7 +2885,7 @@
             if (veggies.length === 0 && fruits.length === 0) {
                 container.innerHTML = `
                     <div class="text-center py-10 text-slate-400 font-bold text-[10px] uppercase tracking-wider bg-white rounded-2xl border border-dashed border-slate-200 p-4 animate-pop">
-                        📭 No active stock requests.<br>Select an article from the dropdown above to begin.
+                        📭 Requisition Ledger Empty.<br>Toggle Complete Checklist or pick from the dropdown.
                     </div>`;
                 return;
             }
@@ -2977,23 +2893,24 @@
             const buildSection = (title, reqList) => {
                 if (reqList.length === 0) return '';
                 let html = `<div class="space-y-2">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-200 pb-1">${title}</p>
+                    <p class="text-[10px] font-black text-slate-450 uppercase tracking-widest border-b border-slate-200 pb-1">${title}</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">`;
 
                 reqList.forEach(({ item, val }) => {
+                    const hasActiveReq = val > 0;
                     html += `
-                        <div class="flex items-center justify-between p-2.5 bg-white border border-slate-100 rounded-xl shadow-sm gap-2">
+                        <div class="flex items-center justify-between p-2.5 bg-white border rounded-xl shadow-sm gap-2 transition-all ${hasActiveReq ? 'border-emerald-300 bg-emerald-50/10' : 'border-slate-100'}" id="planner-card-${item.id}">
                             <div class="min-w-0 flex-1">
                                 <p class="text-xs font-bold text-slate-800 uppercase truncate">${item.name}</p>
-                                ${item.nameHindi ? `<span class="text-[8px] font-bold text-slate-400 bg-slate-100 border px-1 rounded">${item.nameHindi}</span>` : ''}
+                                ${item.nameHindi ? `<span class="text-[8px] font-bold text-slate-405 bg-slate-100 border px-1 rounded">${item.nameHindi}</span>` : ''}
                             </div>
                             <div class="flex items-center gap-1.5 shrink-0">
                                 <button onclick="adjustRequirement(${item.id}, -1)" class="w-7 h-7 bg-slate-100 text-slate-700 hover:bg-slate-200 font-black rounded-lg text-xs flex items-center justify-center transition-colors shadow-sm">-</button>
                                 <input type="number" id="reqInput-${item.id}" value="${val}" onchange="setRequirement(${item.id}, this.value)" class="w-10 text-center font-black text-xs bg-slate-50 border border-slate-200 rounded-lg p-1 outline-none focus:border-emerald-500">
                                 <button onclick="adjustRequirement(${item.id}, 1)" class="w-7 h-7 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white font-black rounded-lg text-xs flex items-center justify-center transition-colors shadow-sm">+</button>
                                 <span class="text-[9px] font-black text-slate-400 uppercase w-6">${item.priceUnit}</span>
-                                <button onclick="removeRequirement(${item.id})" class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg transition-colors ml-1" title="Remove request">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                <button onclick="removeRequirement(${item.id})" class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg transition-colors ml-1" title="Set count to zero">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                                 </button>
                             </div>
                         </div>
@@ -3018,18 +2935,17 @@
                 return;
             }
             
-            // Initialize or increment active requirement
             stockRequirements[itemId] = (stockRequirements[itemId] || 0) + 1;
             renderStockRequirements();
             notify("Added to requirements board.");
-            select.value = ""; // Reset dropdown option
+            select.value = ""; 
         }
 
         window.removeRequirement = function(id) {
             softVibrate();
             stockRequirements[id] = 0;
             renderStockRequirements();
-            notify("Removed request entry.");
+            notify("Requisition count zeroed.");
         }
 
         window.adjustRequirement = function(id, offset) {
@@ -3039,8 +2955,8 @@
             stockRequirements[id] = current;
             const input = document.getElementById(`reqInput-${id}`);
             if (input) input.value = current;
-            if (current === 0) {
-                renderStockRequirements(); // Sweep from workspace if zeroed
+            if (current === 0 && plannerFilterState === 'active') {
+                renderStockRequirements(); 
             }
         }
 
@@ -3048,8 +2964,8 @@
             let num = parseInt(val) || 0;
             num = Math.max(0, num);
             stockRequirements[id] = num;
-            if (num === 0) {
-                renderStockRequirements(); // Refresh to hide zero items
+            if (num === 0 && plannerFilterState === 'active') {
+                renderStockRequirements(); 
             }
         }
 
@@ -3133,7 +3049,6 @@
             render();
             renderManagement();
             
-            // Set initial requirement to 1 unit so it immediately reflects
             stockRequirements[newItem.id] = 1;
             renderStockRequirements();
 
