@@ -1011,26 +1011,47 @@
         }
 
         
-        // Google Sheets Integration
+        // Google Sheets Integration with Published Web & Shared File Fallbacks
         async function syncGoogleSheet() {
             softVibrate();
             const sheetUrl = document.getElementById('sheetUrlInput').value.trim();
             if (!sheetUrl) return notify("Please enter a Google Sheets URL");
 
-            // Extract Spreadsheet ID using Regex
-            const matches = sheetUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
-            if (!matches || !matches[1]) return notify("Invalid Google Sheets URL format");
+            let exportUrl = "";
 
-            const spreadsheetId = matches[1];
-            // Format URL to fetch exported CSV data directly
-            const exportUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`;
+            // Check if it is a "Publish to web" URL which contains sandboxed path /d/e/
+            if (sheetUrl.includes('/d/e/')) {
+                const matches = sheetUrl.match(/\/d\/e\/([a-zA-Z0-9-_]+)/);
+                if (matches && matches[1]) {
+                    const publishId = matches[1];
+                    exportUrl = `https://docs.google.com/spreadsheets/d/e/${publishId}/pub?output=csv`;
+                } else {
+                    // Fallback: If they already pasted the direct CSV output link
+                    if (sheetUrl.includes('/pub?')) {
+                        exportUrl = sheetUrl.replace(/output=[a-z]+/, 'output=csv');
+                        if (!exportUrl.includes('output=csv')) {
+                            exportUrl += (exportUrl.includes('?') ? '&' : '?') + 'output=csv';
+                        }
+                    } else if (sheetUrl.endsWith('/pubhtml')) {
+                        exportUrl = sheetUrl.replace(/\/pubhtml$/, '/pub?output=csv');
+                    } else {
+                        return notify("Unsupported published URL scheme. Paste the complete Publish link.");
+                    }
+                }
+            } else {
+                // Standard "Anyone with link can view" sharing URL
+                const matches = sheetUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+                if (!matches || !matches[1]) return notify("Invalid Google Sheets URL format");
+                const spreadsheetId = matches[1];
+                exportUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`;
+            }
 
             const loader = document.getElementById('smartLoader');
             const progress = document.getElementById('scanProgress');
             const loaderText = document.getElementById('loaderText');
 
             loader.classList.remove('hidden');
-            loaderText.innerText = "Connecting to Google Sheet export API...";
+            loaderText.innerText = "Connecting to Google Sheet published portal...";
             progress.style.width = "30%";
 
             try {
@@ -1053,7 +1074,7 @@
             } catch (err) {
                 console.error("Sheets sync failed: ", err);
                 loader.classList.add('hidden');
-                notify("Google Sheets Sync Failed: Ensure spreadsheet link sharing is set to public.");
+                notify("Google Sheets Sync Failed: Ensure it is published as Web Page or CSV.");
             }
         }
 
