@@ -10,9 +10,15 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     
-    <!-- Tesseract.js for Local, No-API-Key Text Extraction -->
+    <!-- Tesseract.js for Local OCR Text Extraction -->
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     
+    <!-- SheetJS for Excel, CSV, TSV, ODS, and Google Sheet parsing -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+    <!-- PDF.js for extraction of inventory text directly from PDF lists -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+
     <!-- PWA Manifest for Offline Installability -->
     <meta name="theme-color" content="#10b981">
     <link rel="manifest" href='data:application/manifest+json;utf-8,{"name":"Farmer Gate PRO","short_name":"Farmer Gate","start_url":".","display":"standalone","background_color":"#f8fafc","theme_color":"#10b981"}'>
@@ -34,17 +40,17 @@
             overscroll-behavior-y: none;
         }
 
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         
-        .category-pill { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; border: 1px solid transparent; }
-        .category-pill.active { background: var(--primary) !important; color: white !important; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3); transform: scale(1.05); }
+        .category-pill { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); cursor: pointer; border: 1px solid #e2e8f0; }
+        .category-pill.active { background: var(--primary) !important; color: white !important; border-color: var(--primary) !important; box-shadow: 0 4px 15px rgba(16, 185, 129, 0.25); transform: translateY(-1px); }
 
         .glass-panel { 
             background: rgba(255, 255, 255, 0.98); 
-            backdrop-filter: blur(12px); 
+            backdrop-filter: blur(16px); 
             border: 1px solid rgba(226, 232, 240, 0.8);
         }
 
@@ -54,9 +60,9 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        .animate-pop { animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both; }
+        .animate-pop { animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.15) both; }
         @keyframes popIn { 
-            0% { opacity: 0; transform: translateY(10px) scale(0.95); } 
+            0% { opacity: 0; transform: translateY(12px) scale(0.97); } 
             100% { opacity: 1; transform: translateY(0) scale(1); } 
         }
 
@@ -82,10 +88,17 @@
 
         .swipe-handle { cursor: grab; }
         .swipe-handle:active { cursor: grabbing; }
-        .list-enter-active { transition: all 0.3s ease-out; }
+        .list-enter-active { transition: all 0.25s ease-out; }
     </style>
 </head>
 <body class="p-2 md:p-6 h-screen flex flex-col overflow-hidden">
+
+    <script>
+        // Set worker options immediately on load for local PDF rendering
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+        }
+    </script>
 
     <!-- Hidden Thermal Receipt Template -->
     <div id="printArea">
@@ -126,27 +139,28 @@
         </div>
     </div>
 
+    <!-- MAIN VIEW CONTAINER -->
     <div class="max-w-7xl mx-auto w-full flex-1 flex flex-col min-h-0">
         
-        <!-- Daily Reminder Banner (At the very top) -->
-        <div id="dailyReminderBanner" class="hidden bg-amber-50 border border-amber-200 rounded-2xl p-3 mb-3 mx-1 flex items-center justify-between shadow-sm animate-pop shrink-0">
+        <!-- Daily Reminder Banner -->
+        <div id="dailyReminderBanner" class="hidden bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-3 mb-3 mx-1 flex items-center justify-between shadow-sm animate-pop shrink-0">
             <div class="flex items-center gap-3">
-                <div class="bg-amber-100 p-2 rounded-full text-amber-600">
+                <div class="bg-amber-100 p-2.5 rounded-xl text-amber-600">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
                 </div>
                 <div>
-                    <p class="text-[11px] font-black text-amber-800 uppercase tracking-widest">Price Update Required</p>
-                    <p class="text-[10px] font-bold text-amber-700 leading-tight">Please verify and update today's inventory prices.</p>
+                    <p class="text-[11px] font-black text-amber-800 uppercase tracking-widest">Pricing Update Flag</p>
+                    <p class="text-[10px] font-bold text-amber-700 leading-tight">Prices haven't been synchronized today. Verify active inventory.</p>
                 </div>
             </div>
             <button onclick="dismissDailyReminder()" class="p-2 text-amber-500 hover:text-amber-700 hover:bg-amber-100 rounded-xl transition-colors shrink-0" title="Dismiss">
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
             </button>
         </div>
 
         <!-- Header -->
         <header class="grid grid-cols-12 items-center mb-4 px-2 shrink-0 pt-1 gap-2">
-            <!-- Left Controls: Config & Audio options -->
+            <!-- Left Controls: Config & Voice options -->
             <div class="col-span-3 flex justify-start gap-2">
                 <button onclick="toggleAddModal()" class="bg-slate-900 hover:bg-slate-800 text-white p-2.5 rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center" title="Stock Hub & Settings">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.1a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
@@ -162,7 +176,7 @@
                 <p id="displayLoc" class="text-[9px] sm:text-[10px] text-slate-500 font-bold uppercase mt-1 tracking-widest truncate max-w-full">Loading...</p>
             </div>
             
-            <!-- Right: Dynamic Workspace Switcher -->
+            <!-- Right: Dynamic Workspace Switcher & Stats -->
             <div class="col-span-3 flex justify-end items-center gap-1.5">
                 <div class="bg-slate-100 p-1 rounded-xl flex gap-1 shadow-inner shrink-0">
                     <button onclick="switchView('shop')" id="btnViewShop" class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase transition-all bg-white text-slate-900 shadow-sm">🛒 Buy</button>
@@ -171,46 +185,48 @@
             </div>
         </header>
 
-        <!-- Search & Filters -->
+        <!-- Search & Filter Controls -->
         <div id="searchFilterRow" class="grid grid-cols-1 md:grid-cols-12 gap-3 mb-4 shrink-0 px-1">
             <div class="md:col-span-4 flex gap-2">
                 <div class="relative flex-1 group">
-                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Find item..." class="w-full pl-10 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all shadow-sm">
-                    <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <input type="text" id="searchInput" oninput="handleSearch()" placeholder="Find items..." class="w-full pl-10 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-semibold outline-none focus:ring-4 focus:ring-emerald-500/10 focus:border-emerald-500 transition-all shadow-sm">
+                    <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-emerald-500 transition-colors" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
                 </div>
-                <button onclick="startVoiceBilling()" class="bg-white border border-slate-200 text-slate-500 px-3 rounded-xl shadow-sm active:scale-90 transition-all group hover:bg-slate-50 flex items-center justify-center" title="Search with Voice">
+                <button onclick="startVoiceBilling()" class="bg-white border border-slate-200 text-slate-500 px-3.5 rounded-xl shadow-sm active:scale-95 transition-all group hover:bg-slate-50 flex items-center justify-center" title="Voice billing / search">
                     <svg class="group-hover:text-emerald-500 transition-colors" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></svg>
                 </button>
             </div>
-            <div class="md:col-span-8 flex gap-2 overflow-x-auto custom-scrollbar no-scrollbar py-1">
-                <button onclick="setActiveCategory('All', this)" class="category-pill active flex-1 whitespace-nowrap px-4 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-white border border-slate-200 text-slate-500 shadow-sm">All</button>
-                <button onclick="setActiveCategory('Vegetable', this)" class="category-pill flex-1 whitespace-nowrap px-4 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-white border border-slate-200 text-slate-500 shadow-sm">Veggies</button>
-                <button onclick="setActiveCategory('Fruit', this)" class="category-pill flex-1 whitespace-nowrap px-4 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-white border border-slate-200 text-slate-500 shadow-sm">Fruits</button>
-                <button onclick="setActiveCategory('Grocery', this)" class="category-pill flex-1 whitespace-nowrap px-4 py-3 rounded-2xl text-[11px] font-black uppercase tracking-widest bg-white border border-slate-200 text-slate-500 shadow-sm">Grocery</button>
+            <div class="md:col-span-8 flex gap-1.5 overflow-x-auto custom-scrollbar no-scrollbar py-1">
+                <button onclick="setActiveCategory('All', this)" class="category-pill active flex-1 whitespace-nowrap px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-white text-slate-500 shadow-sm">All</button>
+                <button onclick="setActiveCategory('Vegetable', this)" class="category-pill flex-1 whitespace-nowrap px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-white text-slate-500 shadow-sm">Veggies</button>
+                <button onclick="setActiveCategory('Fruit', this)" class="category-pill flex-1 whitespace-nowrap px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-white text-slate-500 shadow-sm">Fruits</button>
+                <button onclick="setActiveCategory('Grocery', this)" class="category-pill flex-1 whitespace-nowrap px-4 py-2.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-white text-slate-500 shadow-sm">Grocery</button>
             </div>
         </div>
 
-        <!-- Main Workspace Grid -->
+        <!-- Dynamic Workspaces: Inventory or Analytics -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0 relative">
             
-            <!-- VIEW 1: Inventory List -->
+            <!-- VIEW 1: MAIN REGISTER / SHOP -->
             <div id="shopWorkspace" class="lg:col-span-7 flex flex-col min-h-0 bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden transition-all duration-300">
                 <div class="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-slate-50/50 shrink-0">
-                    <h2 id="categoryTitle" class="text-[11px] font-black text-slate-500 uppercase tracking-[0.2em]">Master Stock</h2>
+                    <h2 id="categoryTitle" class="text-[11px] font-black text-slate-500 uppercase tracking-widest">Master Stock</h2>
                     <div class="flex items-center gap-1.5">
                         <span id="updateDateBadge" class="bg-blue-50 text-blue-700 border border-blue-100 px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase shadow-sm">Sync: -</span>
                         <span id="itemCount" class="text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-lg shadow-sm">0 Articles</span>
                     </div>
                 </div>
-                <div id="itemGrid" class="flex-1 overflow-y-auto custom-scrollbar p-2 sm:p-4 grid grid-cols-1 sm:grid-cols-2 gap-2 content-start pb-24 lg:pb-4">
+                
+                <!-- Main Grid of Stock Cards -->
+                <div id="itemGrid" class="flex-1 overflow-y-auto custom-scrollbar p-3 sm:p-5 grid grid-cols-1 sm:grid-cols-2 gap-3 content-start pb-24 lg:pb-5">
                     <div class="col-span-1 sm:col-span-2 text-center py-20 text-slate-400 font-bold text-xs uppercase animate-pulse flex flex-col items-center gap-3">
                         <div class="loader"></div>
-                        Loading Stock...
+                        Loading System Stock...
                     </div>
                 </div>
             </div>
 
-            <!-- VIEW 2: Business Analytics Dashboard -->
+            <!-- VIEW 2: INSIGHTS & REPORTS -->
             <div id="insightsWorkspace" class="hidden lg:col-span-7 flex flex-col min-h-0 bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden transition-all duration-300">
                 <div class="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-slate-50/50 shrink-0">
                     <h2 class="text-[11px] font-black text-slate-500 uppercase tracking-widest">Business Dashboard</h2>
@@ -285,31 +301,31 @@
                 </div>
             </div>
 
-            <!-- Cart Overlay Background (Mobile) -->
+            <!-- Cart Overlay (Mobile) -->
             <div id="cartOverlay" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-40 hidden lg:hidden transition-opacity duration-300 opacity-0" onclick="toggleCart()"></div>
 
-            <!-- Right: Active Cart Panel with Multi-Customer Tabs -->
-            <div id="cartPanel" class="fixed inset-x-0 bottom-0 z-50 transform translate-y-full transition-transform duration-400 cubic-bezier(0.4, 0, 0.2, 1) lg:relative lg:translate-y-0 lg:col-span-5 lg:z-auto h-[88vh] lg:h-full flex flex-col shadow-[0_-10px_40px_rgba(0,0,0,0.1)] lg:shadow-none">
-                <div class="glass-panel rounded-t-[2.5rem] lg:rounded-[2rem] p-5 sm:p-6 lg:border-t lg:border-slate-200 flex flex-col bg-white h-full relative">
+            <!-- RIGHT PANEL: ACTIVE CART WITH MULTI-CUSTOMER TABS -->
+            <div id="cartPanel" class="fixed inset-x-0 bottom-0 z-50 transform translate-y-full transition-transform duration-300 ease-out lg:relative lg:translate-y-0 lg:col-span-5 lg:z-auto h-[88vh] lg:h-full flex flex-col shadow-[0_-10px_40px_rgba(0,0,0,0.1)] lg:shadow-none">
+                <div class="glass-panel rounded-t-[2.5rem] lg:rounded-[2rem] p-5 sm:p-6 lg:border flex flex-col bg-white h-full relative overflow-hidden">
                     
                     <div id="cartHandle" class="w-16 h-1.5 bg-slate-300 rounded-full mx-auto mb-5 lg:hidden swipe-handle"></div>
                     
                     <div class="flex justify-between items-center mb-4 shrink-0">
                         <div class="flex items-center gap-2">
-                            <div class="w-8 h-8 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600">
+                            <div class="w-8 h-8 rounded-xl bg-emerald-100 flex items-center justify-center text-emerald-600">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
                             </div>
-                            <h2 class="text-sm font-black text-slate-800 uppercase tracking-widest">Active Order</h2>
+                            <h2 class="text-xs font-black text-slate-800 uppercase tracking-widest">Active Invoice</h2>
                         </div>
-                        <button onclick="clearCart()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 active:scale-90 transition-all p-2 rounded-xl">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+                        <button onclick="clearCart()" class="text-slate-400 hover:text-red-500 hover:bg-red-50 active:scale-95 transition-all p-2 rounded-xl" title="Clear Bill">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
                         </button>
                     </div>
 
                     <!-- Multiple Customers Tabs Container -->
                     <div class="flex items-center gap-2 mb-3 shrink-0 border-b border-slate-100 pb-2">
                         <div id="customerTabsList" class="flex items-center gap-1.5 overflow-x-auto no-scrollbar flex-1 py-1">
-                            <!-- Populated Dynamically via script -->
+                            <!-- Populated Dynamically via Script -->
                         </div>
                         <button onclick="addNewCustomer()" class="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-100 p-2 rounded-xl transition-all active:scale-95 flex items-center justify-center font-bold shrink-0 shadow-sm" title="Add Customer Cart">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 5v14M5 12h14"/></svg>
@@ -320,53 +336,53 @@
 
                     <div class="mt-4 pt-4 border-t border-slate-100 shrink-0 bg-white">
                         
-                        <!-- NEW OFFER & NOTES ACCORDION -->
-                        <details class="mb-4 group">
-                            <summary class="text-[11px] font-black text-blue-600 uppercase tracking-widest cursor-pointer list-none flex items-center justify-between bg-blue-50 p-4 rounded-2xl border border-blue-100 hover:bg-blue-100 transition-colors select-none">
+                        <!-- Offer accordion message block -->
+                        <details class="mb-3 group">
+                            <summary class="text-[10px] font-black text-blue-600 uppercase tracking-wider cursor-pointer list-none flex items-center justify-between bg-blue-50/60 p-3 rounded-xl border border-blue-100 hover:bg-blue-100/60 transition-colors select-none">
                                 <div class="flex items-center gap-2">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-                                    Add Offer Message & Notes
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                                    Offer Banner & Digital QR
                                 </div>
-                                <svg class="w-4 h-4 group-open:rotate-180 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+                                <svg class="w-3.5 h-3.5 group-open:rotate-180 transition-transform" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
                             </summary>
-                            <div class="pt-3 space-y-3 animate-pop">
-                                <input type="text" id="customOfferMsg" oninput="saveCustomerSpecificInputs()" placeholder="Offer: e.g. Get 10% off on your next visit!" class="w-full px-4 py-3 bg-white border border-blue-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-shadow text-blue-900 placeholder-blue-300">
-                                <input type="text" id="paymentInfo" oninput="saveCustomerSpecificInputs()" placeholder="UPI ID or Payment Link..." class="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm transition-shadow">
+                            <div class="pt-2 space-y-2.5 animate-pop">
+                                <input type="text" id="customOfferMsg" oninput="saveCustomerSpecificInputs()" placeholder="Special message: e.g. Get 10% off on your next visit!" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-blue-400 shadow-sm transition-all placeholder-slate-400">
+                                <input type="text" id="paymentInfo" oninput="saveCustomerSpecificInputs()" placeholder="e.g. Pay via GPay/PhonePe to upi@okaxis" class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold outline-none focus:ring-2 focus:ring-emerald-400 shadow-sm transition-all placeholder-slate-400">
                             </div>
                         </details>
 
-                        <div class="flex justify-between items-center mb-5 bg-emerald-50/80 p-3.5 rounded-2xl border border-emerald-100">
-                            <span class="text-[11px] font-black text-emerald-800 uppercase tracking-widest flex items-center gap-2">
+                        <div class="flex justify-between items-center mb-3 bg-emerald-50/70 p-3 rounded-xl border border-emerald-100">
+                            <span class="text-[10px] font-black text-emerald-800 uppercase tracking-widest flex items-center gap-1.5">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m2 9 3-3 3 3"/><path d="M5 6v12"/><path d="m16 15-3 3-3-3"/><path d="M13 18V6"/></svg>
-                                Discount
+                                Invoice Discount
                             </span>
                             <div class="flex items-center gap-1">
-                                <span class="text-emerald-600 font-black text-base">-₹</span>
-                                <input type="number" id="discountInput" oninput="saveCustomerSpecificInputs(); renderCart()" placeholder="0" class="w-20 bg-white border border-emerald-200 rounded-xl px-3 py-2 text-right font-black text-emerald-700 outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm transition-shadow text-sm">
+                                <span class="text-emerald-600 font-extrabold text-sm">-₹</span>
+                                <input type="number" id="discountInput" oninput="saveCustomerSpecificInputs(); renderCart()" placeholder="0" class="w-20 bg-white border border-emerald-200 rounded-lg px-2.5 py-1.5 text-right font-black text-emerald-700 outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm transition-all text-xs">
                             </div>
                         </div>
 
-                        <div class="flex justify-between items-end mb-6 px-1">
+                        <div class="flex justify-between items-end mb-4 px-1">
                             <div>
-                                <p class="text-[11px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1">Grand Total</p>
-                                <div id="grandTotal" class="text-4xl sm:text-5xl font-black text-slate-900 tracking-tighter tabular-nums leading-none">₹0.00</div>
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.15em] mb-1">To pay</p>
+                                <div id="grandTotal" class="text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight tabular-nums leading-none">₹0.00</div>
                             </div>
                             <div class="text-right pb-1">
-                                <p id="orderCount" class="text-[11px] font-black text-emerald-600 uppercase bg-emerald-50 px-3 py-1 rounded-lg">0 Items</p>
+                                <span id="orderCount" class="text-[10px] font-black text-emerald-700 bg-emerald-50 border border-emerald-100 px-3 py-1.5 rounded-lg uppercase tracking-wide">0 items</span>
                             </div>
                         </div>
                         
                         <div class="flex gap-2">
-                            <button onclick="sendInvoice()" class="flex-1 bg-slate-900 text-white py-4 rounded-2xl font-black text-[12px] uppercase tracking-[0.1em] shadow-lg shadow-slate-900/20 active:scale-[0.97] transition-all flex items-center justify-center gap-2 hover:bg-slate-800">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
-                                Send Bill
+                            <button onclick="sendInvoice()" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white py-3.5 rounded-xl font-black text-[11px] uppercase tracking-wider shadow-lg active:scale-95 transition-all flex items-center justify-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/></svg>
+                                Share WhatsApp
                             </button>
-                            <button onclick="generateBill('image')" class="bg-blue-50 text-blue-700 px-4 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-blue-200 shadow-sm active:scale-[0.95] transition-all hover:bg-blue-100 flex flex-col items-center justify-center gap-1 group" title="Save as Image">
-                                <svg class="group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                            <button onclick="generateBill('image')" class="bg-blue-50 text-blue-700 px-3 rounded-xl font-black text-[10px] uppercase tracking-wider border border-blue-200 active:scale-95 transition-all hover:bg-blue-100 flex flex-col items-center justify-center gap-0.5 group">
+                                <svg class="group-hover:scale-105 transition-transform" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
                                 Image
                             </button>
-                            <button onclick="generateBill('pdf')" class="bg-red-50 text-red-700 px-4 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-red-200 shadow-sm active:scale-[0.95] transition-all hover:bg-red-100 flex flex-col items-center justify-center gap-1 group" title="Save as PDF">
-                                <svg class="group-hover:scale-110 transition-transform" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 18H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2h-5"/><path d="m14 14-4 4-4-4"/><path d="M10 18v-8"/></svg>
+                            <button onclick="generateBill('pdf')" class="bg-rose-50 text-rose-700 px-3 rounded-xl font-black text-[10px] uppercase tracking-wider border border-rose-200 active:scale-95 transition-all hover:bg-rose-100 flex flex-col items-center justify-center gap-0.5 group">
+                                <svg class="group-hover:scale-105 transition-transform" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 18H5a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9l5 5v11a2 2 0 0 1-2 2h-5"/><path d="m14 14-4 4-4-4"/><path d="M10 18v-8"/></svg>
                                 PDF
                             </button>
                         </div>
@@ -376,100 +392,133 @@
         </div>
     </div>
 
-    <!-- Floating Mobile Checkout Button -->
-    <div id="floatingCartBtn" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-7 py-4 rounded-full shadow-2xl flex items-center gap-4 z-40 lg:hidden cursor-pointer transform translate-y-[150%] transition-transform duration-400 cubic-bezier(0.175, 0.885, 0.32, 1.275) active:scale-95" onclick="toggleCart()">
+    <!-- Floating Mobile Checkout Trigger Button -->
+    <div id="floatingCartBtn" class="fixed bottom-6 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-6 py-3.5 rounded-full shadow-2xl flex items-center gap-4 z-40 lg:hidden cursor-pointer transform translate-y-[150%] transition-transform duration-300 active:scale-95" onclick="toggleCart()">
         <div class="flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            <span id="floatingCartCount" class="font-black text-sm whitespace-nowrap">0 Items</span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            <span id="floatingCartCount" class="font-extrabold text-xs tracking-wider uppercase whitespace-nowrap">0 Items</span>
         </div>
-        <div class="w-px h-5 bg-slate-700"></div>
-        <span id="floatingCartTotal" class="font-black text-emerald-400 whitespace-nowrap text-lg">₹0</span>
+        <div class="w-px h-4 bg-slate-700"></div>
+        <span id="floatingCartTotal" class="font-black text-emerald-400 whitespace-nowrap text-base">₹0</span>
     </div>
 
-    <!-- Modals & Overlays -->
+    <!-- Stock Hub Modal & Configuration -->
     <div id="addModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-end sm:items-center justify-center sm:p-4 z-[100] transition-opacity duration-300 opacity-0">
-        <div class="bg-white rounded-t-[2.5rem] sm:rounded-[2.5rem] w-full max-w-2xl p-6 sm:p-8 shadow-2xl flex flex-col max-h-[90vh] sm:max-h-[95vh] transform transition-transform duration-300 translate-y-full sm:translate-y-0" id="modalContent">
+        <div class="bg-white rounded-t-[2.5rem] sm:rounded-[2.5rem] w-full max-w-2xl p-5 sm:p-7 shadow-2xl flex flex-col max-h-[90vh] sm:max-h-[95vh] transform transition-transform duration-300 translate-y-full sm:translate-y-0" id="modalContent">
             
             <div id="modalHandle" class="w-16 h-1.5 bg-slate-200 rounded-full mx-auto mb-4 sm:hidden swipe-handle"></div>
 
-            <div class="flex justify-between items-center mb-6 flex-shrink-0">
+            <div class="flex justify-between items-center mb-5 flex-shrink-0">
                 <div>
                     <h3 class="text-2xl font-black text-slate-900 uppercase tracking-tighter">System Console</h3>
-                    <p class="text-[10px] text-slate-400 font-bold tracking-widest uppercase mt-1">Manage & Auto-Scan</p>
+                    <p class="text-[9px] text-slate-400 font-bold tracking-widest uppercase mt-1">Smart Config & Bulk Sync</p>
                 </div>
-                <button onclick="toggleAddModal()" class="bg-slate-50 p-3 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-all active:scale-90">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg>
+                <button onclick="toggleAddModal()" class="bg-slate-100 p-2.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition-all active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg>
                 </button>
             </div>
 
-            <div class="space-y-6 overflow-y-auto custom-scrollbar pr-2 pb-6">
+            <!-- Scrollable Settings Container -->
+            <div class="space-y-6 overflow-y-auto custom-scrollbar pr-1 pb-6">
                 
-                <!-- Scanner UI block -->
-                <div class="bg-gradient-to-br from-indigo-50 to-blue-50 p-6 rounded-[2rem] border border-blue-100 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 p-4 opacity-10">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M3 15h6"/><path d="M3 18h6"/><path d="M3 21h6"/></svg>
+                <!-- BULK IMPORT & SYNC HUB (GOOGLE SHEETS, EXCEL, ODS, TSV, CSV, PDF) -->
+                <div class="bg-gradient-to-br from-emerald-50 to-teal-50 p-5 rounded-[2rem] border border-emerald-100 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     </div>
                     <div class="relative z-10">
-                        <div class="flex items-center gap-2 mb-3">
-                            <span class="bg-blue-600 text-white px-2 py-0.5 rounded text-[9px] font-black uppercase tracking-widest shadow-sm">AI Scan</span>
-                            <h4 class="text-sm font-black text-indigo-900 uppercase">OCR Bill Scanner</h4>
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="bg-emerald-600 text-white px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest shadow-sm">Sync Hub</span>
+                            <h4 class="text-xs font-black text-emerald-900 uppercase tracking-wide">Bulk Inventory Sync</h4>
                         </div>
-                        <p class="text-[11px] text-indigo-700 font-medium mb-4">Snap a photo of a flat list. <strong class="text-indigo-900">Any item marked with a red cross (❌) will be ignored.</strong></p>
+                        <p class="text-[10px] text-emerald-700 font-bold mb-3">Sync via public Google Sheet URLs, Excel sheets, ODS tables, CSV, TSV, or parse structural text from PDFs.</p>
+
+                        <!-- Google Sheets URL Sync Input -->
+                        <div class="bg-white/80 p-3 rounded-xl border border-emerald-200/60 mb-4">
+                            <label class="text-[9px] font-black text-emerald-800 uppercase block mb-1">Link Google Spreadsheet</label>
+                            <div class="flex gap-2">
+                                <input type="url" id="sheetUrlInput" placeholder="Paste Google Sheets Share Link..." class="flex-1 px-3 py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold outline-none focus:ring-2 focus:ring-emerald-400">
+                                <button onclick="syncGoogleSheet()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 rounded-lg text-[10px] font-black uppercase tracking-wider shadow-sm transition-all active:scale-95">Sync Link</button>
+                            </div>
+                            <span class="text-[8px] text-slate-400 font-medium mt-1 block">Make sure Link Sharing is configured to "Anyone with the link can view".</span>
+                        </div>
+
+                        <!-- Local Multi-format Document Drag-Drop Upload Area -->
+                        <div class="border-2 border-dashed border-emerald-300 bg-white/50 rounded-xl p-4 text-center cursor-pointer hover:bg-white transition-all" onclick="document.getElementById('bulkFileInput').click()">
+                            <svg class="mx-auto text-emerald-500 mb-2" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            <span class="text-xs font-black text-emerald-900 block">Tap to Select File</span>
+                            <span class="text-[9px] text-slate-400 block mt-1">Accepts .xlsx, .ods, .csv, .tsv, .pdf, or .gsheet pointers</span>
+                            <input type="file" id="bulkFileInput" accept=".xlsx,.ods,.csv,.tsv,.pdf,.gsheet" class="hidden" onchange="handleBulkSyncFile(event)">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Camera/Gallery Hybrid OCR Scanner block -->
+                <div class="bg-gradient-to-br from-indigo-50 to-blue-50 p-5 rounded-[2rem] border border-blue-100 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-5 pointer-events-none">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22h14a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v4"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M3 15h6"/><path d="M3 18h6"/><path d="M3 21h6"/></svg>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="bg-blue-600 text-white px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest shadow-sm">AI Scan</span>
+                            <h4 class="text-xs font-black text-indigo-900 uppercase tracking-wide">OCR Bill Scanner</h4>
+                        </div>
+                        <p class="text-[10px] text-indigo-700 font-bold mb-3">Upload a clean document image. <strong class="text-indigo-900">Items containing cross (❌) marks will be filtered automatically.</strong></p>
                         
-                        <label class="flex items-center gap-2 mb-4 cursor-pointer bg-white/60 p-2.5 rounded-xl border border-indigo-200 transition-all hover:bg-white select-none">
-                            <input type="checkbox" id="useAiToggle" class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500" checked>
-                            <span class="text-[11px] font-black text-indigo-900 flex items-center gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-emerald-500"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
+                        <label class="flex items-center gap-2 mb-3.5 cursor-pointer bg-white/60 p-2 rounded-xl border border-indigo-150 transition-all hover:bg-white select-none">
+                            <input type="checkbox" id="useAiToggle" class="w-4 h-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" checked>
+                            <span class="text-[10px] font-black text-indigo-900 flex items-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-emerald-500"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg>
                                 High-Accuracy AI Analysis
                             </span>
                         </label>
 
                         <div class="grid grid-cols-2 gap-3">
-                            <button onclick="document.getElementById('cameraInput').click(); softVibrate();" class="bg-white text-indigo-700 p-4 rounded-[1.5rem] flex flex-col items-center justify-center gap-2 active:scale-95 transition-all shadow-sm hover:shadow-md border border-indigo-100">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
-                                <span class="text-[10px] font-black uppercase tracking-widest">Camera</span>
+                            <button onclick="document.getElementById('cameraInput').click();" class="bg-white hover:bg-slate-50 text-indigo-700 p-3.5 rounded-[1.25rem] flex flex-col items-center justify-center gap-1.5 active:scale-95 transition-all shadow-sm border border-indigo-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+                                <span class="text-[9px] font-black uppercase tracking-widest">Capture Photo</span>
                                 <input type="file" id="cameraInput" accept="image/*" capture="environment" class="hidden" onchange="startScan(event)">
                             </button>
-                            <button onclick="document.getElementById('galleryInput').click(); softVibrate();" class="bg-white text-indigo-700 p-4 rounded-[1.5rem] flex flex-col items-center justify-center gap-2 active:scale-95 transition-all shadow-sm hover:shadow-md border border-indigo-100">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
-                                <span class="text-[10px] font-black uppercase tracking-widest">Gallery</span>
+                            <button onclick="document.getElementById('galleryInput').click();" class="bg-white hover:bg-slate-50 text-indigo-700 p-3.5 rounded-[1.25rem] flex flex-col items-center justify-center gap-1.5 active:scale-95 transition-all shadow-sm border border-indigo-100">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                                <span class="text-[9px] font-black uppercase tracking-widest">Photo Gallery</span>
                                 <input type="file" id="galleryInput" accept="image/*" class="hidden" multiple onchange="startScan(event)">
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div id="smartLoader" class="hidden flex flex-col items-center justify-center p-6 bg-indigo-900 text-white rounded-[2rem] shadow-xl animate-pop">
-                    <div class="loader !border-indigo-400 !border-t-white w-6 h-6 mb-3"></div>
-                    <span id="loaderText" class="text-[11px] font-black uppercase tracking-widest text-center">Processing Image...</span>
-                    <div class="w-full bg-indigo-800 rounded-full h-1.5 mt-3 overflow-hidden">
+                <!-- Live Scanner Processing Overlay Indicator -->
+                <div id="smartLoader" class="hidden flex flex-col items-center justify-center p-5 bg-indigo-950 text-white rounded-[2rem] shadow-xl animate-pop">
+                    <div class="loader !border-indigo-500 !border-t-white w-6 h-6 mb-3"></div>
+                    <span id="loaderText" class="text-[10px] font-black uppercase tracking-widest text-center">Processing Document...</span>
+                    <div class="w-full bg-indigo-900 rounded-full h-1.5 mt-3 overflow-hidden">
                         <div id="scanProgress" class="bg-indigo-400 h-1.5 rounded-full w-0 transition-all duration-300"></div>
                     </div>
                 </div>
 
-                <!-- REVIEW SCANNED ITEMS UI -->
-                <div id="scanReviewContainer" class="hidden bg-yellow-50 border border-yellow-200 p-5 rounded-[2rem] animate-pop">
-                    <div class="flex justify-between items-center mb-4">
-                        <h4 class="text-xs font-black text-yellow-800 uppercase tracking-widest flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h20"/><path d="M12 2v20"/></svg>
-                            Review Scanned List
+                <!-- REVIEW SCANNED ITEMS -->
+                <div id="scanReviewContainer" class="hidden bg-yellow-50/50 border border-yellow-200 p-5 rounded-[2rem] animate-pop">
+                    <div class="flex justify-between items-center mb-3">
+                        <h4 class="text-xs font-black text-yellow-800 uppercase tracking-widest flex items-center gap-1.5">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M2 12h20"/><path d="M12 2v20"/></svg>
+                            Confirm Extracted Data
                         </h4>
-                        <span id="scanCountBadge" class="bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded text-[10px] font-black">0 found</span>
+                        <span id="scanCountBadge" class="bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded text-[9px] font-black">0 found</span>
                     </div>
-                    <p class="text-[10px] text-yellow-700 font-bold mb-3">Delete items you don't want to save to Master Stock.</p>
+                    <p class="text-[9px] text-yellow-700 font-bold mb-3">Review values before saving to master system.</p>
                     
-                    <div id="scanReviewList" class="space-y-2 mb-4 max-h-48 overflow-y-auto custom-scrollbar pr-2">
-                        <!-- Populated dynamically -->
-                    </div>
+                    <div id="scanReviewList" class="space-y-2 mb-4 max-h-48 overflow-y-auto custom-scrollbar pr-1"></div>
                     
-                    <div class="flex gap-2 mt-4">
-                        <button onclick="cancelScanReview()" class="flex-1 bg-white text-yellow-700 border border-yellow-300 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform">Cancel</button>
-                        <button onclick="saveReviewedItems()" class="flex-[2] bg-yellow-500 text-yellow-950 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest active:scale-95 transition-transform shadow-md">Save Approved Items</button>
+                    <div class="flex gap-2">
+                        <button onclick="cancelScanReview()" class="flex-1 bg-white text-yellow-800 border border-yellow-300 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider active:scale-95 transition-all">Cancel</button>
+                        <button onclick="saveReviewedItems()" class="flex-[2] bg-yellow-500 text-yellow-950 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-wider active:scale-95 transition-all shadow-md">Approve & Save</button>
                     </div>
                 </div>
 
-                <div class="bg-slate-50 p-5 rounded-[2rem] space-y-4 border border-slate-100">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                <!-- API Key Config Block -->
+                <div class="bg-slate-50 p-4 rounded-[2rem] space-y-3.5 border border-slate-100">
+                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
                         <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                         API Credentials & Branch Configuration
                     </p>
@@ -481,69 +530,66 @@
                         <div>
                             <label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Branch/Store Name</label>
                             <div class="flex gap-2">
-                                <input type="text" id="editLoc" placeholder="e.g. Patiala Organic Hub" class="flex-1 px-4 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-emerald-500 transition-all outline-none shadow-sm">
-                                <button onclick="updateSettings()" class="bg-slate-900 text-white px-6 rounded-xl font-black text-[11px] uppercase active:scale-95 transition-all shadow-md hover:bg-slate-800">Set</button>
+                                <input type="text" id="editLoc" placeholder="e.g. Patiala Organic Hub" class="flex-1 px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-emerald-400 outline-none shadow-sm">
+                                <button onclick="updateSettings()" class="bg-slate-900 text-white px-5 rounded-xl font-black text-[10px] uppercase active:scale-95 transition-all hover:bg-slate-800">Set</button>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Manual Article Setup -->
-                <div class="bg-white border border-slate-200 p-5 sm:p-6 rounded-[2.5rem] shadow-sm space-y-5">
-                    <p id="formTitle" class="text-[12px] font-black text-slate-800 uppercase tracking-widest flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="text-emerald-500"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-                        Manual Setup
+                <!-- Manual Article setup form -->
+                <div class="bg-white border border-slate-200 p-5 rounded-[2rem] shadow-sm space-y-4">
+                    <p id="formTitle" class="text-xs font-black text-slate-800 uppercase tracking-widest flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="text-emerald-500"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                        Manual Stock Setup
                     </p>
                     
-                    <div class="space-y-2">
-                        <p id="catLabel" class="text-[11px] font-black text-slate-400 uppercase tracking-widest text-center">Select Category</p>
-                        <div class="flex gap-2 bg-slate-100 p-2 rounded-2xl h-[60px]">
-                            <button onclick="setMCat('Vegetable')" id="mcVeg" class="mcat flex-1 rounded-xl bg-emerald-600 text-white text-xs sm:text-sm font-extrabold uppercase py-2 transition-all shadow-md">Veg</button>
-                            <button onclick="setMCat('Fruit')" id="mcFruit" class="mcat flex-1 rounded-xl bg-transparent text-slate-500 text-xs sm:text-sm font-extrabold uppercase py-2 transition-all hover:bg-white hover:shadow-sm">Fruit</button>
-                            <button onclick="setMCat('Grocery')" id="mcGroc" class="mcat flex-1 rounded-xl bg-transparent text-slate-500 text-xs sm:text-sm font-extrabold uppercase py-2 transition-all hover:bg-white hover:shadow-sm">Groc</button>
+                    <div class="space-y-1.5">
+                        <p id="catLabel" class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Category Class</p>
+                        <div class="flex gap-2 bg-slate-100 p-1.5 rounded-xl h-[48px]">
+                            <button onclick="setMCat('Vegetable')" id="mcVeg" class="mcat flex-1 rounded-lg bg-emerald-600 text-white text-[11px] font-black uppercase py-1.5 transition-all">Vegetable</button>
+                            <button onclick="setMCat('Fruit')" id="mcFruit" class="mcat flex-1 rounded-lg bg-transparent text-slate-500 text-[11px] font-black uppercase py-1.5 transition-all hover:bg-white">Fruit</button>
+                            <button onclick="setMCat('Grocery')" id="mcGroc" class="mcat flex-1 rounded-lg bg-transparent text-slate-500 text-[11px] font-black uppercase py-1.5 transition-all hover:bg-white">Grocery</button>
                         </div>
                     </div>
 
                     <div class="grid grid-cols-2 gap-3 relative">
-                        <input type="text" id="newName" oninput="debouncedTranslate('newName', 'newHindi', 'en|hi')" placeholder="English Name" class="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold focus:ring-2 focus:ring-emerald-500 outline-none transition-shadow">
-                        <input type="text" id="newHindi" oninput="debouncedTranslate('newHindi', 'newName', 'hi|en')" placeholder="हिंदी नाम (Opt)" class="px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500 transition-shadow">
-                        <div id="translateLoader" class="absolute -top-6 right-2 text-[9px] font-black text-emerald-500 uppercase tracking-widest hidden flex items-center gap-1"><div class="loader !border-emerald-200 !border-t-emerald-500 !w-3 !h-3"></div> Translating...</div>
+                        <input type="text" id="newName" oninput="debouncedTranslate('newName', 'newHindi', 'en|hi')" placeholder="Item Name (English)" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-emerald-400 outline-none">
+                        <input type="text" id="newHindi" oninput="debouncedTranslate('newHindi', 'newName', 'hi|en')" placeholder="आइटम का नाम (हिंदी)" class="px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-emerald-400 outline-none">
+                        <div id="translateLoader" class="absolute -top-5 right-2 text-[8px] font-black text-emerald-500 uppercase tracking-widest hidden flex items-center gap-1"><div class="loader !border-emerald-200 !border-t-emerald-500 !w-2.5 !h-2.5"></div> Translating...</div>
                     </div>
 
-                    <div class="bg-slate-50 p-4 rounded-2xl space-y-3 border border-slate-100">
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest text-center">Reference Price</p>
-                        <div class="flex gap-3 items-center">
+                    <div class="bg-slate-50 p-3.5 rounded-xl space-y-2 border border-slate-100">
+                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Price Metric</p>
+                        <div class="flex gap-2.5 items-center">
                             <div class="relative flex-1">
-                                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-emerald-600 font-black text-lg">₹</span>
-                                <input type="number" id="newPrice" placeholder="Price" class="w-full pl-9 pr-4 py-3 bg-white border border-slate-200 rounded-xl text-lg font-black outline-none focus:ring-2 focus:ring-emerald-500 shadow-sm transition-shadow">
+                                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600 font-extrabold text-sm">₹</span>
+                                <input type="number" id="newPrice" placeholder="Rate" class="w-full pl-7 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-black outline-none focus:ring-2 focus:ring-emerald-400">
                             </div>
-                            <span class="text-[10px] font-black text-slate-400">FOR</span>
+                            <span class="text-[9px] font-black text-slate-400 uppercase">Per</span>
                             <div class="flex gap-1 items-center bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
-                                <input type="number" id="newRefQty" value="1" class="w-12 py-2 bg-transparent text-center font-black text-sm outline-none">
-                                <select id="newPriceUnit" class="bg-slate-100 border-0 rounded-lg text-[10px] py-2 px-2 font-black uppercase outline-none cursor-pointer text-slate-700">
+                                <input type="number" id="newRefQty" value="1" class="w-10 py-1 bg-transparent text-center font-black text-xs outline-none">
+                                <select id="newPriceUnit" class="bg-slate-100 border-0 rounded-lg text-[9px] py-1 px-1.5 font-black uppercase outline-none cursor-pointer text-slate-700">
                                     <option value="Kg">Kg</option><option value="Gm">Gm</option><option value="Pcs">Pcs</option><option value="Pkt">Pkt</option>
                                 </select>
                             </div>
                         </div>
                     </div>
 
-                    <button id="saveBtn" onclick="saveItem()" class="w-full bg-emerald-600 text-white font-black py-4 rounded-xl shadow-lg shadow-emerald-600/20 active:scale-[0.98] transition-all uppercase text-[12px] tracking-[0.1em] hover:bg-emerald-700 flex justify-center items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-                        Update Master Stock
+                    <button id="saveBtn" onclick="saveItem()" class="w-full bg-emerald-600 text-white font-black py-3 rounded-xl shadow-lg active:scale-[0.98] transition-all uppercase text-[11px] tracking-widest hover:bg-emerald-700 flex justify-center items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                        Update Inventory
                     </button>
-                    <button id="cancelEditBtn" onclick="resetForm()" class="hidden w-full text-[11px] font-bold text-slate-400 uppercase mt-2 text-center hover:text-red-500 transition-colors p-2">Cancel Edit</button>
+                    <button id="cancelEditBtn" onclick="resetForm()" class="hidden w-full text-[10px] font-black text-slate-400 uppercase mt-2 text-center hover:text-red-500 transition-colors py-1.5">Cancel Edit</button>
                 </div>
 
-                <div class="space-y-3 pt-4 border-t border-slate-100">
-                    <p class="text-[11px] font-black text-slate-500 uppercase tracking-widest px-2">Inventory Management</p>
+                <!-- Database Tools -->
+                <div class="space-y-3 pt-3 border-t border-slate-100">
+                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">Import / Export Backup</p>
                     
-                    <div class="flex gap-2 px-1">
-                        <button onclick="exportInventory()" class="flex-1 bg-slate-50 text-slate-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-200 hover:bg-slate-100 transition-all active:scale-95">⬇️ Export CSV</button>
-                        <label class="flex-1 bg-slate-50 text-slate-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-slate-200 hover:bg-slate-100 transition-all active:scale-95 text-center cursor-pointer">
-                            ⬆️ Import CSV
-                            <input type="file" accept=".csv" class="hidden" onchange="importInventory(event)">
-                        </label>
-                        <button onclick="confirmDeleteAll(this)" data-confirm="false" class="flex-[1.5] bg-red-50 text-red-600 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-red-200 hover:bg-red-100 transition-all active:scale-95">🗑️ Delete All</button>
+                    <div class="flex gap-2 px-0.5">
+                        <button onclick="exportInventory()" class="flex-1 bg-slate-50 text-slate-600 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all">⬇️ Export Backup</button>
+                        <button onclick="confirmDeleteAll(this)" data-confirm="false" class="flex-1 bg-rose-50 text-rose-600 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider border border-rose-200 hover:bg-rose-100 active:scale-95 transition-all">🗑️ Delete All</button>
                     </div>
 
                     <div id="manageList" class="space-y-2 mt-2"></div>
@@ -552,18 +598,15 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
-    <div id="toast" class="fixed bottom-24 lg:bottom-10 left-1/2 -translate-x-1/2 px-6 py-3 bg-slate-900 text-white rounded-full shadow-2xl opacity-0 transition-all duration-300 pointer-events-none z-[200] font-bold text-[11px] uppercase tracking-widest flex items-center gap-3 transform translate-y-4 max-w-[90vw]">
-        <div class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_#34d399] shrink-0"></div>
-        <span id="toastMsg" class="whitespace-nowrap overflow-hidden text-ellipsis">Success</span>
+    <!-- Translucent Ultra-Premium Toast Notification -->
+    <div id="toast" class="fixed bottom-24 lg:bottom-10 left-1/2 -translate-x-1/2 px-5 py-3 bg-slate-900/60 backdrop-blur-xl border border-white/10 text-white rounded-2xl shadow-xl opacity-0 transition-all duration-300 pointer-events-none z-[200] font-bold text-[10px] uppercase tracking-wider flex items-center gap-2.5 transform translate-y-4 max-w-[90vw]">
+        <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse shadow-[0_0_8px_#34d399] shrink-0"></div>
+        <span id="toastMsg" class="whitespace-nowrap overflow-hidden text-ellipsis">System Online</span>
     </div>
 
     <!-- SCRIPT DECK -->
     <script>
-        // --- DATA & CONFIG ---
-        const apiKey = ""; // Injected by execution environment
-
-        // Web Audio Synthesizer for tactile feedback
+        // Web Audio Synthesizer for System Feedback
         const AudioSynthesizer = {
             ctx: null,
             enabled: true,
@@ -579,14 +622,14 @@
                     const osc = this.ctx.createOscillator();
                     const gain = this.ctx.createGain();
                     osc.type = 'sine';
-                    osc.frequency.setValueAtTime(1400, this.ctx.currentTime);
+                    osc.frequency.setValueAtTime(1400, this.ctx.currentTime); // Quick haptic scan pulse
                     gain.gain.setValueAtTime(0.08, this.ctx.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
                     osc.connect(gain);
                     gain.connect(this.ctx.destination);
                     osc.start();
                     osc.stop(this.ctx.currentTime + 0.05);
-                } catch (e) { console.warn("Audio Context blocked or unsupported."); }
+                } catch (e) { console.warn("Audio Context blocked or not supported."); }
             },
             playSuccess() {
                 if (!this.enabled) return;
@@ -607,7 +650,6 @@
             }
         };
 
-        // Exponential backoff fetch function for robust API calls
         async function fetchWithBackoff(url, options) {
             const delays = [1000, 2000, 4000, 8000, 16000];
             for (let i = 0; i <= delays.length; i++) {
@@ -618,7 +660,7 @@
                     return data;
                 } catch (error) {
                     if (i === delays.length) {
-                        throw new Error("Unable to connect to AI service after multiple attempts.");
+                        throw new Error("Unable to reach AI services after 5 sequential retries.");
                     }
                     await new Promise(res => setTimeout(res, delays[i]));
                 }
@@ -631,8 +673,8 @@
             { id: 3, name: 'Onion', nameHindi: 'प्याज', price: 40, refQty: 1, priceUnit: 'Kg', category: 'Vegetable' },
             { id: 4, name: 'Apple', nameHindi: 'सेब', price: 180, refQty: 1, priceUnit: 'Kg', category: 'Fruit' },
             { id: 5, name: 'Banana', nameHindi: 'केला', price: 60, refQty: 12, priceUnit: 'Pcs', category: 'Fruit' },
-            { id: 6, name: 'Green Chilli', nameHindi: 'मिर्च', price: 40, refQty: 250, priceUnit: 'Gm', category: 'Vegetable' },
-            { id: 7, name: 'Rice', nameHindi: 'चावल', price: 95, refQty: 1, priceUnit: 'Kg', category: 'Grocery' }
+            { id: 6, name: 'Green Chilli', nameHindi: 'हरी मिर्च', price: 45, refQty: 250, priceUnit: 'Gm', category: 'Vegetable' },
+            { id: 7, name: 'Basmati Rice', nameHindi: 'चावल', price: 95, refQty: 1, priceUnit: 'Kg', category: 'Grocery' }
         ];
 
         const memoryStorage = {};
@@ -649,7 +691,7 @@
 
         const DataAdapter = {
             async load() {
-                const loc = SafeStorage.get('fg_loc') || "Main Branch";
+                const loc = SafeStorage.get('fg_loc') || "Main Hub, Patiala";
                 const invStr = SafeStorage.get('fg_inventory');
                 const lastUpdatedStr = SafeStorage.get('fg_last_updated');
                 const key = SafeStorage.get('fg_api_key') || "";
@@ -660,7 +702,7 @@
                 const qtyPatterns = JSON.parse(SafeStorage.get('fg_qty_patterns') || "{}");
                 const transactions = JSON.parse(transStr);
 
-                // Load multi-customer data
+                // Load multi-customer parameters
                 const customersStr = SafeStorage.get('fg_customers') || "[]";
                 const activeCustId = SafeStorage.get('fg_active_customer_id') || "";
                 
@@ -681,7 +723,7 @@
                 SafeStorage.set('fg_audio_enabled', audioData ? "true" : "false");
                 SafeStorage.set('fg_transactions', JSON.stringify(transData));
                 
-                // Save multi-customer queue
+                // Save customer states
                 SafeStorage.set('fg_customers', JSON.stringify(customersData));
                 SafeStorage.set('fg_active_customer_id', activeCustomerIdData);
 
@@ -689,7 +731,6 @@
                 SafeStorage.set('fg_last_updated', nowStr);
                 updateDateDisplay(nowStr);
 
-                // Remove notification banner
                 const banner = document.getElementById('dailyReminderBanner');
                 if (banner && !banner.classList.contains('hidden')) {
                     banner.classList.add('hidden');
@@ -703,13 +744,13 @@
         let sLoc = "Loading...";
         let customApiKey = "";
         let inventory = [];
-        let cart = {}; // Tracks active customer's cart
+        let cart = {};
         let pendingScanItems = [];
-        let quantityPatterns = {}; // Stores observed quantity patterns
+        let quantityPatterns = {};
         let transactions = [];
         let currentWorkspace = 'shop';
 
-        // Multi-customer queues
+        // Multi-customer parameters
         let customers = [];
         let activeCustomerId = '';
 
@@ -718,14 +759,10 @@
             'green chilli': 'हरी मिर्च', 'rice': 'चावल', 'garlic': 'लहसुन', 'ginger': 'अदरक',
             'lemon': 'नींबू', 'coriander': 'धनिया', 'mint': 'पुदीना', 'spinach': 'पालक',
             'cabbage': 'पत्ता गोभी', 'cauliflower': 'फूल गोभी', 'carrot': 'गाजर', 'radish': 'मूली',
-            'eggplant': 'बैंगन', 'brinjal': 'बैंगन', 'capsicum': 'शिमला मिर्च', 'lady finger': 'भिंडी',
-            'okra': 'भिंडी', 'bottle gourd': 'लौकी', 'bitter gourd': 'करेला', 'pumpkin': 'कद्दू',
-            'cucumber': 'खीरा', 'papaya': 'पपीता', 'mango': 'आम', 'orange': 'संतरा', 'grapes': 'अंगूर',
-            'pomegranate': 'अनार', 'watermelon': 'तरबूज', 'guava': 'अमरूद', 'pineapple': 'अन्नानास',
-            'wheat': 'गेहूं', 'flour': 'आटा', 'sugar': 'चीनी', 'salt': 'नमक', 'oil': 'तेल',
-            'milk': 'दूध', 'curd': 'दही', 'butter': 'मक्खन', 'cheese': 'पनीर', 'egg': 'अंडा',
-            'tea': 'चाय', 'coffee': 'कॉफी', 'turmeric': 'हल्दी', 'cumin': 'जीरा', 'mustard': 'सरसों',
-            'dal': 'दाल', 'pulse': 'दाल', 'paneer': 'पनीर', 'pea': 'मटर', 'peas': 'मटर'
+            'eggplant': 'बैंगन', 'capsicum': 'शिमला मिर्च', 'lady finger': 'भिंडी', 'okra': 'भिंडी',
+            'bottle gourd': 'लौकी', 'bitter gourd': 'करेला', 'pumpkin': 'कद्दू', 'cucumber': 'खीरा',
+            'papaya': 'पपीता', 'mango': 'आम', 'orange': 'संतरा', 'grapes': 'अंगूर', 'pomegranate': 'अनार',
+            'wheat': 'गेहूं', 'flour': 'आटा', 'sugar': 'चीनी', 'salt': 'नमक', 'oil': 'तेल', 'milk': 'दूध'
         };
 
         const HEALTH_QUOTES = [
@@ -734,7 +771,7 @@
             "🥦 Fresh veggies for a fresh mind!",
             "💚 Health is the greatest wealth!",
             "🥗 Nourish to flourish!",
-            "🍅 Fresh from farm to keep you strong!"
+            "🍅 Fresh from the organic farms of Patiala!"
         ];
 
         document.addEventListener('DOMContentLoaded', async () => { 
@@ -746,7 +783,7 @@
             AudioSynthesizer.enabled = data.audioSet;
             transactions = data.transactions;
             
-            // Populating multi-customer state
+            // Populating multi-customer states
             customers = data.customers;
             activeCustomerId = data.activeCustomerId;
 
@@ -760,12 +797,11 @@
             updateDateDisplay(data.lastUpdatedStr);
             updateStockBadge();
 
-            // Load correct customer details
+            // Load selected customer profiles
             const activeCust = customers.find(c => c.id === activeCustomerId) || customers[0];
             activeCustomerId = activeCust.id;
             cart = { ...activeCust.cart };
 
-            // Wait a brief moment for DOM inputs to align, then draw
             setTimeout(() => {
                 const discInput = document.getElementById('discountInput');
                 if (discInput) discInput.value = activeCust.discount || '';
@@ -781,7 +817,6 @@
                 setupTouchGestures();
             }, 100);
 
-            // Offline Mode Setup
             window.addEventListener('online', updateNetworkStatus);
             window.addEventListener('offline', updateNetworkStatus);
             updateNetworkStatus();
@@ -806,7 +841,6 @@
                 activeCustomerId = customerId;
                 cart = { ...targetCust.cart };
                 
-                // Switch Inputs cleanly
                 const discInput = document.getElementById('discountInput');
                 if (discInput) discInput.value = targetCust.discount || '';
                 
@@ -822,7 +856,6 @@
         }
 
         function saveCustomerSpecificInputs() {
-            // Actively syncs inputs to memory storage on input changes
             const activeCust = customers.find(c => c.id === activeCustomerId);
             if (activeCust) {
                 activeCust.discount = parseFloat(document.getElementById('discountInput')?.value) || 0;
@@ -853,7 +886,7 @@
         }
 
         function removeCustomer(customerId, event) {
-            if (event) event.stopPropagation(); // Prevent tab switch trigger
+            if (event) event.stopPropagation();
             if (customers.length <= 1) {
                 notify("Cannot close the last active invoice tab");
                 return;
@@ -865,7 +898,6 @@
             
             customers.splice(index, 1);
             
-            // Switch active view if the currently open tab was closed
             if (activeCustomerId === customerId) {
                 const nextActiveId = customers[index === 0 ? 0 : index - 1].id;
                 loadCustomerState(nextActiveId);
@@ -921,18 +953,15 @@
                     }
                 };
 
-                // Double tap/click to rename
                 tab.ondblclick = (e) => {
                     startRenameCustomer(cust.id, e);
                 };
 
-                // Tab label
                 const labelSpan = document.createElement('span');
                 labelSpan.id = `tab-label-${cust.id}`;
                 labelSpan.className = 'truncate pointer-events-none flex-1';
                 labelSpan.innerText = cust.name;
 
-                // Tab rename input element
                 const inputEl = document.createElement('input');
                 inputEl.id = `tab-input-${cust.id}`;
                 inputEl.type = 'text';
@@ -950,7 +979,6 @@
                     finishRenameCustomer(cust.id, inputEl.value);
                 };
 
-                // Inline Rename Edit button
                 const editBtn = document.createElement('button');
                 editBtn.className = 'opacity-40 hover:opacity-100 p-0.5 rounded transition-opacity shrink-0';
                 editBtn.title = 'Rename tab';
@@ -962,7 +990,6 @@
                     <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="text-slate-505"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                 `;
 
-                // Delete tab button
                 const closeBtn = document.createElement('button');
                 closeBtn.className = 'text-slate-400 hover:text-red-650 transition-colors shrink-0 ml-0.5 font-extrabold text-[12px] h-4 w-4 flex items-center justify-center rounded-full';
                 closeBtn.innerHTML = '&times;';
@@ -981,6 +1008,313 @@
 
                 container.appendChild(tab);
             });
+        }
+
+        
+        // Google Sheets Integration
+        async function syncGoogleSheet() {
+            softVibrate();
+            const sheetUrl = document.getElementById('sheetUrlInput').value.trim();
+            if (!sheetUrl) return notify("Please enter a Google Sheets URL");
+
+            // Extract Spreadsheet ID using Regex
+            const matches = sheetUrl.match(/\/d\/([a-zA-Z0-9-_]+)/);
+            if (!matches || !matches[1]) return notify("Invalid Google Sheets URL format");
+
+            const spreadsheetId = matches[1];
+            // Format URL to fetch exported CSV data directly
+            const exportUrl = `https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`;
+
+            const loader = document.getElementById('smartLoader');
+            const progress = document.getElementById('scanProgress');
+            const loaderText = document.getElementById('loaderText');
+
+            loader.classList.remove('hidden');
+            loaderText.innerText = "Connecting to Google Sheet export API...";
+            progress.style.width = "30%";
+
+            try {
+                const response = await fetch(exportUrl);
+                if (!response.ok) throw new Error("Spreadsheet view access denied. Verify permissions.");
+                
+                progress.style.width = "60%";
+                loaderText.innerText = "Parsing spreadsheet columns...";
+                
+                const csvText = await response.text();
+                parseSpreadsheetData(csvText, true); // true for CSV format
+                
+                progress.style.width = "100%";
+                setTimeout(() => {
+                    loader.classList.add('hidden');
+                    notify("Google Sheet Synchronized!");
+                    AudioSynthesizer.playSuccess();
+                }, 400);
+
+            } catch (err) {
+                console.error("Sheets sync failed: ", err);
+                loader.classList.add('hidden');
+                notify("Google Sheets Sync Failed: Ensure spreadsheet link sharing is set to public.");
+            }
+        }
+
+        // Handlers for bulk uploaded files (.xlsx, .ods, .csv, .tsv, .pdf, .gsheet)
+        async function handleBulkSyncFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const loader = document.getElementById('smartLoader');
+            const progress = document.getElementById('scanProgress');
+            const loaderText = document.getElementById('loaderText');
+
+            loader.classList.remove('hidden');
+            loaderText.innerText = "Reading uploaded data...";
+            progress.style.width = "20%";
+
+            const fileExtension = file.name.split('.').pop().toLowerCase();
+
+            try {
+                // If the user uploaded a local Google Sheet link pointer (.gsheet shortcut file)
+                if (fileExtension === 'gsheet') {
+                    const reader = new FileReader();
+                    reader.onload = async function(e) {
+                        try {
+                            const json = JSON.parse(e.target.result);
+                            if (json && json.url) {
+                                document.getElementById('sheetUrlInput').value = json.url;
+                                await syncGoogleSheet();
+                            } else {
+                                throw new Error("Not a valid Google Sheet schema pointer");
+                            }
+                        } catch(err) {
+                            loader.classList.add('hidden');
+                            notify("Failed parsing .gsheet shortcut file");
+                        }
+                    };
+                    reader.readAsText(file);
+                    return;
+                }
+
+                // If document is PDF
+                if (fileExtension === 'pdf') {
+                    progress.style.width = "40%";
+                    loaderText.innerText = "Extracting text from PDF file pages...";
+                    const fileReader = new FileReader();
+                    
+                    fileReader.onload = async function() {
+                        try {
+                            const typedarray = new Uint8Array(this.result);
+                            const pdf = await pdfjsLib.getDocument({data: typedarray}).promise;
+                            let fullText = '';
+                            
+                            for (let i = 1; i <= pdf.numPages; i++) {
+                                const page = await pdf.getPage(i);
+                                const textContent = await page.getTextContent();
+                                const pageText = textContent.items.map(item => item.str).join(' ');
+                                fullText += pageText + '\n';
+                            }
+                            
+                            progress.style.width = "70%";
+                            loaderText.innerText = "Analyzing text mapping structure...";
+                            parseInventoryFromText(fullText);
+                            
+                            progress.style.width = "100%";
+                            setTimeout(() => {
+                                loader.classList.add('hidden');
+                                notify("PDF Text Synced!");
+                                AudioSynthesizer.playSuccess();
+                            }, 400);
+
+                        } catch(err) {
+                            loader.classList.add('hidden');
+                            notify("PDF extraction failed: " + err.message);
+                        }
+                    };
+                    fileReader.readAsArrayBuffer(file);
+                    return;
+                }
+
+                // Excel/ODS/CSV/TSV SheetJS Reader
+                const fileReader = new FileReader();
+                fileReader.onload = function(e) {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        progress.style.width = "50%";
+                        loaderText.innerText = "Unpacking spreadsheets sheets...";
+                        
+                        const workbook = XLSX.read(data, {type: 'array'});
+                        const firstSheetName = workbook.SheetNames[0];
+                        const worksheet = workbook.Sheets[firstSheetName];
+                        
+                        progress.style.width = "80%";
+                        loaderText.innerText = "Parsing spreadsheet rows...";
+                        
+                        // Convert to JSON
+                        const json = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
+                        processImportedRows(json);
+
+                        progress.style.width = "100%";
+                        setTimeout(() => {
+                            loader.classList.add('hidden');
+                            notify("Inventory Synchronized!");
+                            AudioSynthesizer.playSuccess();
+                        }, 400);
+
+                    } catch(err) {
+                        loader.classList.add('hidden');
+                        notify("Failed to process sheet format: " + err.message);
+                    }
+                };
+                fileReader.readAsArrayBuffer(file);
+
+            } catch(e) {
+                loader.classList.add('hidden');
+                notify("Failed parsing sync files");
+            } finally {
+                event.target.value = '';
+            }
+        }
+
+        // CSV parsing fallback converter
+        function parseSpreadsheetData(dataText, isCSV) {
+            try {
+                const workbook = XLSX.read(dataText, {type: 'string'});
+                const sheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[sheetName];
+                const json = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
+                processImportedRows(json);
+            } catch(e) {
+                notify("Spreadsheet converter failed.");
+            }
+        }
+
+        // Process tabular rows normalized from SheetJS JSON
+        function processImportedRows(rows) {
+            if (!rows || rows.length === 0) return notify("Document sheet is empty");
+
+            // Look for headers (Name, HindiName, Price, RefQty, Unit, Category) via case-insensitive keys
+            const mapColumnKeys = (row) => {
+                const schema = { name: '', nameHindi: '', price: 0, refQty: 1, priceUnit: 'Kg', category: 'Vegetable' };
+                const rowKeys = Object.keys(row);
+
+                const findVal = (alternatives) => {
+                    const found = rowKeys.find(k => alternatives.includes(k.toLowerCase().replace(/[^a-z]/g, '')));
+                    return found ? row[found] : null;
+                };
+
+                schema.name = findVal(['name', 'item', 'itemname', 'articlename', 'title', 'englishname']) || '';
+                schema.nameHindi = findVal(['namehindi', 'hindiname', 'hindi', 'translation', 'localname']) || '';
+                schema.price = parseFloat(findVal(['price', 'rate', 'cost', 'mrp', 'charges'])) || 0;
+                schema.refQty = parseFloat(findVal(['refqty', 'qty', 'quantity', 'baseqty', 'multiplier'])) || 1;
+                schema.priceUnit = findVal(['unit', 'priceunit', 'qtyunit', 'packaging']) || 'Kg';
+                schema.category = findVal(['category', 'class', 'group', 'type', 'section']) || 'Vegetable';
+
+                return schema;
+            };
+
+            const parsed = [];
+            rows.forEach(row => {
+                const mapped = mapColumnKeys(row);
+                if (mapped.name && mapped.price > 0) {
+                    parsed.push({
+                        id: Date.now() + Math.random(),
+                        name: mapped.name.toString().trim(),
+                        nameHindi: mapped.nameHindi.toString().trim(),
+                        price: mapped.price,
+                        refQty: mapped.refQty,
+                        priceUnit: normalizeUnit(mapped.priceUnit),
+                        category: normalizeCategory(mapped.category)
+                    });
+                }
+            });
+
+            if (parsed.length > 0) {
+                inventory = parsed;
+                triggerSave();
+                render();
+                renderManagement();
+                notify(`Successfully synced ${parsed.length} master inventory items!`);
+            } else {
+                notify("Could not map items. Verify column headers match: Name, Price, Category");
+            }
+        }
+
+        // Parse structured inventory lists from PDF text blocks
+        function parseInventoryFromText(textText) {
+            // Searches text block sequentially using regular expression rules
+            // Matches: [Item Name] [Hindi Name (Optional)] [Price] [RefQty (Optional)] [Unit] [Category (Optional)]
+            const lines = textText.split('\n');
+            const parsed = [];
+
+            lines.forEach(line => {
+                const cleaned = line.replace(/[^\w\s\.\,\₹\-\/]/g, ' ').trim();
+                if (cleaned.length < 5) return;
+
+                // Split words and values
+                const parts = cleaned.split(/\s+/);
+                // Look for price elements
+                const priceMatch = cleaned.match(/₹?\s?(\d+([.,]\d{1,2})?)/);
+                if (!priceMatch) return;
+
+                const price = parseFloat(priceMatch[1]);
+                const nameParts = [];
+                let hindiName = '';
+                let unit = 'Kg';
+                let category = 'Vegetable';
+
+                parts.forEach(p => {
+                    const low = p.toLowerCase();
+                    if (/kg|gm|pcs|pkt/i.test(low)) {
+                        unit = normalizeUnit(p);
+                    } else if (/vegetable|veggies|fruit|grocery/i.test(low)) {
+                        category = normalizeCategory(p);
+                    } else if (isNaN(p) && !/₹/i.test(p)) {
+                        // Check if unicode matches Hindi characters
+                        if (/[\u0900-\u097F]/.test(p)) {
+                            hindiName = p;
+                        } else {
+                            nameParts.push(p);
+                        }
+                    }
+                });
+
+                const finalName = nameParts.join(' ').replace(/Total|Tax|Date|Gst|Cash|Rate/gi, '').trim();
+                if (finalName.length > 2 && price > 0) {
+                    parsed.push({
+                        id: Date.now() + Math.random(),
+                        name: finalName,
+                        nameHindi: hindiName,
+                        price: price,
+                        refQty: 1,
+                        priceUnit: unit,
+                        category: category
+                    });
+                }
+            });
+
+            if (parsed.length > 0) {
+                inventory = parsed;
+                triggerSave();
+                render();
+                renderManagement();
+                notify(`Imported ${parsed.length} items from PDF text list!`);
+            } else {
+                notify("No structured items found. Verify text clarity.");
+            }
+        }
+
+        function normalizeUnit(unitStr) {
+            const low = unitStr.toString().toLowerCase();
+            if (low.includes('gm') || low.includes('gram')) return 'Gm';
+            if (low.includes('pc') || low.includes('piece')) return 'Pcs';
+            if (low.includes('pkt') || low.includes('packet')) return 'Pkt';
+            return 'Kg';
+        }
+
+        function normalizeCategory(catStr) {
+            const low = catStr.toString().toLowerCase();
+            if (low.includes('fruit')) return 'Fruit';
+            if (low.includes('groc') || low.includes('provision')) return 'Grocery';
+            return 'Vegetable';
         }
 
         function checkDailyUpdate(lastUpdatedStr) {
@@ -1498,7 +1832,7 @@
             editingId = null; 
             const formTitle = document.getElementById('formTitle');
             const saveBtn = document.getElementById('saveBtn');
-            if(formTitle) formTitle.innerHTML = `<svg xmlns="http://www.w3.org/2050/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="text-emerald-500"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Manual Setup`; 
+            if(formTitle) formTitle.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="text-emerald-500"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg> Manual Setup`; 
             if(saveBtn) saveBtn.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Update Master Stock`; 
             const cBtn = document.getElementById('cancelEditBtn');
             if(cBtn) cBtn.classList.add('hidden'); 
@@ -1544,13 +1878,13 @@
                 if(catItems.length > 0) {
                     const catHeader = document.createElement('div');
                     catHeader.className = 'text-[9px] font-black text-slate-400 uppercase tracking-widest mt-4 mb-2 px-1 border-b border-slate-100 pb-1 flex items-center gap-1.5';
-                    catHeader.innerHTML = `${cat}s <span class="bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md text-[9px]">${catItems.length}</span>`;
+                    catHeader.innerHTML = `${cat}s <span class="bg-slate-100 text-slate-505 px-1.5 py-0.5 rounded-md text-[9px]">${catItems.length}</span>`;
                     div.appendChild(catHeader);
 
                     catItems.forEach(it => {
                         const isDup = counts[it.name.toLowerCase().trim()] > 1;
                         const el = document.createElement('div'); el.className = `flex items-center justify-between p-3.5 bg-white border rounded-xl shadow-sm mb-2 ${isDup ? 'border-red-200 bg-rose-50/20' : 'border-slate-200'}`;
-                        el.innerHTML = `<div class="min-w-0 flex-1 py-1"><div><div class="flex items-center flex-wrap gap-2"><span class="text-xs font-black text-slate-800 truncate uppercase">${it.name}</span><select onchange="changeItemCategory(${it.id}, this.value)" class="text-[9px] font-bold text-slate-500 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 outline-none cursor-pointer hover:bg-slate-100 focus:border-emerald-400"><option value="Vegetable" ${it.category==='Vegetable'?'selected':''}>Veg</option><option value="Fruit" ${it.category==='Fruit'?'selected':''}>Fruit</option><option value="Grocery" ${it.category==='Grocery'?'selected':''}>Groc</option></select>${isDup ? '<span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-red-100 text-red-700">DUP</span>' : ''}</div><span class="text-[11px] text-emerald-600 font-extrabold mt-1 block">₹${it.price}/${it.refQty}${it.priceUnit}</span></div></div><div class="flex gap-1.5"><button onclick="editArticle(${it.id})" class="bg-slate-50 text-slate-500 p-2 rounded-lg border border-slate-200 hover:text-blue-600 hover:bg-blue-50 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button><button onclick="inventory=inventory.filter(i=>i.id!=${it.id});triggerSave();renderManagement();render();notify('Deleted')" class="bg-slate-50 text-slate-500 p-2 rounded-lg border border-slate-200 hover:text-red-600 hover:bg-red-50 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>`;
+                        el.innerHTML = `<div class="min-w-0 flex-1 py-1"><div><div class="flex items-center flex-wrap gap-2"><span class="text-xs font-black text-slate-800 truncate uppercase">${it.name}</span><select onchange="changeItemCategory(${it.id}, this.value)" class="text-[9px] font-bold text-slate-500 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 outline-none cursor-pointer hover:bg-slate-100 focus:border-emerald-400"><option value="Vegetable" ${it.category==='Vegetable'?'selected':''}>Veg</option><option value="Fruit" ${it.category==='Fruit'?'selected':''}>Fruit</option><option value="Grocery" ${it.category==='Grocery'?'selected':''}>Groc</option></select>${isDup ? '<span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-red-100 text-red-700">DUP</span>' : ''}</div><span class="text-[11px] text-emerald-600 font-extrabold mt-1 block">₹${it.price}/${it.refQty}${it.priceUnit}</span></div></div><div class="flex gap-1.5"><button onclick="editArticle(${it.id})" class="bg-slate-50 text-slate-505 p-2 rounded-lg border border-slate-200 hover:text-blue-600 hover:bg-blue-50 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button><button onclick="inventory=inventory.filter(i=>i.id!=${it.id});triggerSave();renderManagement();render();notify('Deleted')" class="bg-slate-50 text-slate-505 p-2 rounded-lg border border-slate-200 hover:text-red-600 hover:bg-red-50 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>`;
                         div.appendChild(el);
                     });
                 }
@@ -1830,211 +2164,6 @@
             }
         }
 
-        // SCAN REVIEW LEDGER
-        function showScanReview() {
-            const container = document.getElementById('scanReviewContainer');
-            const list = document.getElementById('scanReviewList');
-            document.getElementById('scanCountBadge').innerText = `${pendingScanItems.length} Found`;
-            
-            list.innerHTML = '';
-            pendingScanItems.forEach((item, index) => {
-                const el = document.createElement('div');
-                el.className = 'flex items-center gap-2 bg-white p-2 rounded-xl border border-yellow-200 animate-pop';
-                el.innerHTML = `
-                    <div class="flex-1 min-w-0 flex flex-col gap-1.5">
-                        <input type="text" value="${item.name}" onchange="updatePendingItem(${index}, 'name', this.value)" class="w-full bg-slate-50 px-2 py-1.5 rounded-lg text-xs font-bold text-slate-800 outline-none border border-slate-100">
-                        <select onchange="updatePendingItem(${index}, 'category', this.value)" class="w-max text-[9px] font-bold text-slate-505 bg-white border border-slate-200 rounded px-1 py-0.5 outline-none cursor-pointer">
-                            <option value="Vegetable" ${item.category==='Vegetable'?'selected':''}>Vegetable</option>
-                            <option value="Fruit" ${item.category==='Fruit'?'selected':''}>Fruit</option>
-                            <option value="Grocery" ${item.category==='Grocery'?'selected':''}>Grocery</option>
-                        </select>
-                    </div>
-                    <div class="flex items-center gap-1 bg-slate-50 px-2 py-1 rounded-lg border border-slate-100 h-full">
-                        <span class="text-[9px] font-bold text-emerald-600">₹</span>
-                        <input type="number" value="${item.price}" onchange="updatePendingItem(${index}, 'price', this.value)" class="w-10 bg-transparent text-xs font-black outline-none p-0 text-slate-800">
-                    </div>
-                    <button onclick="deletePendingItem(${index})" class="bg-rose-50 text-rose-500 p-2 rounded-lg hover:bg-rose-500 hover:text-white transition-colors h-full">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg>
-                    </button>
-                `;
-                list.appendChild(el);
-            });
-            container.classList.remove('hidden');
-            container.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        window.updatePendingItem = function(index, field, value) {
-            if(field === 'price') pendingScanItems[index].price = parseFloat(value) || 0;
-            else if(field === 'category') pendingScanItems[index].category = value;
-            else pendingScanItems[index].name = value;
-        }
-
-        window.deletePendingItem = function(index) {
-            softVibrate();
-            pendingScanItems.splice(index, 1);
-            if(pendingScanItems.length === 0) {
-                cancelScanReview();
-            } else {
-                showScanReview();
-            }
-        }
-
-        window.cancelScanReview = function() {
-            pendingScanItems = [];
-            document.getElementById('scanReviewContainer').classList.add('hidden');
-            notify("Pending buffer cleared");
-        }
-
-        window.saveReviewedItems = function() {
-            softVibrate();
-            let added = 0;
-            pendingScanItems.forEach(item => {
-                if(item.name.trim() !== "" && item.price > 0) {
-                    inventory.unshift({
-                        id: Date.now() + Math.random(),
-                        name: item.name.trim(),
-                        nameHindi: "",
-                        price: item.price,
-                        refQty: 1,
-                        priceUnit: "Kg",
-                        category: item.category
-                    });
-                    added++;
-                }
-            });
-            
-            triggerSave(); 
-            render(); 
-            renderManagement(); 
-            
-            document.getElementById('scanReviewContainer').classList.add('hidden');
-            pendingScanItems = [];
-            notify(`${added} items saved successfully.`);
-        }
-
-        function parseCSVLine(text) {
-            let ret = [''], i = 0, p = '', s = true;
-            for (let l in text) {
-                let c = text[l];
-                if ('"' === c) {
-                    s = !s;
-                    if ('"' === p) { ret[i] += '"'; c = '-'; } else if ('' === p) c = '-';
-                } else if (s && ',' === c) c = ret[++i] = '';
-                else ret[i] += c;
-                p = c;
-            }
-            return ret;
-        }
-
-        window.exportInventory = function() {
-            if(inventory.length === 0) return notify("No inventory records found to compile.");
-            let csvData = "Name,HindiName,Price,RefQty,Unit,Category\n";
-            inventory.forEach(item => {
-                const safeName = `"${(item.name || '').replace(/"/g, '""')}"`;
-                const safeHindi = `"${(item.nameHindi || '').replace(/"/g, '""')}"`;
-                csvData += `${safeName},${safeHindi},${item.price},${item.refQty},${item.priceUnit},${item.category}\n`;
-            });
-            
-            const dataStr = "data:text/csv;charset=utf-8," + encodeURIComponent(csvData);
-            const dlNode = document.createElement('a');
-            dlNode.setAttribute("href", dataStr);
-            dlNode.setAttribute("download", `FarmersGate_Backup_${Date.now()}.csv`);
-            document.body.appendChild(dlNode);
-            dlNode.click();
-            dlNode.remove();
-            notify("Database backup saved.");
-            softVibrate();
-        };
-
-        window.importInventory = function(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const lines = e.target.result.split('\n');
-                    const imported = [];
-                    for(let i = 1; i < lines.length; i++) {
-                        const line = lines[i].trim();
-                        if(!line) continue;
-                        const parts = parseCSVLine(line);
-                        if(parts.length >= 6) {
-                            imported.push({
-                                id: Date.now() + Math.random() + i,
-                                name: parts[0].trim(),
-                                nameHindi: parts[1].trim(),
-                                price: parseFloat(parts[2]) || 0,
-                                refQty: parseFloat(parts[3]) || 1,
-                                priceUnit: parts[4].trim(),
-                                category: parts[5].trim()
-                            });
-                        }
-                    }
-                    if (imported.length > 0) {
-                        inventory = imported;
-                        triggerSave();
-                        render();
-                        renderManagement();
-                        notify("Database synced successfully!");
-                        softVibrate();
-                    } else {
-                        notify("Parsed structure doesn't meet standard scheme.");
-                    }
-                } catch (err) {
-                    notify("Failed to parse directory matrix.");
-                }
-            };
-            reader.readAsText(file);
-            event.target.value = '';
-        };
-
-        window.confirmDeleteAll = function(btn) {
-            softVibrate();
-            if(btn.dataset.confirm === "true") {
-                inventory = [];
-                triggerSave();
-                renderManagement();
-                render();
-                notify("Full repository deleted");
-                btn.dataset.confirm = "false";
-                btn.innerHTML = "🗑️ Delete All";
-                btn.className = "flex-1 bg-rose-50 text-rose-600 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider border border-rose-200";
-            } else {
-                btn.dataset.confirm = "true";
-                btn.innerHTML = "Tap to Confirm!";
-                btn.className = "flex-1 bg-red-600 text-white py-2 rounded-xl text-[9px] font-black uppercase tracking-wider border border-red-700";
-                setTimeout(() => {
-                    if(btn.dataset.confirm === "true") {
-                        btn.dataset.confirm = "false";
-                        btn.innerHTML = "🗑️ Delete All";
-                        btn.className = "flex-1 bg-rose-50 text-rose-600 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider border border-rose-200";
-                    }
-                }, 3000);
-            }
-        };
-
-        function setMCat(cat) { 
-            softVibrate();
-            manualCat = cat; 
-            document.querySelectorAll('.mcat').forEach(b => {
-                b.className = 'mcat flex-1 rounded-lg bg-transparent text-slate-505 text-[11px] font-black uppercase py-1.5 transition-all'; 
-            });
-            const b = cat==='Vegetable'?'mcVeg':cat==='Fruit'?'mcFruit':'mcGroc'; 
-            if(document.getElementById(b)) {
-                document.getElementById(b).className = 'mcat flex-1 rounded-lg bg-emerald-600 text-white text-[11px] font-black uppercase py-1.5 shadow-md scale-105'; 
-            }
-        }
-        
-        function updateSettings() { 
-            softVibrate();
-            sLoc = document.getElementById('editLoc').value || "Main Hub, Patiala"; 
-            customApiKey = document.getElementById('geminiApiKey').value.trim();
-            document.getElementById('displayLoc').innerText = sLoc; 
-            triggerSave(); 
-            notify("Configuration parameters updated."); 
-        }
-
-        // SALES LEDGER & BUSINESS INSIGHTS COMPUTATION
         function logTransaction(finalTotal, discountValue, totalItems) {
             const timestamp = new Date();
             const record = {
@@ -2104,7 +2233,7 @@
                 row.innerHTML = `
                     <div>
                         <p class="font-extrabold text-slate-800 uppercase tracking-wide">TXID: ${t.id.substring(3,9)} <span class="text-[9px] font-bold text-slate-400">@ ${t.time}</span></p>
-                        <p class="text-[10px] text-slate-500 font-bold uppercase mt-0.5">${t.itemsCount} Articles • Disc ₹${t.discount.toFixed(0)}</p>
+                        <p class="text-[10px] text-slate-505 font-bold uppercase mt-0.5">${t.itemsCount} Articles • Disc ₹${t.discount.toFixed(0)}</p>
                     </div>
                     <div class="flex items-center gap-2">
                         <span class="font-black text-slate-900 text-sm">₹${t.amount.toFixed(2)}</span>
@@ -2122,36 +2251,29 @@
             const tx = transactions.find(t => t.id === txId);
             if (!tx) return notify("Reference Transaction not found.");
 
-            // Temporarily swap global cart state with saved details to build print receipt
             const originalCart = { ...cart };
             cart = {};
             tx.details.forEach((item, idx) => {
                 const key = `rep_${idx}`;
-                // Reconstruct a dummy item profile mimicking standard layout
                 cart[key] = {
                     name: item.name,
                     qty: item.qty,
                     totalPrice: item.val,
                     unit: item.unit,
-                    basePrice: item.val / item.qty, // Estimated
+                    basePrice: item.val / item.qty,
                     dSQ: 1,
                     dSU: item.unit,
                     category: item.cat
                 };
             });
 
-            // Set discount input field value temporarily
             const originalDisc = document.getElementById('discountInput').value;
             const discountInput = document.getElementById('discountInput');
             if(discountInput) discountInput.value = tx.discount;
 
-            // Trigger print area builder
             buildReceipt();
-            
-            // Generate visual export instantly
             generateBill('pdf');
 
-            // Restore initial cart buffer state
             cart = originalCart;
             if(discountInput) discountInput.value = originalDisc;
             renderCart();
@@ -2164,7 +2286,7 @@
             recalculateAnalytics();
             notify("Ledger History Cleared.");
         }
-        
+
         function sendInvoice() {
             softVibrate();
             const items = Object.values(cart); if(items.length===0) return notify("Cart Ledger Empty");
@@ -2193,9 +2315,7 @@
             msg += `🙏 *Thank you for visiting Farmer's Gate!*\n`;
             msg += `_${HEALTH_QUOTES[Math.floor(Math.random() * HEALTH_QUOTES.length)]}_`;
             
-            // Log this transaction into history
             logTransaction(parseFloat(finalTotalStr), discount, items.length);
-
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
@@ -2270,7 +2390,6 @@
                     notify("PDF compiled & downloaded.");
                 }
 
-                // Log into system history if logged from fresh active cart state
                 const currentTotal = parseFloat(document.getElementById('grandTotal').innerText.replace('₹',''));
                 const discVal = parseFloat(document.getElementById('discountInput')?.value) || 0;
                 const freshCartItems = Object.keys(cart);
@@ -2290,9 +2409,10 @@
             t.style.opacity = '1'; 
             
             if(window.toastTimer) clearTimeout(window.toastTimer);
+            // Reduced to a snappy 1400ms duration for rapid and clean market transactions
             window.toastTimer = setTimeout(() => {
                 t.classList.add('translate-y-4', 'opacity-0');
-            }, 3000); 
+            }, 1400); 
         }
     </script>
 </body>
