@@ -107,7 +107,6 @@
         }
     </script>
 
-    <!-- Hidden Thermal Receipt Template -->
     <div id="printArea">
         <div class="text-center mb-4">
             <h2 class="text-xl font-black uppercase mb-1">Farmer's Gate</h2>
@@ -146,7 +145,6 @@
         </div>
     </div>
 
-    <!-- MAIN VIEW CONTAINER -->
     <div class="max-w-[1600px] mx-auto w-full flex-1 flex flex-col min-h-0">
         
         <!-- Daily Reminder Banner -->
@@ -177,13 +175,13 @@
                 </button>
             </div>
             
-            <!-- Center: Title -->
+            <!-- Center: Title with dynamic Version Control -->
             <div class="col-span-6 text-center flex flex-col items-center justify-center">
-                <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 leading-none whitespace-nowrap">Farmer's <span class="text-emerald-500">Gate</span> <span class="bg-slate-900 text-emerald-400 text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase align-middle ml-1">PRO</span><span class="text-[9px] font-extrabold text-slate-400 ml-1.5 tracking-wider align-middle">v2.5.0</span></h1>
-                <p id="displayLoc" class="text-[9px] sm:text-[10px] text-slate-500 font-bold uppercase mt-1 tracking-widest truncate max-w-full">Loading...</p>
+                <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight text-slate-900 leading-none whitespace-nowrap">Farmer's <span class="text-emerald-500">Gate</span> <span class="bg-slate-900 text-emerald-400 text-[9px] px-1.5 py-0.5 rounded-md font-bold uppercase align-middle ml-1">PRO</span><span class="text-[9px] font-extrabold text-slate-400 ml-1.5 tracking-wider align-middle">v2.5.1</span></h1>
+                <p id="displayLoc" class="text-[9px] sm:text-[10px] text-slate-505 font-bold uppercase mt-1 tracking-widest truncate max-w-full">Loading...</p>
             </div>
             
-            <!-- Right: Dynamic Workspace Switcher & Stats -->
+            <!-- Right: Dynamic Workspace Switcher -->
             <div class="col-span-3 flex justify-end items-center gap-1.5">
                 <div class="bg-slate-100 p-1 rounded-xl flex gap-1 shadow-inner shrink-0">
                     <button onclick="switchView('shop')" id="btnViewShop" class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase transition-all bg-white text-slate-900 shadow-sm">🛒 Buy</button>
@@ -192,7 +190,6 @@
             </div>
         </header>
 
-        <!-- Search & Filter Controls -->
         <div id="searchFilterRow" class="grid grid-cols-1 md:grid-cols-12 gap-3 mb-4 shrink-0 px-1">
             <div class="md:col-span-4 flex gap-2">
                 <div class="relative flex-1 group">
@@ -211,13 +208,12 @@
             </div>
         </div>
 
-        <!-- Dynamic Workspaces: Inventory or Analytics -->
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 min-h-0 relative mb-4">
             
             <!-- VIEW 1: MAIN REGISTER / SHOP -->
             <div id="shopWorkspace" class="lg:col-span-7 xl:col-span-8 flex flex-col min-h-0 bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden transition-all duration-300">
                 <div class="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-slate-50/50 shrink-0">
-                    <h2 id="categoryTitle" class="text-[11px] font-black text-slate-500 uppercase tracking-widest">Master Stock</h2>
+                    <h2 id="categoryTitle" class="text-[11px] font-black text-slate-505 uppercase tracking-widest">Master Stock</h2>
                     <div class="flex items-center gap-1.5">
                         <span id="updateDateBadge" class="bg-blue-50 text-blue-700 border border-blue-100 px-2.5 py-1 rounded-lg text-[9px] font-bold uppercase shadow-sm">Sync: -</span>
                         <span id="itemCount" class="text-[10px] font-bold text-emerald-800 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-lg shadow-sm">0 Articles</span>
@@ -236,7 +232,7 @@
             <!-- VIEW 2: INSIGHTS & REPORTS -->
             <div id="insightsWorkspace" class="hidden lg:col-span-7 xl:col-span-8 flex flex-col min-h-0 bg-white rounded-[2rem] border border-slate-200 shadow-sm overflow-hidden transition-all duration-300">
                 <div class="flex justify-between items-center px-6 py-4 border-b border-slate-100 bg-slate-50/50 shrink-0">
-                    <h2 class="text-[11px] font-black text-slate-500 uppercase tracking-widest">Business Dashboard</h2>
+                    <h2 class="text-[11px] font-black text-slate-505 uppercase tracking-widest">Business Dashboard</h2>
                     <span class="text-[10px] font-bold text-blue-800 bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-lg shadow-sm">Live Insights</span>
                 </div>
                 
@@ -295,6 +291,20 @@
                         </div>
                     </div>
 
+                    <!-- Recent Invoices Ledger -->
+                    <div class="bg-slate-50 border border-slate-100 p-5 rounded-[2rem] space-y-4">
+                        <div class="flex justify-between items-center pb-2 border-b border-slate-200">
+                            <h3 class="text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M7 8h10M7 12h10M7 16h10"/></svg>
+                                Recent Invoices Log
+                            </h3>
+                            <button onclick="clearTransactionHistory()" class="text-[9px] font-bold text-red-600 hover:bg-red-50 px-2.5 py-1 rounded-lg uppercase tracking-wider">Clear Log</button>
+                        </div>
+                        <div id="transactionsLedger" class="space-y-2 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+                            <p class="text-center py-6 text-slate-400 text-xs font-semibold uppercase">No invoices generated yet</p>
+                        </div>
+                    </div>
+
                     <!-- DAILY SALES CLOSING CLOSING & DENOMINATION AUDITOR -->
                     <div class="bg-gradient-to-br from-slate-900 to-slate-950 text-white border border-slate-800 p-5 rounded-[2rem] space-y-4 shadow-xl">
                         <div class="flex justify-between items-center pb-2 border-b border-slate-800">
@@ -313,7 +323,7 @@
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Revenue Metrics Inputs -->
-                            <div class="space-y-3 bg-slate-850/50 p-4 rounded-xl border border-slate-800">
+                            <div class="space-y-3 bg-slate-855/50 p-4 rounded-xl border border-slate-800">
                                 <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-800 pb-1">Register Transactions</p>
                                 <div class="grid grid-cols-2 gap-2 text-xs">
                                     <div>
@@ -350,7 +360,7 @@
                             </div>
 
                             <!-- Note Denominations Selector -->
-                            <div class="space-y-3 bg-slate-850/50 p-4 rounded-xl border border-slate-800">
+                            <div class="space-y-3 bg-slate-855/50 p-4 rounded-xl border border-slate-800">
                                 <div class="flex justify-between items-center border-b border-slate-800 pb-1">
                                     <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest">Note Denominations</p>
                                     <span id="denomAuditBadge" class="text-[8px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-bold uppercase tracking-wider">Unbalanced</span>
@@ -428,7 +438,7 @@
 
                         <!-- Filter Tabs: Show Active Requests vs Show Complete Checklist -->
                         <div class="bg-slate-200/60 p-1 rounded-xl flex gap-1 shadow-inner max-w-md">
-                            <button onclick="setPlannerFilterState('active')" id="btnPlannerActive" class="flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all bg-white text-slate-800 shadow-sm">
+                            <button onclick="setPlannerFilterState('active')" id="btnPlannerActive" class="flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all bg-white text-slate-850 shadow-sm">
                                 📋 Active Requests
                             </button>
                             <button onclick="setPlannerFilterState('all')" id="btnPlannerAll" class="flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all text-slate-500 hover:text-slate-800">
@@ -581,7 +591,7 @@
 
         <!-- Premium Adaptive Footer Attribution -->
         <footer class="mt-3 py-2 text-center text-[10px] font-bold text-slate-400 uppercase tracking-widest shrink-0 border-t border-slate-100/60 select-none flex wrap items-center justify-center gap-1">
-            <span>Farmer's Gate PRO v2.5.0</span>
+            <span>Farmer's Gate PRO v2.5.1</span>
             <span class="text-slate-300">•</span>
             <span>Developed by <span class="text-slate-700 font-extrabold">Arvind Kumar Shukla</span></span>
         </footer>
@@ -695,7 +705,7 @@
                             <input type="password" id="geminiApiKey" placeholder="Enter custom API key (saved locally)" class="w-full px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-emerald-400 outline-none shadow-sm">
                         </div>
                         <div>
-                            <label class="text-[9px] font-black text-slate-500 uppercase block mb-1">Branch/Store Name</label>
+                            <label class="text-[9px] font-black text-slate-505 uppercase block mb-1">Branch/Store Name</label>
                             <div class="flex gap-2">
                                 <input type="text" id="editLoc" placeholder="e.g. Patiala Organic Hub" class="flex-1 px-3.5 py-2.5 bg-white border border-slate-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-emerald-400 outline-none shadow-sm">
                                 <button onclick="updateSettings()" class="bg-slate-900 text-white px-5 rounded-xl font-black text-[10px] uppercase active:scale-95 transition-all hover:bg-slate-800">Set</button>
@@ -712,7 +722,7 @@
                     </p>
                     
                     <div class="space-y-1.5">
-                        <p id="catLabel" class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Category Class</p>
+                        <p id="catLabel" class="text-[9px] font-black text-slate-405 uppercase tracking-widest text-center">Category Class</p>
                         <div class="flex gap-2 bg-slate-100 p-1.5 rounded-xl h-[48px]">
                             <button onclick="setMCat('Vegetable')" id="mcVeg" class="mcat flex-1 rounded-lg bg-emerald-600 text-white text-[11px] font-black uppercase py-1.5 transition-all">Vegetable</button>
                             <button onclick="setMCat('Fruit')" id="mcFruit" class="mcat flex-1 rounded-lg bg-transparent text-slate-500 text-[11px] font-black uppercase py-1.5 transition-all hover:bg-white">Fruit</button>
@@ -727,16 +737,16 @@
                     </div>
 
                     <div class="bg-slate-50 p-3.5 rounded-xl space-y-2 border border-slate-100">
-                        <p class="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">Price Metric</p>
+                        <p class="text-[9px] font-black text-slate-405 uppercase tracking-widest text-center">Price Metric</p>
                         <div class="flex gap-2.5 items-center">
                             <div class="relative flex-1">
                                 <span class="absolute left-3 top-1/2 -translate-y-1/2 text-emerald-600 font-extrabold text-sm">₹</span>
                                 <input type="number" id="newPrice" placeholder="Rate" class="w-full pl-7 pr-3 py-2 bg-white border border-slate-200 rounded-xl text-sm font-black outline-none focus:ring-2 focus:ring-emerald-400">
                             </div>
-                            <span class="text-[9px] font-black text-slate-400 uppercase">Per</span>
+                            <span class="text-[9px] font-black text-slate-405 uppercase">Per</span>
                             <div class="flex gap-1 items-center bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
                                 <input type="number" id="newRefQty" value="1" class="w-10 py-1 bg-transparent text-center font-black text-xs outline-none">
-                                <select id="newPriceUnit" class="bg-slate-100 border-0 rounded-lg text-[9px] py-1 px-1.5 font-black uppercase outline-none cursor-pointer text-slate-700">
+                                <select id="newPriceUnit" class="bg-slate-100 border-0 rounded-lg text-[9px] py-1 px-1.5 font-black uppercase outline-none cursor-pointer text-slate-705">
                                     <option value="Kg">Kg</option><option value="Gm">Gm</option><option value="Pcs">Pcs</option><option value="Pkt">Pkt</option>
                                 </select>
                             </div>
@@ -747,16 +757,16 @@
                         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
                         Update Inventory
                     </button>
-                    <button id="cancelEditBtn" onclick="resetForm()" class="hidden w-full text-[10px] font-black text-slate-400 uppercase mt-2 text-center hover:text-red-500 transition-colors py-1.5">Cancel Edit</button>
+                    <button id="cancelEditBtn" onclick="resetForm()" class="hidden w-full text-[10px] font-black text-slate-405 uppercase mt-2 text-center hover:text-red-500 transition-colors py-1.5">Cancel Edit</button>
                 </div>
 
                 <!-- Database Tools -->
                 <div class="space-y-3 pt-3 border-t border-slate-100">
-                    <p class="text-[10px] font-black text-slate-500 uppercase tracking-widest px-1">Import / Export Backup</p>
+                    <p class="text-[10px] font-black text-slate-505 uppercase tracking-widest px-1">Import / Export Backup</p>
                     
                     <div class="flex gap-2 px-0.5">
-                        <button onclick="exportInventory()" class="flex-1 bg-slate-50 text-slate-600 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all">⬇️ Export Backup</button>
-                        <button onclick="confirmDeleteAll(this)" data-confirm="false" class="flex-1 bg-rose-50 text-rose-600 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider border border-rose-200 hover:bg-rose-100 active:scale-95 transition-all">🗑️ Delete All</button>
+                        <button onclick="exportInventory()" class="flex-1 bg-slate-50 text-slate-655 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider border border-slate-200 hover:bg-slate-100 active:scale-95 transition-all">⬇️ Export Backup</button>
+                        <button onclick="confirmDeleteAll(this)" data-confirm="false" class="flex-1 bg-rose-50 text-rose-655 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider border border-rose-200 hover:bg-rose-100 active:scale-95 transition-all">🗑️ Delete All</button>
                     </div>
 
                     <div id="manageList" class="space-y-2 mt-2"></div>
@@ -764,8 +774,8 @@
 
                 <!-- Console Author & Version Attribution Footer -->
                 <div class="text-center py-4 border-t border-slate-150 mt-6 select-none">
-                    <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Farmer's Gate Console v2.5.0</p>
-                    <p class="text-[9px] font-bold text-slate-500 uppercase tracking-wider mt-1.5">Developed by <span class="text-slate-700 font-extrabold">Arvind Kumar Shukla</span></p>
+                    <p class="text-[10px] font-black text-slate-405 uppercase tracking-widest">Farmer's Gate Console v2.5.1</p>
+                    <p class="text-[9px] font-bold text-slate-505 uppercase tracking-wider mt-1.5">Developed by <span class="text-slate-700 font-extrabold">Arvind Kumar Shukla</span></p>
                 </div>
             </div>
         </div>
@@ -1188,7 +1198,7 @@
                     startRenameCustomer(cust.id, e);
                 };
                 editBtn.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="text-slate-500"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" class="text-slate-505"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
                 `;
 
                 const closeBtn = document.createElement('button');
@@ -1211,7 +1221,6 @@
             });
         }
 
-        // Google Sheets Integration - Saving spreadsheet URL on trigger
         async function syncGoogleSheet() {
             softVibrate();
             const sheetUrl = document.getElementById('sheetUrlInput').value.trim();
@@ -1250,35 +1259,34 @@
             const progress = document.getElementById('scanProgress');
             const loaderText = document.getElementById('loaderText');
 
-            loader.classList.remove('hidden');
-            loaderText.innerText = "Connecting to Google Sheet published portal...";
-            progress.style.width = "30%";
+            if (loader) loader.classList.remove('hidden');
+            if (loaderText) loaderText.innerText = "Connecting to Google Sheet published portal...";
+            if (progress) progress.style.width = "30%";
 
             try {
                 const response = await fetch(exportUrl);
                 if (!response.ok) throw new Error("Spreadsheet view access denied. Verify permissions.");
                 
-                progress.style.width = "60%";
-                loaderText.innerText = "Parsing spreadsheet columns...";
+                if (progress) progress.style.width = "60%";
+                if (loaderText) loaderText.innerText = "Parsing spreadsheet columns...";
                 
                 const csvText = await response.text();
                 parseSpreadsheetData(csvText, true); 
                 
-                progress.style.width = "100%";
+                if (progress) progress.style.width = "100%";
                 setTimeout(() => {
-                    loader.classList.add('hidden');
+                    if (loader) loader.classList.add('hidden');
                     notify("Google Sheet Synchronized!");
                     AudioSynthesizer.playSuccess();
                 }, 400);
 
             } catch (err) {
                 console.error("Sheets sync failed: ", err);
-                loader.classList.add('hidden');
+                if (loader) loader.classList.add('hidden');
                 notify("Google Sheets Sync Failed: Ensure it is published as Web Page or CSV.");
             }
         }
 
-        // Handlers for bulk uploaded files
         async function handleBulkSyncFile(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1287,9 +1295,9 @@
             const progress = document.getElementById('scanProgress');
             const loaderText = document.getElementById('loaderText');
 
-            loader.classList.remove('hidden');
-            loaderText.innerText = "Reading uploaded data...";
-            progress.style.width = "20%";
+            if (loader) loader.classList.remove('hidden');
+            if (loaderText) loaderText.innerText = "Reading uploaded data...";
+            if (progress) progress.style.width = "20%";
 
             const fileExtension = file.name.split('.').pop().toLowerCase();
 
@@ -1306,7 +1314,7 @@
                                 throw new Error("Not a valid Google Sheet schema pointer");
                             }
                         } catch(err) {
-                            loader.classList.add('hidden');
+                            if (loader) loader.classList.add('hidden');
                             notify("Failed parsing .gsheet shortcut file");
                         }
                     };
@@ -1315,8 +1323,8 @@
                 }
 
                 if (fileExtension === 'pdf') {
-                    progress.style.width = "40%";
-                    loaderText.innerText = "Extracting text from PDF file pages...";
+                    if (progress) progress.style.width = "40%";
+                    if (loaderText) loaderText.innerText = "Extracting text from PDF file pages...";
                     const fileReader = new FileReader();
                     
                     fileReader.onload = async function() {
@@ -1332,19 +1340,19 @@
                                 fullText += pageText + '\n';
                             }
                             
-                            progress.style.width = "70%";
-                            loaderText.innerText = "Analyzing text mapping structure...";
+                            if (progress) progress.style.width = "70%";
+                            if (loaderText) loaderText.innerText = "Analyzing text mapping structure...";
                             parseInventoryFromText(fullText);
                             
-                            progress.style.width = "100%";
+                            if (progress) progress.style.width = "100%";
                             setTimeout(() => {
-                                loader.classList.add('hidden');
+                                if (loader) loader.classList.add('hidden');
                                 notify("PDF Text Synced!");
                                 AudioSynthesizer.playSuccess();
                             }, 400);
 
                         } catch(err) {
-                            loader.classList.add('hidden');
+                            if (loader) loader.classList.add('hidden');
                             notify("PDF extraction failed: " + err.message);
                         }
                     };
@@ -1356,35 +1364,35 @@
                 fileReader.onload = function(e) {
                     try {
                         const data = new Uint8Array(e.target.result);
-                        progress.style.width = "50%";
-                        loaderText.innerText = "Unpacking spreadsheets sheets...";
+                        if (progress) progress.style.width = "50%";
+                        if (loaderText) loaderText.innerText = "Unpacking spreadsheets sheets...";
                         
                         const workbook = XLSX.read(data, {type: 'array'});
                         const firstSheetName = workbook.SheetNames[0];
                         const worksheet = workbook.Sheets[firstSheetName];
                         
-                        progress.style.width = "80%";
-                        loaderText.innerText = "Parsing spreadsheet rows...";
+                        if (progress) progress.style.width = "80%";
+                        if (loaderText) loaderText.innerText = "Parsing spreadsheet rows...";
                         
                         const json = XLSX.utils.sheet_to_json(worksheet, {defval: ""});
                         processImportedRows(json);
 
-                        progress.style.width = "100%";
+                        if (progress) progress.style.width = "100%";
                         setTimeout(() => {
-                            loader.classList.add('hidden');
+                            if (loader) loader.classList.add('hidden');
                             notify("Inventory Synchronized!");
                             AudioSynthesizer.playSuccess();
                         }, 400);
 
                     } catch(err) {
-                        loader.classList.add('hidden');
+                        if (loader) loader.classList.add('hidden');
                         notify("Failed to process sheet format: " + err.message);
                     }
                 };
                 fileReader.readAsArrayBuffer(file);
 
             } catch(e) {
-                loader.classList.add('hidden');
+                if (loader) loader.classList.add('hidden');
                 notify("Failed parsing sync files");
             } finally {
                 event.target.value = '';
@@ -1570,7 +1578,7 @@
                 <div class="flex-1 min-w-0">
                     <div class="flex flex-wrap items-center gap-1.5 mb-1.5">
                         <h4 class="font-extrabold text-slate-800 text-sm uppercase truncate leading-tight">${item.name}</h4>
-                        ${item.nameHindi ? `<span class="text-[9px] px-1.5 py-0.5 bg-slate-100 text-slate-505 rounded-lg font-bold border border-slate-200">${item.nameHindi}</span>` : ''}
+                        ${item.nameHindi ? `<span class="text-[9px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded-lg font-bold border border-slate-200">${item.nameHindi}</span>` : ''}
                     </div>
                     <div class="flex items-center flex-wrap gap-1.5">
                         <div class="flex items-center gap-0.5 bg-slate-50 px-2 py-1 rounded-lg w-max border border-slate-100">
@@ -1631,7 +1639,7 @@
                     const catItems = filtered.filter(i => i.category === cat);
                     if (catItems.length > 0) {
                         const head = document.createElement('div');
-                        head.className = 'col-span-1 sm:col-span-2 text-[10px] font-black text-slate-600 uppercase tracking-widest mt-4 mb-2 px-1 flex items-center gap-1.5 pb-2 border-b border-slate-100';
+                        head.className = 'col-span-1 sm:col-span-2 text-[10px] font-black text-slate-650 uppercase tracking-widest mt-4 mb-2 px-1 flex items-center gap-1.5 pb-2 border-b border-slate-100';
                         head.innerHTML = `${cat}s <span class="bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-md text-[9px] shadow-sm">${catItems.length}</span>`;
                         grid.appendChild(head);
                         
@@ -1642,7 +1650,7 @@
                 });
             } else {
                 const head = document.createElement('div');
-                head.className = 'col-span-1 sm:col-span-2 text-[10px] font-black text-slate-600 uppercase tracking-widest mt-4 mb-2 px-1 flex items-center gap-1.5 pb-2 border-b border-slate-100';
+                head.className = 'col-span-1 sm:col-span-2 text-[10px] font-black text-slate-655 uppercase tracking-widest mt-4 mb-2 px-1 flex items-center gap-1.5 pb-2 border-b border-slate-100';
                 head.innerHTML = `${activeCat}s <span class="bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded-md text-[9px] shadow-sm">${filtered.length}</span>`;
                 grid.appendChild(head);
 
@@ -1732,7 +1740,7 @@
                                 ${item.name}
                                 <span class="text-[8px] bg-slate-200 text-slate-600 px-1.5 py-0.5 rounded uppercase tracking-widest hidden sm:inline-block">${item.category.substring(0,3)}</span>
                             </p>
-                            <p class="text-[10px] text-slate-550 font-bold uppercase mt-1 tracking-wider"><span class="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded mr-1">${item.qty}${item.unit}</span>@ ₹${item.basePrice}/${item.dSQ}${item.dSU}</p>
+                            <p class="text-[10px] text-slate-505 font-bold uppercase mt-1 tracking-wider"><span class="text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded mr-1">${item.qty}${item.unit}</span>@ ₹${item.basePrice}/${item.dSQ}${item.dSU}</p>
                         </div>
                         <div class="flex items-center gap-1.5 shrink-0">
                             <span class="font-black text-sm text-slate-900 mr-1 tabular-nums">₹${item.totalPrice.toFixed(2)}</span>
@@ -1926,13 +1934,13 @@
                 if(catItems.length > 0) {
                     const catHeader = document.createElement('div');
                     catHeader.className = 'text-[9px] font-black text-slate-400 uppercase tracking-widest mt-4 mb-2 px-1 border-b border-slate-100 pb-1 flex items-center gap-1.5';
-                    catHeader.innerHTML = `${cat}s <span class="bg-slate-100 text-slate-505 px-1.5 py-0.5 rounded-md text-[9px]">${catItems.length}</span>`;
+                    catHeader.innerHTML = `${cat}s <span class="bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded-md text-[9px]">${catItems.length}</span>`;
                     div.appendChild(catHeader);
 
                     catItems.forEach(it => {
                         const isDup = counts[it.name.toLowerCase().trim()] > 1;
                         const el = document.createElement('div'); el.className = `flex items-center justify-between p-3.5 bg-white border rounded-xl shadow-sm mb-2 ${isDup ? 'border-red-200 bg-rose-50/20' : 'border-slate-200'}`;
-                        el.innerHTML = `<div class="min-w-0 flex-1 py-1"><div><div class="flex items-center flex-wrap gap-2"><span class="text-xs font-black text-slate-800 truncate uppercase">${it.name}</span><select onchange="changeItemCategory(${it.id}, this.value)" class="text-[9px] font-bold text-slate-505 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 outline-none cursor-pointer hover:bg-slate-100 focus:border-emerald-400"><option value="Vegetable" ${it.category==='Vegetable'?'selected':''}>Veg</option><option value="Fruit" ${it.category==='Fruit'?'selected':''}>Fruit</option><option value="Grocery" ${it.category==='Grocery'?'selected':''}>Groc</option></select>${isDup ? '<span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-red-100 text-red-700">DUP</span>' : ''}</div><span class="text-[11px] text-emerald-600 font-extrabold mt-1 block">₹${it.price}/${it.refQty}${it.priceUnit}</span></div></div><div class="flex gap-1.5"><button onclick="editArticle(${it.id})" class="bg-slate-50 text-slate-550 p-2 rounded-lg border border-slate-200 hover:text-blue-600 hover:bg-blue-50 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button><button onclick="inventory=inventory.filter(i=>i.id!=${it.id});triggerSave();renderManagement();render();renderStockRequirements();notify('Deleted')" class="bg-slate-50 text-slate-550 p-2 rounded-lg border border-slate-200 hover:text-red-600 hover:bg-red-50 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>`;
+                        el.innerHTML = `<div class="min-w-0 flex-1 py-1"><div><div class="flex items-center flex-wrap gap-2"><span class="text-xs font-black text-slate-800 truncate uppercase">${it.name}</span><select onchange="changeItemCategory(${it.id}, this.value)" class="text-[9px] font-bold text-slate-505 bg-slate-50 border border-slate-200 rounded px-1 py-0.5 outline-none cursor-pointer hover:bg-slate-100 focus:border-emerald-400"><option value="Vegetable" ${it.category==='Vegetable'?'selected':''}>Veg</option><option value="Fruit" ${it.category==='Fruit'?'selected':''}>Fruit</option><option value="Grocery" ${it.category==='Grocery'?'selected':''}>Groc</option></select>${isDup ? '<span class="text-[8px] font-black px-1.5 py-0.5 rounded bg-red-100 text-red-700">DUP</span>' : ''}</div><span class="text-[11px] text-emerald-600 font-extrabold mt-1 block">₹${it.price}/${it.refQty}${it.priceUnit}</span></div></div><div class="flex gap-1.5"><button onclick="editArticle(${it.id})" class="bg-slate-50 text-slate-505 p-2 rounded-lg border border-slate-200 hover:text-blue-600 hover:bg-blue-50 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></button><button onclick="inventory=inventory.filter(i=>i.id!=${it.id});triggerSave();renderManagement();render();renderStockRequirements();notify('Deleted')" class="bg-slate-50 text-slate-505 p-2 rounded-lg border border-slate-200 hover:text-red-600 hover:bg-red-50 transition-colors"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>`;
                         div.appendChild(el);
                     });
                 }
@@ -1952,7 +1960,6 @@
             }
         };
 
-        // IMAGE PRE-PROCESSING MECHANISMS
         async function compressImageForAI(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -2043,16 +2050,16 @@
             const progress = document.getElementById('scanProgress');
             const loaderText = document.getElementById('loaderText');
 
-            loader.classList.remove('hidden');
-            loader.scrollIntoView({ behavior: 'smooth' });
-            progress.style.width = '20%';
+            if (loader) loader.classList.remove('hidden');
+            if (loader) loader.scrollIntoView({ behavior: 'smooth' });
+            if (progress) progress.style.width = '20%';
 
             try {
-                loaderText.innerText = "Preprocessing Image Matrices...";
+                if (loaderText) loaderText.innerText = "Preprocessing Image Matrices...";
                 const base64 = await compressImageForAI(file);
-                progress.style.width = '50%';
+                if (progress) progress.style.width = '50%';
                 
-                loaderText.innerText = "Passing context payload to Gemini...";
+                if (loaderText) loaderText.innerText = "Passing context payload to Gemini...";
                 
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${customApiKey}`;
 
@@ -2091,7 +2098,7 @@
                     body: JSON.stringify(payload)
                 });
                 
-                progress.style.width = '85%';
+                if (progress) progress.style.width = '85%';
                 const resultData = JSON.parse(result.candidates[0].content.parts[0].text);
 
                 pendingScanItems = [];
@@ -2109,9 +2116,9 @@
                     });
                 }
 
-                progress.style.width = '100%';
+                if (progress) progress.style.width = '100%';
                 setTimeout(() => {
-                    loader.classList.add('hidden');
+                    if (loader) loader.classList.add('hidden');
                     if(pendingScanItems.length > 0) {
                         showScanReview();
                         softVibrate();
@@ -2126,7 +2133,7 @@
             } catch (err) {
                 console.error(err);
                 notify("AI OCR processing failed: " + err.message.slice(0,35));
-                loader.classList.add('hidden');
+                if (loader) loader.classList.add('hidden');
                 if(ev) ev.target.value = '';
             }
         }
@@ -2136,22 +2143,22 @@
             const progress = document.getElementById('scanProgress');
             const loaderText = document.getElementById('loaderText');
             
-            loader.classList.remove('hidden');
-            loader.scrollIntoView({ behavior: 'smooth' });
-            progress.style.width = '15%';
+            if (loader) loader.classList.remove('hidden');
+            if (loader) loader.scrollIntoView({ behavior: 'smooth' });
+            if (progress) progress.style.width = '15%';
             
             try {
-                loaderText.innerText = "Enhancing contrasting parameters...";
+                if (loaderText) loaderText.innerText = "Enhancing contrasting parameters...";
                 const enhancedImage = await preprocessImageForLocalOCR(file);
-                progress.style.width = '45%';
+                if (progress) progress.style.width = '45%';
                 
-                loaderText.innerText = "Booting local Tesseract worker...";
+                if (loaderText) loaderText.innerText = "Booting local Tesseract worker...";
                 const worker = await Tesseract.createWorker('eng');
                 const result = await worker.recognize(enhancedImage);
                 await worker.terminate();
-                progress.style.width = '80%';
+                if (progress) progress.style.width = '80%';
                 
-                loaderText.innerText = "Analyzing parsed lexical sequences...";
+                if (loaderText) loaderText.innerText = "Analyzing parsed lexical sequences...";
                 const text = result.data.text;
                 
                 pendingScanItems = [];
@@ -2191,9 +2198,9 @@
                     }
                 });
 
-                progress.style.width = '100%';
+                if (progress) progress.style.width = '100%';
                 setTimeout(() => {
-                    loader.classList.add('hidden');
+                    if (loader) loader.classList.add('hidden');
                     if(pendingScanItems.length > 0) {
                         showScanReview();
                         softVibrate();
@@ -2208,12 +2215,11 @@
             } catch (err) {
                 console.error(err);
                 notify("Local processing crashed");
-                loader.classList.add('hidden');
+                if (loader) loader.classList.add('hidden');
                 if(ev) ev.target.value = '';
             }
         }
 
-        // SCAN REVIEW LEDGER
         function showScanReview() {
             const container = document.getElementById('scanReviewContainer');
             const list = document.getElementById('scanReviewList');
@@ -2392,7 +2398,7 @@
             softVibrate();
             manualCat = cat; 
             document.querySelectorAll('.mcat').forEach(b => {
-                b.className = 'mcat flex-1 rounded-lg bg-transparent text-slate-550 text-[11px] font-black uppercase py-1.5 transition-all'; 
+                b.className = 'mcat flex-1 rounded-lg bg-transparent text-slate-500 text-[11px] font-black uppercase py-1.5 transition-all'; 
             });
             const b = cat==='Vegetable'?'mcVeg':cat==='Fruit'?'mcFruit':'mcGroc'; 
             if(document.getElementById(b)) {
@@ -2409,7 +2415,6 @@
             notify("Configuration parameters updated."); 
         }
 
-        // SALES LEDGER & BUSINESS INSIGHTS COMPUTATION
         function logTransaction(finalTotal, discountValue, totalItems) {
             const timestamp = new Date();
             const record = {
@@ -2478,7 +2483,7 @@
                 row.className = 'bg-slate-50 border border-slate-100 p-3 rounded-xl flex items-center justify-between text-xs gap-2';
                 row.innerHTML = `
                     <div>
-                        <p class="font-extrabold text-slate-800 uppercase tracking-wide">TXID: ${t.id.substring(3,9)} <span class="text-[9px] font-bold text-slate-400">@ ${t.time}</span></p>
+                        <p class="font-extrabold text-slate-800 uppercase tracking-wide">TXID: ${t.id.substring(3,9)} <span class="text-[9px] font-bold text-slate-405">@ ${t.time}</span></p>
                         <p class="text-[10px] text-slate-500 font-bold uppercase mt-0.5">${t.itemsCount} Articles • Disc ₹${t.discount.toFixed(0)}</p>
                     </div>
                     <div class="flex items-center gap-2">
@@ -2578,7 +2583,7 @@
             const rItems = document.getElementById('receiptItems');
             rItems.innerHTML = '';
             items.forEach(i => {
-                rItems.innerHTML += `<div class="flex justify-between items-start mb-1"><div class="pr-2"><span class="font-bold">${i.name}</span><br><span class="text-[10px] text-gray-650">${i.qty}${i.unit} x ₹${i.basePrice.toFixed(2)}/${i.dSQ}${i.dSU}</span></div><span class="font-bold">₹${i.totalPrice.toFixed(2)}</span></div>`;
+                rItems.innerHTML += `<div class="flex justify-between items-start mb-1"><div class="pr-2"><span class="font-bold">${i.name}</span><br><span class="text-[10px] text-gray-700">${i.qty}${i.unit} x ₹${i.basePrice.toFixed(2)}/${i.dSQ}${i.dSU}</span></div><span class="font-bold">₹${i.totalPrice.toFixed(2)}</span></div>`;
             });
 
             const discount = parseFloat(document.getElementById('discountInput')?.value) || 0;
@@ -2647,7 +2652,6 @@
             } catch(e) { console.error(e); notify("Graphic generation failed"); }
         }
 
-        // DAILY SALES CLOSING RECONCILIATION & WHATSAPP EXPORTER
         let totalClosingSaleCalculated = 0;
         let totalDenominationsCalculated = 0;
 
@@ -2764,12 +2768,11 @@
             }
 
             msg += `🙏 Developed by Arvind Kumar Shukla\n`;
-            msg += `_Farmer's Gate PRO v2.5.0_`;
+            msg += `_Farmer's Gate PRO v2.5.1_`;
 
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         }
 
-        // PREDICTIVE STOCK REQUISITION ENGINES
         window.autoGenerateRequirementsFromHistory = function() {
             softVibrate();
             if (transactions.length === 0) {
@@ -2777,16 +2780,13 @@
                 return;
             }
 
-            // Create temporary aggregation matrices
             const itemCounts = {};
             const itemUnits = {};
             let predictiveAdditions = 0;
 
-            // Loop and compile recent checkout history profiles
             transactions.forEach(tx => {
                 if (tx.details) {
                     tx.details.forEach(item => {
-                        // Resolve master stock ID
                         const match = inventory.find(i => i.name.toLowerCase().trim() === item.name.toLowerCase().trim());
                         if (match && (match.category === 'Vegetable' || match.category === 'Fruit')) {
                             itemCounts[match.id] = (itemCounts[match.id] || 0) + (parseFloat(item.qty) || 0);
@@ -2796,18 +2796,11 @@
                 }
             });
 
-            // Iterate and inject mathematical forecasts into requirements array
             Object.keys(itemCounts).forEach(itemId => {
                 const totalSoldQty = itemCounts[itemId];
-                const activeUnit = itemUnits[itemId];
-
-                // Factor a scaling coefficient based on transactions density
                 let recommendationVal = Math.ceil(totalSoldQty / Math.max(1, transactions.length / 4));
-                
-                // Avoid suggesting zeros
                 if (recommendationVal < 1) recommendationVal = 1;
 
-                // Set value dynamically to requirements register
                 stockRequirements[itemId] = (stockRequirements[itemId] || 0) + recommendationVal;
                 predictiveAdditions++;
             });
@@ -2815,7 +2808,7 @@
             if (predictiveAdditions > 0) {
                 renderStockRequirements();
                 triggerSave();
-                notify(`✨ Predictive auto-fill injected suggestions for ${predictiveAdditions} items!`);
+                notify(`✨ Predictive suggestions applied for ${predictiveAdditions} items!`);
             } else {
                 notify("No vegetable or fruit sales observed inside ledger histories.");
             }
@@ -2836,20 +2829,18 @@
 
             if (plannerFilterState === 'active') {
                 btnActive.className = "flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all bg-white text-slate-800 shadow-sm";
-                btnAll.className = "flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all text-slate-505 hover:text-slate-800";
+                btnAll.className = "flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all text-slate-500 hover:text-slate-800";
             } else {
                 btnAll.className = "flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all bg-white text-slate-800 shadow-sm";
-                btnActive.className = "flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all text-slate-505 hover:text-slate-800";
+                btnActive.className = "flex-1 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider transition-all text-slate-500 hover:text-slate-800";
             }
         }
 
-        // STOCK REQUIREMENT CONCURRENT COUNTERS & WHATSAPP EXPORTER
         window.renderStockRequirements = function() {
             const container = document.getElementById('stockRequirementsGrid');
             if (!container) return;
             container.innerHTML = '';
 
-            // Populate selection dropdown filter lists
             const select = document.getElementById('plannerSelectOption');
             if (select) {
                 const currentValue = select.value;
@@ -2868,12 +2859,10 @@
             const veggies = [];
             const fruits = [];
 
-            // Compile eligible planner arrays based on active filter state
             inventory.forEach(item => {
                 if (item.category === 'Vegetable' || item.category === 'Fruit') {
                     const currentVal = stockRequirements[item.id] || 0;
 
-                    // If 'active', show only values > 0. If 'all', display everything as checklist.
                     if (plannerFilterState === 'all' || currentVal > 0) {
                         const targetObj = { item, val: currentVal };
                         if (item.category === 'Vegetable') veggies.push(targetObj);
@@ -2902,13 +2891,13 @@
                         <div class="flex items-center justify-between p-2.5 bg-white border rounded-xl shadow-sm gap-2 transition-all ${hasActiveReq ? 'border-emerald-300 bg-emerald-50/10' : 'border-slate-100'}" id="planner-card-${item.id}">
                             <div class="min-w-0 flex-1">
                                 <p class="text-xs font-bold text-slate-800 uppercase truncate">${item.name}</p>
-                                ${item.nameHindi ? `<span class="text-[8px] font-bold text-slate-405 bg-slate-100 border px-1 rounded">${item.nameHindi}</span>` : ''}
+                                ${item.nameHindi ? `<span class="text-[8px] font-bold text-slate-400 bg-slate-100 border px-1 rounded">${item.nameHindi}</span>` : ''}
                             </div>
                             <div class="flex items-center gap-1.5 shrink-0">
                                 <button onclick="adjustRequirement(${item.id}, -1)" class="w-7 h-7 bg-slate-100 text-slate-700 hover:bg-slate-200 font-black rounded-lg text-xs flex items-center justify-center transition-colors shadow-sm">-</button>
                                 <input type="number" id="reqInput-${item.id}" value="${val}" onchange="setRequirement(${item.id}, this.value)" class="w-10 text-center font-black text-xs bg-slate-50 border border-slate-200 rounded-lg p-1 outline-none focus:border-emerald-500">
-                                <button onclick="adjustRequirement(${item.id}, 1)" class="w-7 h-7 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white font-black rounded-lg text-xs flex items-center justify-center transition-colors shadow-sm">+</button>
-                                <span class="text-[9px] font-black text-slate-400 uppercase w-6">${item.priceUnit}</span>
+                                <button onclick="adjustRequirement(${item.id}, 1)" class="w-7 h-7 bg-emerald-50 text-emerald-700 hover:bg-emerald-650 hover:text-white font-black rounded-lg text-xs flex items-center justify-center transition-colors shadow-sm">+</button>
+                                <span class="text-[9px] font-black text-slate-404 uppercase w-6">${item.priceUnit}</span>
                                 <button onclick="removeRequirement(${item.id})" class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg transition-colors ml-1" title="Set count to zero">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
                                 </button>
@@ -3007,7 +2996,7 @@
 
             msg += `---------------------\n`;
             msg += `🙏 Request Compiled by Arvind Kumar Shukla\n`;
-            msg += `_Farmer's Gate PRO v2.5.0_`;
+            msg += `_Farmer's Gate PRO v2.5.1_`;
 
             window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
         }
